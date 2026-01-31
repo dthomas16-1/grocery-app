@@ -55,11 +55,13 @@
  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 003)</span></header>
 
   <div class="wrap">
-    <div class="row">
-      <button id="btnNew">New List</button>
-      <button id="btnScan">SCAN</button>
-      <button id="btnAdd" class="secondary">Add Item</button>
-    </div>
+<div class="row">
+  <button id="btnNew">New List</button>
+  <button id="btnScan">SCAN</button>
+  <button id="btnUndo" class="secondary">Undo</button>
+  <button id="btnClearDone" class="secondary">Clear Purchased</button>
+  <button id="btnAdd" class="secondary">Add Item</button>
+</div>
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
@@ -108,6 +110,7 @@
   }
 
   let state = loadState() || { current: newBlankList("Today") };
+  let lastAddedId = null;
 
   function money(n){ return (Math.round(n*100)/100).toFixed(2); }
 
@@ -123,6 +126,7 @@
 
   function addItem(name){
     state.current.items.push({
+      lastAddedId = state.current.items[state.current.items.length - 1].id;
       id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
       name,
       done:false,
@@ -199,6 +203,23 @@
     if(!name) return;
     addItem(name.trim());
   });
+  document.getElementById("btnUndo").addEventListener("click", ()=>{
+  if(!lastAddedId) return;
+  const i = state.current.items.findIndex(x => x.id === lastAddedId);
+  if(i >= 0){
+    state.current.items.splice(i, 1);
+    lastAddedId = null;
+    saveState(state); render();
+  }
+});
+
+document.getElementById("btnClearDone").addEventListener("click", ()=>{
+  const before = state.current.items.length;
+  state.current.items = state.current.items.filter(x => !x.done);
+  if(state.current.items.length !== before){
+    saveState(state); render();
+  }
+});
 
   // --- Scanner modal + scanning ---
   const modalBg = document.getElementById("modalBg");
