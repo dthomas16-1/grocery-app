@@ -214,7 +214,6 @@ const SCAN_COOLDOWN_MS = 1500;
     modalBg.style.display = "flex";
 
     // Create scanner instance once each open (simple + stable)
-    qr = new Html5Qrcode("reader");
     qr = new Html5Qrcode("reader", { formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] });
     Html5Qrcode.getCameras().then(cams => {
   if(!cams || cams.length === 0) throw new Error("No camera found");
