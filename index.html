@@ -9,5 +9,10 @@
 <body style="font-family: Arial, Helvetica, sans-serif; padding: 24px;">
   <h1>Grocery App</h1>
   <p>If you can see this page, Netlify is deployed correctly.</p>
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+</script>
 </body>
 </html>
