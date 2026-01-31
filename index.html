@@ -3,16 +3,273 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Grocery App</title>
+  <title>Grocery APP</title>
+
   <link rel="manifest" href="/manifest.webmanifest">
+
+  <style>
+    body{ font-family: Arial, Helvetica, sans-serif; margin:0; background:#f6f7fb; }
+    header{ padding:14px 16px; background:#111827; color:#fff; font-weight:700; font-size:18px; }
+    .wrap{ padding:14px 14px 90px; max-width:720px; margin:0 auto; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    button{
+      appearance:none; border:0; border-radius:14px; padding:14px 16px;
+      font-size:16px; font-weight:700; cursor:pointer;
+      background:#2563eb; color:#fff;
+    }
+    button.secondary{ background:#e5e7eb; color:#111827; }
+    .card{
+      background:#fff; border-radius:16px; padding:12px; margin-top:12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    .item{ display:flex; align-items:center; gap:10px; padding:10px 6px; border-bottom:1px solid #eee; }
+    .item:last-child{ border-bottom:0; }
+    .check{ width:26px; height:26px; }
+    .name{ flex:1; font-size:16px; }
+    .done .name{ text-decoration: line-through; opacity:.55; }
+    .qty{ width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    select{ padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
+    .price{ width:86px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    .total{ font-weight:800; font-size:18px; }
+
+    /* Scanner modal */
+    .modalBg{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; padding:16px;
+    }
+    .modal{
+      width:min(680px, 100%); background:#fff; border-radius:18px; overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .modalHead{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#111827; color:#fff; }
+    .modalBody{ padding:12px; }
+    #reader{ width:100%; }
+    .hint{ color:#6b7280; font-size:14px; margin-top:8px; }
+  </style>
+
+  <!-- QR scanner library (simple + cross-platform) -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
-<body style="font-family: Arial, Helvetica, sans-serif; padding: 24px;">
-  <h1>Grocery App</h1>
-  <p>If you can see this page, Netlify is deployed correctly.</p>
+
+<body>
+  <header>Grocery APP</header>
+
+  <div class="wrap">
+    <div class="row">
+      <button id="btnNew">New List</button>
+      <button id="btnScan">SCAN</button>
+      <button id="btnAdd" class="secondary">Add Item</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div><b>Current List:</b> <span id="listName">Today</span></div>
+        <div class="total">Total: $<span id="total">0.00</span></div>
+      </div>
+    </div>
+
+    <div class="card" id="listCard">
+      <!-- items render here -->
+    </div>
+  </div>
+
+  <!-- Scanner Modal -->
+  <div class="modalBg" id="modalBg">
+    <div class="modal">
+      <div class="modalHead">
+        <div><b>Scan QR Code</b></div>
+        <button id="btnClose" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
+      </div>
+      <div class="modalBody">
+        <div id="reader"></div>
+        <div class="hint">
+          Tip: hold the phone steady 6–10 inches away, good lighting helps.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
+  // --- PWA service worker ---
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+
+  // --- Simple local list model (we’ll expand this later) ---
+  const LS_KEY = "groceryApp_v1";
+  const UNITS = ["ea","lb","oz","gal","ct"];
+
+  function loadState(){
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
+    catch { return null; }
+  }
+  function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+  function newBlankList(name){
+    return { name, items: [], created: Date.now() };
+  }
+
+  let state = loadState() || { current: newBlankList("Today") };
+
+  function money(n){ return (Math.round(n*100)/100).toFixed(2); }
+
+  function computeTotal(){
+    let t = 0;
+    for(const it of state.current.items){
+      const p = parseFloat(it.price || "0");
+      const q = parseFloat(it.qty || "1");
+      if(!isNaN(p) && !isNaN(q)) t += p*q;
+    }
+    return t;
+  }
+
+  function addItem(name){
+    state.current.items.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+      name,
+      done:false,
+      qty:1,
+      unit:"ea",
+      price:""
+    });
+    saveState(state);
+    render();
+  }
+
+  function render(){
+    document.getElementById("listName").textContent = state.current.name;
+    document.getElementById("total").textContent = money(computeTotal());
+
+    const card = document.getElementById("listCard");
+    if(state.current.items.length === 0){
+      card.innerHTML = `<div style="padding:10px; color:#6b7280;">No items yet. Tap SCAN or Add Item.</div>`;
+      return;
+    }
+
+    card.innerHTML = state.current.items.map(it => `
+      <div class="item ${it.done ? "done":""}" data-id="${it.id}">
+        <input class="check" type="checkbox" ${it.done ? "checked":""}>
+        <div class="name">${escapeHtml(it.name)}</div>
+        <input class="qty" type="number" step="0.5" min="0" value="${it.qty}">
+        <select class="unit">
+          ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
+        </select>
+        <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
+      </div>
+    `).join("");
+
+    // wire events
+    card.querySelectorAll(".item").forEach(row => {
+      const id = row.getAttribute("data-id");
+      const it = state.current.items.find(x => x.id === id);
+
+      row.querySelector(".check").addEventListener("change", (e)=>{
+        it.done = e.target.checked;
+        saveState(state); render();
+      });
+      row.querySelector(".qty").addEventListener("change", (e)=>{
+        it.qty = e.target.value;
+        saveState(state); render();
+      });
+      row.querySelector(".unit").addEventListener("change", (e)=>{
+        it.unit = e.target.value;
+        saveState(state); render();
+      });
+      row.querySelector(".price").addEventListener("change", (e)=>{
+        it.price = e.target.value;
+        saveState(state); render();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  // --- Buttons ---
+  document.getElementById("btnNew").addEventListener("click", ()=>{
+    const name = prompt("List name?", "Today");
+    if(!name) return;
+    state.current = newBlankList(name.trim());
+    saveState(state); render();
+  });
+
+  document.getElementById("btnAdd").addEventListener("click", ()=>{
+    const name = prompt("Add item:");
+    if(!name) return;
+    addItem(name.trim());
+  });
+
+  // --- Scanner modal + scanning ---
+  const modalBg = document.getElementById("modalBg");
+  const btnScan = document.getElementById("btnScan");
+  const btnClose = document.getElementById("btnClose");
+
+  let qr = null;
+
+  function openScanner(){
+    modalBg.style.display = "flex";
+
+    // Create scanner instance once each open (simple + stable)
+    qr = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(cams => {
+      const camId = cams?.[0]?.id;
+      if(!camId) throw new Error("No camera found");
+      return qr.start(
+        camId,
+        { fps: 10, qrbox: { width: 260, height: 260 } },
+        onScanSuccess
+      );
+    }).catch(err => {
+      alert("Camera/scanner not available here.\n\n" + err);
+      closeScanner();
+    });
+  }
+
+  function closeScanner(){
+    modalBg.style.display = "none";
+    if(qr){
+      qr.stop().catch(()=>{}).finally(()=>{
+        qr.clear();
+        qr = null;
+        document.getElementById("reader").innerHTML = "";
+      });
+    } else {
+      document.getElementById("reader").innerHTML = "";
+    }
+  }
+
+function onScanSuccess(decodedText){
+  // Expect QR content like:
+  // https://graceful-sorbet-d84a80.netlify.app/add?item=milk
+  // https://graceful-sorbet-d84a80.netlify.app/add?dish=meatloaf
+  try{
+    const url = new URL(decodedText);
+    const item = url.searchParams.get("item");
+    const dish = url.searchParams.get("dish");
+
+    if(item){
+      addItem(decodeURIComponent(item));
+      return;
+    }
+    if(dish){
+      addItem("DISH: " + decodeURIComponent(dish));
+      return;
+    }
+
+    // If it's our site but not in expected format, fall back
+    addItem(decodedText);
+  }catch{
+    // Not a URL → fall back
+    addItem(decodedText);
+  }
 }
-</script>
+
+  btnScan.addEventListener("click", openScanner);
+  btnClose.addEventListener("click", closeScanner);
+  modalBg.addEventListener("click", (e)=>{ if(e.target === modalBg) closeScanner(); });
+
+  render();
+  </script>
 </body>
 </html>
