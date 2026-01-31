@@ -1,4 +1,4 @@
-<!doctype html>
+F<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -206,6 +206,9 @@
   const btnClose = document.getElementById("btnClose");
 
   let qr = null;
+  let lastScanText = "";
+  let lastScanAt = 0;
+const SCAN_COOLDOWN_MS = 1500;
 
   function openScanner(){
     modalBg.style.display = "flex";
@@ -244,8 +247,21 @@
       document.getElementById("reader").innerHTML = "";
     }
   }
-
 function onScanSuccess(decodedText){
+  const now = Date.now();
+
+  // Prevent rapid-fire duplicates
+  if (decodedText === lastScanText && (now - lastScanAt) < SCAN_COOLDOWN_MS) {
+    return;
+  }
+  // Also block any scan spam within cooldown, even if text differs slightly
+  if ((now - lastScanAt) < 350) {
+    return;
+  }
+
+  lastScanText = decodedText;
+  lastScanAt = now;
+if (navigator.vibrate) navigator.vibrate(40);
   // Expect QR content like:
   // https://graceful-sorbet-d84a80.netlify.app/add?item=milk
   // https://graceful-sorbet-d84a80.netlify.app/add?dish=meatloaf
@@ -263,13 +279,13 @@ function onScanSuccess(decodedText){
       return;
     }
 
-    // If it's our site but not in expected format, fall back
     addItem(decodedText);
   }catch{
-    // Not a URL → fall back
     addItem(decodedText);
   }
 }
+
+
 
   btnScan.addEventListener("click", openScanner);
   btnClose.addEventListener("click", closeScanner);
