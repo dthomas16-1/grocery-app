@@ -212,15 +212,21 @@
 
     // Create scanner instance once each open (simple + stable)
     qr = new Html5Qrcode("reader");
+    qr = new Html5Qrcode("reader", { formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] });
     Html5Qrcode.getCameras().then(cams => {
-      const camId = cams?.[0]?.id;
-      if(!camId) throw new Error("No camera found");
-      return qr.start(
-        camId,
-        { fps: 10, qrbox: { width: 260, height: 260 } },
-        onScanSuccess
-      );
-    }).catch(err => {
+  if(!cams || cams.length === 0) throw new Error("No camera found");
+
+  // Prefer a rear camera if present (labels vary by device/iOS)
+  const rear =
+    cams.find(c => /back|rear|environment/i.test(c.label)) ||
+    cams[cams.length - 1]; // common fallback: last camera is rear
+
+  return qr.start(
+    rear.id,
+    { fps: 10, qrbox: { width: 260, height: 260 } },
+    onScanSuccess
+  );
+}).catch(err => {
       alert("Camera/scanner not available here.\n\n" + err);
       closeScanner();
     });
