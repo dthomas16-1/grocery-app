@@ -49,16 +49,32 @@
       z-index: 9999;
     }
     .modal{
-      width:min(760px, 100%); background:#fff; border-radius:18px; overflow:hidden;
+      width:min(760px, 100%);
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
+
+  /* NEW: clamp to viewport and use a stable layout */
+      max-height: calc(100dvh - 32px);
+      display:flex;
+      flex-direction:column;
     }
+
     .modalHead{
       display:flex; justify-content:space-between; align-items:center;
       padding:12px 14px; background:#111827; color:#fff;
     }
-    .modalBody{ padding:12px; }
-    #reader{ width:100%; }
-    .hint{ color:#6b7280; font-size:14px; margin-top:8px; }
+    .modalBody{
+      padding:12px;
+
+  /* NEW: body becomes a flex column and can scroll internally */
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:auto;
+    }
+
 
     .scanBar{
       margin-top:10px;
@@ -83,6 +99,33 @@
     .scanBtns{ display:flex; gap:10px; flex-wrap:wrap; }
     .capBtn{ background:#16a34a; }
     .doneBtn{ background:#e5e7eb; color:#111827; }
+    /* NEW: keep the camera preview from growing forever */
+#reader{
+  width:100%;
+  max-height: 45dvh;         /* Option A: ~45% of the phone screen */
+  overflow:hidden;
+  border-radius:16px;
+}
+
+/* Some builds of html5-qrcode inject a video element */
+#reader video{
+  width:100% !important;
+  height:auto !important;
+  max-height: 45dvh !important;
+  object-fit: cover;
+  border-radius:16px;
+}
+
+/* NEW: keep the capture bar visible even if content grows */
+.scanBar{
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: #fff;
+  border:1px solid rgba(17,24,39,.10);
+  box-shadow: 0 -6px 18px rgba(0,0,0,.06);
+}
+
   </style>
 
   <!-- QR scanner library -->
