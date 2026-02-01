@@ -48,6 +48,8 @@
       display:none; align-items:center; justify-content:center; padding:16px;
       z-index: 9999;
     }
+
+    /* UPDATED */
     .modal{
       width:min(760px, 100%);
       background:#fff;
@@ -55,7 +57,6 @@
       overflow:hidden;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
 
-  /* NEW: clamp to viewport and use a stable layout */
       max-height: calc(100dvh - 32px);
       display:flex;
       flex-direction:column;
@@ -65,16 +66,32 @@
       display:flex; justify-content:space-between; align-items:center;
       padding:12px 14px; background:#111827; color:#fff;
     }
+
+    /* UPDATED */
     .modalBody{
       padding:12px;
-
-  /* NEW: body becomes a flex column and can scroll internally */
       display:flex;
       flex-direction:column;
       gap:10px;
       overflow:auto;
     }
 
+    /* UPDATED/NEW: clamp camera area */
+    #reader{
+      width:100%;
+      max-height: 45dvh;
+      overflow:hidden;
+      border-radius:16px;
+    }
+    #reader video{
+      width:100% !important;
+      height:auto !important;
+      max-height: 45dvh !important;
+      object-fit: cover;
+      border-radius:16px;
+    }
+
+    .hint{ color:#6b7280; font-size:14px; margin-top:0; }
 
     .scanBar{
       margin-top:10px;
@@ -87,6 +104,12 @@
       justify-content:space-between;
       gap:10px;
       flex-wrap:wrap;
+
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fff;
+      box-shadow: 0 -6px 18px rgba(0,0,0,.06);
     }
     .scanMsg{
       font-weight:900;
@@ -99,41 +122,13 @@
     .scanBtns{ display:flex; gap:10px; flex-wrap:wrap; }
     .capBtn{ background:#16a34a; }
     .doneBtn{ background:#e5e7eb; color:#111827; }
-    /* NEW: keep the camera preview from growing forever */
-#reader{
-  width:100%;
-  max-height: 45dvh;         /* Option A: ~45% of the phone screen */
-  overflow:hidden;
-  border-radius:16px;
-}
-
-/* Some builds of html5-qrcode inject a video element */
-#reader video{
-  width:100% !important;
-  height:auto !important;
-  max-height: 45dvh !important;
-  object-fit: cover;
-  border-radius:16px;
-}
-
-/* NEW: keep the capture bar visible even if content grows */
-.scanBar{
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  background: #fff;
-  border:1px solid rgba(17,24,39,.10);
-  box-shadow: 0 -6px 18px rgba(0,0,0,.06);
-}
-
   </style>
 
-  <!-- QR scanner library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 005)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 006)</span></header>
 
   <div class="wrap">
     <div class="row">
@@ -154,7 +149,6 @@
     <div class="card" id="listCard"></div>
   </div>
 
-  <!-- Scanner Modal -->
   <div class="modalBg" id="modalBg">
     <div class="modal">
       <div class="modalHead">
@@ -180,10 +174,8 @@
   </div>
 
   <script>
-  // --- PWA service worker ---
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 
-  // --- Local list model ---
   const LS_KEY = "groceryApp_v1";
   const UNITS = ["ea","lb","oz","gal","ct"];
 
@@ -289,7 +281,6 @@
     }[m]));
   }
 
-  // --- Buttons (list) ---
   document.getElementById("btnNew").addEventListener("click", ()=>{
     const name = prompt("List name?", "Today");
     if(!name) return;
@@ -317,7 +308,7 @@
     }
   });
 
-  // --- Scanner (manual capture loop) ---
+  // Scanner
   const modalBg = document.getElementById("modalBg");
   const btnScan = document.getElementById("btnScan");
   const btnCloseTop = document.getElementById("btnCloseTop");
@@ -326,13 +317,9 @@
   const scanMsgEl = document.getElementById("scanMsg");
 
   let qr = null;
-
-  // “Target acquired” state
   let pendingLabel = "";
-  let pendingRaw = "";
-  let targetLocked = false; // while target is shown, ignore repeats
+  let targetLocked = false;
 
-  // Audio beep
   let audioCtx = null;
   function beep(){
     try{
@@ -356,16 +343,12 @@
 
   function resetTarget(){
     pendingLabel = "";
-    pendingRaw = "";
     targetLocked = false;
     btnCapture.disabled = true;
     setScanMsg("Point at QR and hold still…");
   }
 
   function parseLabel(decodedText){
-    // Accept:
-    // 1) URL with ?item=milk or ?dish=meatloaf
-    // 2) plain text milk
     try{
       const url = new URL(decodedText);
       const item = url.searchParams.get("item");
@@ -406,27 +389,31 @@
     });
   }
 
+  // UPDATED: close-first teardown to avoid white screen
   function closeScanner(){
     modalBg.style.display = "none";
     resetTarget();
-    if(qr){
-      qr.stop().catch(()=>{}).finally(()=>{
-        qr.clear().catch(()=>{});
-        qr = null;
-        document.getElementById("reader").innerHTML = "";
-      });
-    } else {
-      document.getElementById("reader").innerHTML = "";
-    }
+
+    const toStop = qr;
+    qr = null;
+
+    setTimeout(() => {
+      const r = document.getElementById("reader");
+      if(toStop){
+        toStop.stop().catch(()=>{}).finally(()=>{
+          toStop.clear().catch(()=>{});
+          if(r) r.innerHTML = "";
+        });
+      } else {
+        if(r) r.innerHTML = "";
+      }
+    }, 60);
   }
 
   function onScanSuccess(decodedText){
-    // If we already have a target, ignore until user captures (manual loop)
     if(targetLocked) return;
 
-    // Acquire target once
     targetLocked = true;
-    pendingRaw = decodedText;
     pendingLabel = parseLabel(decodedText);
 
     if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
@@ -440,12 +427,9 @@
     if(!pendingLabel) return;
 
     addItem(pendingLabel);
-
-    // Confirm capture, keep camera running
     setScanMsg("✅ Captured: " + pendingLabel, "ok");
     btnCapture.disabled = true;
 
-    // After a short beat, go back to “Point at QR…”
     setTimeout(() => {
       resetTarget();
     }, 650);
