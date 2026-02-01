@@ -5,40 +5,78 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Grocery APP</title>
   <link rel="manifest" href="manifest.webmanifest">
+
+  <!-- XLSX Import (OFFLINE): place xlsx.full.min.js next to this html.
+       Download once (SheetJS) and keep it local. Without this file, import is disabled. -->
+  <script src="xlsx.full.min.js"></script>
+
   <style>
     html, body { overflow-x: hidden; margin:0; }
     * { box-sizing: border-box; }
     body { font-family: Arial, Helvetica, sans-serif; background:#f6f7fb; }
     header { padding:14px 16px; background:#111827; color:#fff; font-weight:700; font-size:18px; }
-    .wrap { padding:14px 14px 90px; max-width:820px; margin:0 auto; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .wrap { padding:14px 14px 110px; max-width:920px; margin:0 auto; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     button {
       appearance:none; border:0; border-radius:14px; padding:14px 16px;
       font-size:16px; font-weight:800; cursor:pointer;
       background:#2563eb; color:#fff;
     }
     button.secondary { background:#e5e7eb; color:#111827; }
+    button.ghost { background:transparent; border:1px solid rgba(17,24,39,.20); color:#111827; }
+    button.danger { background:#fee2e2; color:#7f1d1d; }
     button:disabled { opacity:.5; cursor:not-allowed; }
+
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; }
+    .tabBtn { background:#e5e7eb; color:#111827; }
+    .tabBtn.active { background:#111827; color:#fff; }
+
     .card {
       background:#fff; border-radius:16px; padding:12px; margin-top:12px;
       box-shadow: 0 6px 18px rgba(0,0,0,.08);
     }
+    .muted { color:#6b7280; font-size:14px; }
+    .pill { font-size:12px; font-weight:900; padding:4px 10px; border-radius:999px; background:rgba(37,99,235,.10); color:#1d4ed8; }
+    .pill.gray { background:rgba(17,24,39,.08); color:#111827; }
+    .pill.green { background:rgba(22,163,74,.12); color:#065f46; }
+    .pill.orange { background:rgba(245,158,11,.16); color:#92400e; }
+
+    /* Grocery list rows */
     .item {
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
     }
     .item:last-child { border-bottom:0; }
     .check { width:26px; height:26px; }
-    .name { flex:1; font-size:16px; cursor:pointer; }
+    .name { flex:1; font-size:16px; cursor:pointer; min-width:0; }
+    .subline { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
     .done .name { text-decoration: line-through; opacity:.55; }
     .qty { width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
     select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
     .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    .total { font-weight:900; font-size:18px; }
-    .delBtn {
-      background:#fee2e2; color:#7f1d1d;
-      padding:10px 12px; border-radius:12px; font-weight:900;
+
+    /* Category editor rows */
+    .catRow{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 6px; border-bottom:1px solid #eee;
     }
+    .catRow:last-child{ border-bottom:0; }
+    .catName{ flex:1; font-weight:900; }
+    .miniBtn{
+      padding:10px 12px; border-radius:12px; font-weight:900;
+      background:#e5e7eb; color:#111827;
+    }
+
+    /* Dishes */
+    .dishRow{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 6px; border-bottom:1px solid #eee;
+    }
+    .dishRow:last-child{ border-bottom:0; }
+    .dishName{ flex:1; font-size:16px; font-weight:900; cursor:pointer; }
+
+    .total { font-weight:900; font-size:18px; }
+
     /* Scanner modal */
     .modalBg {
       position:fixed; inset:0; background:rgba(0,0,0,.55);
@@ -91,31 +129,125 @@
     .capBtn { background:#16a34a; }
     .doneBtn { background:#e5e7eb; color:#111827; }
   </style>
+
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 009 – faster scan)</span></header>
+  <header>
+    Grocery APP
+    <span style="opacity:.7;font-weight:600;">(build 010 – categories + dishes + xlsx)</span>
+  </header>
+
   <div class="wrap">
+    <!-- Tabs -->
     <div class="row">
-      <button id="btnNew">New List</button>
-      <button id="btnScan">SCAN</button>
-      <button id="btnUndo" class="secondary">Undo</button>
-      <button id="btnClearDone" class="secondary">Clear Purchased</button>
-      <button id="btnAdd" class="secondary">Add Item</button>
+      <div class="tabs">
+        <button class="tabBtn active" data-tab="groceries">Groceries</button>
+        <button class="tabBtn" data-tab="dishes">Dishes</button>
+        <button class="tabBtn" data-tab="categories">Categories</button>
+      </div>
     </div>
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+
+    <!-- Groceries toolbar -->
+    <div class="card" id="groceriesToolbar">
+      <div class="row">
+        <button id="btnNew">New List</button>
+        <button id="btnScan">SCAN</button>
+        <button id="btnUndo" class="secondary">Undo</button>
+        <button id="btnClearDone" class="secondary">Clear Purchased</button>
+        <button id="btnAdd" class="secondary">Add Item</button>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px;">
         <div><b>Current List:</b> <span id="listName">Today</span></div>
         <div class="total">Total: $<span id="total">0.00</span></div>
       </div>
+      <div class="muted" style="margin-top:8px;">
+        Sorting: universal walking order (Excel category order + learned appended).
+      </div>
     </div>
+
+    <!-- Groceries list -->
     <div class="card" id="listCard"></div>
+
+    <!-- Dishes -->
+    <div class="card" id="dishesCard" style="display:none;">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <div style="font-weight:900;font-size:18px;">Current Menu</div>
+          <div class="muted">Random Menu (14) replaces Current Menu; duplicates minimized by recency.</div>
+        </div>
+        <div class="row">
+          <button id="btnRandom14">Random Menu (14)</button>
+          <button id="btnScanDish" class="secondary">Scan Dish</button>
+        </div>
+      </div>
+
+      <div class="card" style="box-shadow:none; border:1px solid rgba(17,24,39,.10); margin-top:12px;">
+        <div id="menuList"></div>
+        <div class="muted" id="menuEmpty" style="display:none; padding:12px; text-align:center;">
+          Menu is empty. Scan dishes or generate Random Menu (14).
+        </div>
+      </div>
+
+      <div style="height:10px;"></div>
+
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <div style="font-weight:900;font-size:18px;">Dish Catalog</div>
+          <div class="muted">Persistent. Scanning <span class="pill gray">dish=Name</span> adds here.</div>
+        </div>
+        <div class="row">
+          <button id="btnAddDish" class="secondary">Add Dish</button>
+          <button id="btnClearMenu" class="secondary">Clear Menu</button>
+        </div>
+      </div>
+
+      <div class="card" style="box-shadow:none; border:1px solid rgba(17,24,39,.10); margin-top:12px;">
+        <div id="dishCatalog"></div>
+        <div class="muted" id="dishEmpty" style="display:none; padding:12px; text-align:center;">
+          No dishes yet. Scan a dish QR or add manually.
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="card" id="categoriesCard" style="display:none;">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <div style="font-weight:900;font-size:18px;">Categories</div>
+          <div class="muted">
+            Order defines universal walking order. New/learned categories append to the end by default.
+          </div>
+        </div>
+        <div class="row">
+          <label class="miniBtn" style="cursor:pointer;">
+            Import XLSX
+            <input id="fileXlsx" type="file" accept=".xlsx" style="display:none;">
+          </label>
+          <button id="btnAddCat" class="secondary">Add Category</button>
+        </div>
+      </div>
+
+      <div class="muted" id="xlsxStatus" style="margin-top:10px;"></div>
+
+      <div class="card" style="box-shadow:none; border:1px solid rgba(17,24,39,.10); margin-top:12px;">
+        <div id="catList"></div>
+        <div class="muted" id="catEmpty" style="display:none; padding:12px; text-align:center;">
+          No categories yet. Import XLSX or scan items with cat=...
+        </div>
+      </div>
+
+      <div class="muted" style="margin-top:10px;">
+        XLSX format: sheet name <b>Categories</b> preferred; first column or column header <b>Category</b>.
+      </div>
+    </div>
   </div>
 
+  <!-- Scanner Modal -->
   <div class="modalBg" id="modalBg">
     <div class="modal">
       <div class="modalHead">
-        <div><b>Scan Items</b></div>
+        <div><b id="scanTitle">Scan Items</b></div>
         <button id="btnCloseTop" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
       </div>
       <div class="modalBody">
@@ -128,7 +260,7 @@
           </div>
         </div>
         <div class="hint">
-          Tip: Use good light, hold ~15–30 cm away, slight angle is now OK.
+          Tip: Use good light, hold ~15–30 cm away, slight angle is OK.
         </div>
       </div>
     </div>
@@ -137,32 +269,23 @@
   <script>
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(console.warn);
 
-  const LS_KEY = "groceryApp_v1";
+  // =========================================================
+  // STORAGE / STATE
+  // =========================================================
+  const LS_KEY = "groceryApp_v2"; // bumped for new structure
   const UNITS = ["ea","lb","oz","gal","ct"];
 
-  function loadState() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
-    catch { return null; }
-  }
-
-  function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-
-  function newBlankList(name) { return { name, items: [], created: Date.now() }; }
-
-  let state = loadState() || { current: newBlankList("Today") };
-  let lastAddedId = null;
-  let renderTimeout = null;
-
+  // ---- Helpers
+  function now(){ return Date.now(); }
   function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
-
-  function computeTotal() {
-    return state.current.items.reduce((sum, it) => {
-      const p = parseFloat(it.price) || 0;
-      const q = parseFloat(it.qty) || 1;
-      return sum + p * q;
-    }, 0);
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[m]));
   }
-
+  function normalizeKey(s){
+    return String(s ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+  }
   function generateId() {
     if (crypto.randomUUID) return crypto.randomUUID();
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -171,7 +294,88 @@
     });
   }
 
-  function addItem(name) {
+  function newBlankList(name) { return { name, items: [], created: now() }; }
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
+    catch { return null; }
+  }
+  function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+  // ---- Default state
+  let state = loadState() || {
+    current: newBlankList("Today"),
+
+    // Categories:
+    // [{id, name, sortIndex, source:"excel|learned|manual", createdAt}]
+    categories: [],
+
+    // Item catalog: learned defaults by item name
+    // { [normName]: { name, defaultCategoryId, seenCount, lastSeenAt } }
+    itemCatalog: {},
+
+    // Dishes
+    dishCatalog: [], // [{id,name,createdAt,lastUsedAt,useCount}]
+    currentMenu: { dishIds: [], generatedAt: 0, mode: "manual" }
+  };
+
+  let lastAddedId = null;
+  let renderTimeout = null;
+  let activeTab = "groceries";
+
+  // =========================================================
+  // CATEGORY SYSTEM
+  // =========================================================
+  function findCategoryByName(name){
+    const key = normalizeKey(name);
+    return state.categories.find(c => normalizeKey(c.name) === key) || null;
+  }
+  function getCategoryById(id){
+    return state.categories.find(c => c.id === id) || null;
+  }
+  function ensureCategory(name, source="learned"){
+    name = String(name ?? "").trim();
+    if(!name) return null;
+
+    const existing = findCategoryByName(name);
+    if(existing) return existing;
+
+    const maxIndex = state.categories.reduce((m,c)=>Math.max(m, c.sortIndex ?? 0), -1);
+    const cat = {
+      id: generateId(),
+      name,
+      sortIndex: maxIndex + 1,  // NEW categories appended by default (your rule)
+      source,
+      createdAt: now()
+    };
+    state.categories.push(cat);
+    saveState(state);
+    return cat;
+  }
+  function categoryDisplayForItem(listItem){
+    const cat = getCategoryById(listItem.categoryId);
+    return cat ? cat.name : "Uncategorized";
+  }
+  function sortedCategories(){
+    return [...state.categories].sort((a,b)=>{
+      const ai = a.sortIndex ?? 0, bi = b.sortIndex ?? 0;
+      if(ai !== bi) return ai - bi;
+      return normalizeKey(a.name).localeCompare(normalizeKey(b.name));
+    });
+  }
+
+  // =========================================================
+  // GROCERIES: add/update/delete + sorting by walking order
+  // =========================================================
+  function computeTotal() {
+    return state.current.items.reduce((sum, it) => {
+      const p = parseFloat(it.price) || 0;
+      const q = parseFloat(it.qty) || 1;
+      return sum + p * q;
+    }, 0);
+  }
+
+  function addGroceryItem(name, categoryId=null) {
     name = String(name ?? "").trim();
     if (!name) return;
 
@@ -181,7 +385,10 @@
       done: false,
       qty: "1",
       unit: "ea",
-      price: ""
+      price: "",
+      categoryId: categoryId,      // resolved at add time
+      createdAt: now(),
+      source: "manual"
     };
     state.current.items.push(item);
     lastAddedId = item.id;
@@ -211,103 +418,215 @@
     renderTimeout = setTimeout(render, 80);
   }
 
-  function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-    }[m]));
-  }
-
-  function render() {
-    document.getElementById("listName").textContent = state.current.name;
-    document.getElementById("total").textContent = money(computeTotal());
-
-    const card = document.getElementById("listCard");
-    if (state.current.items.length === 0) {
-      card.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
-        No items yet.<br>Tap <b>SCAN</b> or <b>Add Item</b>.
-      </div>`;
-      return;
-    }
-
-    card.innerHTML = state.current.items.map(it => `
-      <div class="item ${it.done ? "done":""}" data-id="${it.id}">
-        <input class="check" type="checkbox" ${it.done ? "checked":""}>
-        <div class="name">${escapeHtml(it.name)}</div>
-        <input class="qty" type="number" step="0.5" min="0" value="${it.qty}">
-        <select class="unit">
-          ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
-        </select>
-        <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
-        <button class="delBtn" title="Delete">🗑️</button>
-      </div>
-    `).join("");
-
-    card.querySelectorAll(".item").forEach(row => {
-      const id = row.dataset.id;
-      const item = state.current.items.find(x => x.id === id);
-      if (!item) return;
-
-      row.querySelector(".check").onchange = e => updateItem(id, { done: e.target.checked });
-
-      row.querySelector(".qty").onchange = e => {
-        let v = parseFloat(e.target.value) || 0;
-        v = Math.max(0, Math.min(999, v));
-        updateItem(id, { qty: String(v) });
-      };
-
-      row.querySelector(".unit").onchange = e => updateItem(id, { unit: e.target.value });
-
-      row.querySelector(".price").onchange = e => {
-        let v = parseFloat(e.target.value);
-        updateItem(id, { price: isNaN(v) ? "" : String(Math.max(0, v)) });
-      };
-
-      row.querySelector(".delBtn").onclick = () => deleteItemById(id);
-
-      row.querySelector(".name").onclick = () => {
-        const newName = prompt("Edit item:", item.name);
-        if (newName && newName.trim() !== item.name) {
-          updateItem(id, { name: newName.trim() });
-        }
-      };
+  function groceriesDisplayItems(){
+    // UNIVERSAL WALKING ORDER: sort by category.sortIndex, then name
+    const items = [...state.current.items];
+    return items.sort((a,b)=>{
+      const ca = getCategoryById(a.categoryId);
+      const cb = getCategoryById(b.categoryId);
+      const ai = ca ? (ca.sortIndex ?? 999999) : 999999;
+      const bi = cb ? (cb.sortIndex ?? 999999) : 999999;
+      if(ai !== bi) return ai - bi;
+      return normalizeKey(a.name).localeCompare(normalizeKey(b.name));
     });
   }
 
-  // ── UI actions ────────────────────────────────────────
-  document.getElementById("btnNew").onclick = () => {
-    const name = prompt("List name?", state.current.name);
-    if (!name?.trim()) return;
-    state.current = newBlankList(name.trim());
-    lastAddedId = null;
-    saveState(state);
-    render();
-  };
+  // =========================================================
+  // DISHES
+  // =========================================================
+  function findDishByName(name){
+    const key = normalizeKey(name);
+    return state.dishCatalog.find(d => normalizeKey(d.name) === key) || null;
+  }
+  function addDish(name){
+    name = String(name ?? "").trim();
+    if(!name) return;
 
-  document.getElementById("btnAdd").onclick = () => {
-    const name = prompt("Add item:");
-    if (name) addItem(name.trim());
-  };
-
-  document.getElementById("btnUndo").onclick = () => {
-    if (lastAddedId) deleteItemById(lastAddedId);
-  };
-
-  document.getElementById("btnClearDone").onclick = () => {
-    const before = state.current.items.length;
-    state.current.items = state.current.items.filter(x => !x.done);
-    if (state.current.items.length !== before) {
+    let dish = findDishByName(name);
+    if(!dish){
+      dish = { id: generateId(), name, createdAt: now(), lastUsedAt: 0, useCount: 0 };
+      state.dishCatalog.push(dish);
       saveState(state);
-      render();
     }
-  };
+    debouncedRender();
+  }
+  function removeDishFromMenu(dishId){
+    state.currentMenu.dishIds = state.currentMenu.dishIds.filter(id => id !== dishId);
+    saveState(state);
+    debouncedRender();
+  }
+  function removeDishFromCatalog(dishId){
+    state.dishCatalog = state.dishCatalog.filter(d => d.id !== dishId);
+    state.currentMenu.dishIds = state.currentMenu.dishIds.filter(id => id !== dishId);
+    saveState(state);
+    debouncedRender();
+  }
+  function setMenu(dishIds, mode){
+    state.currentMenu = { dishIds: [...dishIds], generatedAt: now(), mode: mode || "manual" };
+    // update recency stats
+    const t = now();
+    dishIds.forEach(id=>{
+      const d = state.dishCatalog.find(x=>x.id===id);
+      if(d){
+        d.lastUsedAt = t;
+        d.useCount = (d.useCount||0) + 1;
+      }
+    });
+    saveState(state);
+    debouncedRender();
+  }
+  function randomMenu14(){
+    const pool = [...state.dishCatalog];
+    // minimize duplicates by preferring older lastUsedAt (0 = never used)
+    pool.sort((a,b)=>{
+      const al = a.lastUsedAt || 0;
+      const bl = b.lastUsedAt || 0;
+      if(al !== bl) return al - bl;
+      // secondary: lower useCount preferred
+      const au = a.useCount || 0;
+      const bu = b.useCount || 0;
+      if(au !== bu) return au - bu;
+      return normalizeKey(a.name).localeCompare(normalizeKey(b.name));
+    });
 
-  // ── Scanner logic ─────────────────────────────────────
+    const pick = [];
+    for(const d of pool){
+      if(pick.length >= 14) break;
+      pick.push(d.id);
+    }
+    setMenu(pick, "random14");
+  }
+
+  // =========================================================
+  // XLSX IMPORT (OFFLINE)
+  // =========================================================
+  function setXlsxStatus(msg){
+    document.getElementById("xlsxStatus").textContent = msg || "";
+  }
+
+  function importCategoriesFromNames(names){
+    // Excel is "source of truth" for base order.
+    // We overwrite the Excel-defined categories in the given order,
+    // but keep any existing learned/manual categories that aren't in Excel,
+    // appending them after (preserving their relative order).
+    const clean = [];
+    const seen = new Set();
+    names.forEach(n=>{
+      const name = String(n ?? "").trim();
+      const key = normalizeKey(name);
+      if(!name || seen.has(key)) return;
+      seen.add(key);
+      clean.push(name);
+    });
+
+    // Map existing categories by normalized name
+    const existingByKey = new Map(state.categories.map(c => [normalizeKey(c.name), c]));
+
+    const newCats = [];
+    clean.forEach((name, idx)=>{
+      const key = normalizeKey(name);
+      const old = existingByKey.get(key);
+      newCats.push({
+        id: old?.id || generateId(),
+        name: old?.name || name,
+        sortIndex: idx,
+        source: "excel",
+        createdAt: old?.createdAt || now()
+      });
+      existingByKey.delete(key);
+    });
+
+    // Remaining categories (learned/manual) get appended after
+    const leftovers = [];
+    for(const [,cat] of existingByKey){
+      leftovers.push(cat);
+    }
+    leftovers.sort((a,b)=>(a.sortIndex??0)-(b.sortIndex??0)); // preserve older-ish order
+
+    let start = newCats.length;
+    leftovers.forEach((cat, i)=>{
+      newCats.push({
+        ...cat,
+        sortIndex: start + i,
+        source: cat.source || "learned"
+      });
+    });
+
+    state.categories = newCats;
+    saveState(state);
+    debouncedRender();
+  }
+
+  async function handleXlsxFile(file){
+    if(!file) return;
+    if(typeof XLSX === "undefined"){
+      setXlsxStatus("XLSX import disabled: missing local xlsx.full.min.js (SheetJS).");
+      return;
+    }
+
+    setXlsxStatus(`Reading ${file.name}…`);
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+
+    // Prefer sheet named "Categories", else first sheet
+    const sheetName = wb.SheetNames.find(n => normalizeKey(n) === "categories") || wb.SheetNames[0];
+    const ws = wb.Sheets[sheetName];
+    if(!ws){
+      setXlsxStatus("No sheet found in XLSX.");
+      return;
+    }
+
+    // Convert to rows
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+    if(!rows.length){
+      setXlsxStatus("XLSX sheet is empty.");
+      return;
+    }
+
+    // Determine column: if first row contains "Category", use that header column; else use col 0.
+    const header = rows[0].map(x => normalizeKey(String(x)));
+    let col = 0;
+    const idx = header.findIndex(h => h === "category");
+    if(idx >= 0) col = idx;
+
+    const names = [];
+    for(let r=1; r<rows.length; r++){
+      const v = rows[r][col];
+      const name = String(v ?? "").trim();
+      if(name) names.push(name);
+    }
+
+    if(!names.length){
+      // maybe no header row; treat whole column 0 as values
+      const fallback = [];
+      for(let r=0; r<rows.length; r++){
+        const name = String(rows[r][0] ?? "").trim();
+        if(name && normalizeKey(name) !== "category") fallback.push(name);
+      }
+      if(!fallback.length){
+        setXlsxStatus("No categories found. Expected column 'Category' or first column values.");
+        return;
+      }
+      importCategoriesFromNames(fallback);
+      setXlsxStatus(`Imported ${fallback.length} categories from "${sheetName}".`);
+      return;
+    }
+
+    importCategoriesFromNames(names);
+    setXlsxStatus(`Imported ${names.length} categories from "${sheetName}".`);
+  }
+
+  // =========================================================
+  // SCANNER + QR PARSING (keeps your v14 capture loop behavior)
+  // =========================================================
   const modalBg = document.getElementById("modalBg");
   const scanMsgEl = document.getElementById("scanMsg");
+  const scanTitleEl = document.getElementById("scanTitle");
   let qr = null;
-  let pendingLabel = "";
+  let pendingScan = null; // parsed object
   let targetLocked = false;
   let audioCtx = null;
+  let scanMode = "auto"; // "auto" | "groceries" | "dishes"
 
   function beep() {
     try {
@@ -328,36 +647,95 @@
   }
 
   function resetTarget() {
-    pendingLabel = "";
+    pendingScan = null;
     targetLocked = false;
     document.getElementById("btnCapture").disabled = true;
     setScanMsg("Point camera at QR code – hold steady…");
   }
 
-  function parseLabel(text) {
-    if (typeof text !== "string" || text.length > 2000) return "Invalid";
-    text = text.trim().slice(0, 120);
+  function parseQR(decodedText) {
+    // Returns:
+    // { type:"grocery", itemName, catName, raw }
+    // { type:"dish", dishName, raw }
+    // { type:"text", label, raw, warn }
+    const raw = String(decodedText ?? "").trim();
+    if (!raw || raw.length > 4000) return { type:"text", label:"Invalid", raw, warn:true };
+
+    // If it's a URL, only accept if it contains item= or dish= query params.
+    // Otherwise (no short-link dependency), treat as raw text and warn.
     try {
-      const url = new URL(text);
+      const url = new URL(raw);
       const item = url.searchParams.get("item");
-      if (item) return decodeURIComponent(item).trim().slice(0, 100);
+      const cat  = url.searchParams.get("cat");
       const dish = url.searchParams.get("dish");
-      if (dish) return "DISH: " + decodeURIComponent(dish).trim().slice(0, 80);
-      return text;
+
+      if (item) {
+        return {
+          type: "grocery",
+          itemName: decodeURIComponent(item).trim().slice(0, 100),
+          catName: cat ? decodeURIComponent(cat).trim().slice(0, 80) : "",
+          raw
+        };
+      }
+      if (dish) {
+        return {
+          type: "dish",
+          dishName: decodeURIComponent(dish).trim().slice(0, 120),
+          raw
+        };
+      }
+      return { type:"text", label: raw.slice(0, 120), raw, warn:true };
     } catch {
-      return text;
+      // Not a URL
+      // Support plain "item=..&cat=.." style too (some QR generators omit scheme)
+      const q = raw;
+      const hasItem = /(^|[?&])item=/.test(q);
+      const hasDish = /(^|[?&])dish=/.test(q);
+      if (hasItem || hasDish) {
+        // Use URLSearchParams by faking a base URL
+        try {
+          const u = new URL("https://local/?" + q.replace(/^\?/, ""));
+          const item = u.searchParams.get("item");
+          const cat  = u.searchParams.get("cat");
+          const dish = u.searchParams.get("dish");
+          if(item){
+            return {
+              type:"grocery",
+              itemName: decodeURIComponent(item).trim().slice(0,100),
+              catName: cat ? decodeURIComponent(cat).trim().slice(0,80) : "",
+              raw
+            };
+          }
+          if(dish){
+            return { type:"dish", dishName: decodeURIComponent(dish).trim().slice(0,120), raw };
+          }
+        } catch {}
+      }
+      return { type:"text", label: raw.slice(0, 120), raw, warn:false };
     }
   }
 
-  async function openScanner() {
+  function pendingLabel(scan){
+    if(!scan) return "";
+    if(scan.type === "grocery"){
+      return scan.catName ? `${scan.itemName}  [${scan.catName}]` : scan.itemName;
+    }
+    if(scan.type === "dish") return `DISH: ${scan.dishName}`;
+    return scan.label || scan.raw || "";
+  }
+
+  async function openScanner(mode="auto") {
+    scanMode = mode;
     modalBg.style.display = "flex";
     resetTarget();
     document.getElementById("reader").innerHTML = "";
 
+    scanTitleEl.textContent = (scanMode === "dishes") ? "Scan Dishes" : "Scan Items";
+
     qr = new Html5Qrcode("reader", {
       verbose: false,
       formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-      experimentalFeatures: { useBarCodeDetectorIfSupported: true } // try native if available
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true }
     });
 
     try {
@@ -368,18 +746,18 @@
 
       const qrboxFunction = (vw, vh) => {
         const min = Math.min(vw, vh);
-        const size = Math.round(min * 0.80); // larger = more forgiving
+        const size = Math.round(min * 0.80);
         return { width: size, height: size };
       };
 
       await qr.start(
         rear.id,
         {
-          fps: 15,                      // ↑ faster detection
+          fps: 15,
           qrbox: qrboxFunction,
-          disableFlip: false,           // allow upside-down
-          rememberLastUsedCamera: true, // faster reopen
-          aspectRatio: 1.777            // try to encourage better framing
+          disableFlip: false,
+          rememberLastUsedCamera: true,
+          aspectRatio: 1.777
         },
         onScanSuccess
       );
@@ -409,28 +787,475 @@
 
   function onScanSuccess(decodedText) {
     if (targetLocked) return;
+
+    const parsed = parseQR(decodedText);
+
+    // If user explicitly opened "Scan Dish", but QR is item=..., still allow (auto)
+    // If user opened groceries scan and QR is dish=..., still allow (auto)
+    // Your workflow said scanning can be just capture loop; we keep it permissive.
     targetLocked = true;
-    pendingLabel = parseLabel(decodedText);
+    pendingScan = parsed;
 
     if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
     beep();
 
     document.getElementById("btnCapture").disabled = false;
-    setScanMsg(`Detected: ${pendingLabel} → tap Capture`, "ok");
+
+    const label = pendingLabel(parsed);
+    if(parsed.warn){
+      setScanMsg(`Detected: ${label} (note: URL without item/dish) → tap Capture`, "warn");
+    } else {
+      setScanMsg(`Detected: ${label} → tap Capture`, "ok");
+    }
   }
 
-  document.getElementById("btnCapture").onclick = () => {
-    if (!pendingLabel) return;
-    addItem(pendingLabel);
-    setScanMsg(`✅ Added: ${pendingLabel}`, "ok");
+  function capturePending(){
+    if(!pendingScan) return;
+
+    // Route by parsed type
+    if(pendingScan.type === "dish"){
+      addDish(pendingScan.dishName);
+      setScanMsg(`✅ Added dish: ${pendingScan.dishName}`, "ok");
+      document.getElementById("btnCapture").disabled = true;
+      setTimeout(resetTarget, 700);
+      return;
+    }
+
+    if(pendingScan.type === "grocery"){
+      const itemName = pendingScan.itemName;
+      const catName  = pendingScan.catName;
+
+      // Update item catalog "learned default" only when first seen.
+      const key = normalizeKey(itemName);
+      let rec = state.itemCatalog[key];
+      if(!rec){
+        // If cat provided, set as default; else null
+        let defaultCategoryId = null;
+        if(catName){
+          const cat = ensureCategory(catName, "learned");
+          defaultCategoryId = cat?.id || null;
+        }
+        state.itemCatalog[key] = {
+          name: itemName,
+          defaultCategoryId,
+          seenCount: 1,
+          lastSeenAt: now()
+        };
+      } else {
+        rec.seenCount = (rec.seenCount || 0) + 1;
+        rec.lastSeenAt = now();
+        // Option B: do NOT overwrite existing defaultCategoryId if item already known.
+        // But we can still ensure the scanned cat exists in category list.
+        if(catName) ensureCategory(catName, "learned");
+      }
+
+      // Resolve categoryId for THIS LIST ENTRY (Option B):
+      // - If scan has cat: use it
+      // - Else: use learned default if any
+      let categoryId = null;
+      if(catName){
+        const cat = ensureCategory(catName, "learned");
+        categoryId = cat?.id || null;
+      } else {
+        const defId = state.itemCatalog[key]?.defaultCategoryId || null;
+        categoryId = defId;
+      }
+
+      // Add list entry
+      const item = {
+        id: generateId(),
+        name: itemName,
+        done: false,
+        qty: "1",
+        unit: "ea",
+        price: "",
+        categoryId,
+        createdAt: now(),
+        source: "scan"
+      };
+      state.current.items.push(item);
+      lastAddedId = item.id;
+      saveState(state);
+      debouncedRender();
+
+      setScanMsg(`✅ Added: ${pendingLabel(pendingScan)}`, "ok");
+      document.getElementById("btnCapture").disabled = true;
+      setTimeout(resetTarget, 700);
+      return;
+    }
+
+    // Fallback: treat as text item
+    addGroceryItem(pendingLabel(pendingScan), null);
+    setScanMsg(`✅ Added: ${pendingLabel(pendingScan)}`, "ok");
     document.getElementById("btnCapture").disabled = true;
     setTimeout(resetTarget, 700);
+  }
+
+  // =========================================================
+  // UI: Tabs
+  // =========================================================
+  function setTab(tab){
+    activeTab = tab;
+    document.querySelectorAll(".tabBtn").forEach(b=>{
+      b.classList.toggle("active", b.dataset.tab === tab);
+    });
+
+    document.getElementById("groceriesToolbar").style.display = (tab==="groceries") ? "" : "none";
+    document.getElementById("listCard").style.display = (tab==="groceries") ? "" : "none";
+
+    document.getElementById("dishesCard").style.display = (tab==="dishes") ? "" : "none";
+    document.getElementById("categoriesCard").style.display = (tab==="categories") ? "" : "none";
+  }
+
+  document.querySelectorAll(".tabBtn").forEach(btn=>{
+    btn.onclick = ()=> setTab(btn.dataset.tab);
+  });
+
+  // =========================================================
+  // UI: Groceries actions (your original buttons)
+  // =========================================================
+  document.getElementById("btnNew").onclick = () => {
+    const name = prompt("List name?", state.current.name);
+    if (!name?.trim()) return;
+    state.current = newBlankList(name.trim());
+    lastAddedId = null;
+    saveState(state);
+    render();
   };
 
-  document.getElementById("btnScan").onclick = openScanner;
+  document.getElementById("btnAdd").onclick = () => {
+    const name = prompt("Add item:");
+    if (!name) return;
+    // For manual add: use learned default if known
+    const norm = normalizeKey(name);
+    const defId = state.itemCatalog[norm]?.defaultCategoryId || null;
+    addGroceryItem(name.trim(), defId);
+  };
+
+  document.getElementById("btnUndo").onclick = () => {
+    if (lastAddedId) deleteItemById(lastAddedId);
+  };
+
+  document.getElementById("btnClearDone").onclick = () => {
+    const before = state.current.items.length;
+    state.current.items = state.current.items.filter(x => !x.done);
+    if (state.current.items.length !== before) {
+      saveState(state);
+      render();
+    }
+  };
+
+  // =========================================================
+  // UI: Dishes actions
+  // =========================================================
+  document.getElementById("btnRandom14").onclick = () => {
+    if(state.dishCatalog.length === 0){
+      alert("Dish Catalog is empty.");
+      return;
+    }
+    randomMenu14();
+  };
+
+  document.getElementById("btnAddDish").onclick = () => {
+    const name = prompt("Dish name?");
+    if(name) addDish(name.trim());
+  };
+
+  document.getElementById("btnClearMenu").onclick = () => {
+    state.currentMenu.dishIds = [];
+    state.currentMenu.generatedAt = now();
+    state.currentMenu.mode = "manual";
+    saveState(state);
+    render();
+  };
+
+  // Dishes: scan dish QR
+  document.getElementById("btnScanDish").onclick = () => openScanner("dishes");
+
+  // =========================================================
+  // UI: Categories actions
+  // =========================================================
+  document.getElementById("btnAddCat").onclick = () => {
+    const name = prompt("Category name?");
+    if(!name?.trim()) return;
+    ensureCategory(name.trim(), "manual");
+    debouncedRender();
+  };
+
+  document.getElementById("fileXlsx").onchange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if(file) await handleXlsxFile(file);
+  };
+
+  // =========================================================
+  // Scanner buttons (your original loop; now routes groceries/dishes)
+  // =========================================================
+  document.getElementById("btnScan").onclick = () => openScanner("groceries");
   document.getElementById("btnCloseTop").onclick = closeScanner;
   document.getElementById("btnDone").onclick = closeScanner;
   modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
+  document.getElementById("btnCapture").onclick = capturePending;
+
+  // =========================================================
+  // RENDER
+  // =========================================================
+  function renderGroceries(){
+    document.getElementById("listName").textContent = state.current.name;
+    document.getElementById("total").textContent = money(computeTotal());
+
+    const card = document.getElementById("listCard");
+    const items = groceriesDisplayItems();
+
+    if (items.length === 0) {
+      card.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
+        No items yet.<br>Tap <b>SCAN</b> or <b>Add Item</b>.
+      </div>`;
+      return;
+    }
+
+    card.innerHTML = items.map(it => {
+      const catName = categoryDisplayForItem(it);
+      const catPill = (catName === "Uncategorized")
+        ? `<span class="pill orange">Uncategorized</span>`
+        : `<span class="pill gray">${escapeHtml(catName)}</span>`;
+
+      const srcPill = (it.source === "scan")
+        ? `<span class="pill green">scan</span>`
+        : `<span class="pill">manual</span>`;
+
+      return `
+        <div class="item ${it.done ? "done":""}" data-id="${it.id}">
+          <input class="check" type="checkbox" ${it.done ? "checked":""}>
+          <div class="name">
+            <div>${escapeHtml(it.name)}</div>
+            <div class="subline">${catPill}${srcPill}</div>
+          </div>
+          <input class="qty" type="number" step="0.5" min="0" value="${escapeHtml(it.qty)}">
+          <select class="unit">
+            ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
+          </select>
+          <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
+          <button class="danger" style="padding:10px 12px; border-radius:12px; font-weight:900;" title="Delete">🗑️</button>
+        </div>
+      `;
+    }).join("");
+
+    card.querySelectorAll(".item").forEach(row => {
+      const id = row.dataset.id;
+      const item = state.current.items.find(x => x.id === id);
+      if (!item) return;
+
+      row.querySelector(".check").onchange = e => updateItem(id, { done: e.target.checked });
+
+      row.querySelector(".qty").onchange = e => {
+        let v = parseFloat(e.target.value) || 0;
+        v = Math.max(0, Math.min(999, v));
+        updateItem(id, { qty: String(v) });
+      };
+
+      row.querySelector(".unit").onchange = e => updateItem(id, { unit: e.target.value });
+
+      row.querySelector(".price").onchange = e => {
+        let v = parseFloat(e.target.value);
+        updateItem(id, { price: isNaN(v) ? "" : String(Math.max(0, v)) });
+      };
+
+      row.querySelector("button.danger").onclick = () => deleteItemById(id);
+
+      // Edit item name; keep categoryId as-is on the list row
+      row.querySelector(".name").onclick = () => {
+        const newName = prompt("Edit item:", item.name);
+        if (newName && newName.trim() && newName.trim() !== item.name) {
+          updateItem(id, { name: newName.trim() });
+        }
+      };
+    });
+  }
+
+  function renderDishes(){
+    const menuEl = document.getElementById("menuList");
+    const menuEmpty = document.getElementById("menuEmpty");
+    const catEl = document.getElementById("dishCatalog");
+    const dishEmpty = document.getElementById("dishEmpty");
+
+    // Menu
+    const menuIds = state.currentMenu.dishIds || [];
+    const menu = menuIds.map(id => state.dishCatalog.find(d => d.id === id)).filter(Boolean);
+
+    if(menu.length === 0){
+      menuEl.innerHTML = "";
+      menuEmpty.style.display = "";
+    } else {
+      menuEmpty.style.display = "none";
+      menuEl.innerHTML = menu.map(d => `
+        <div class="dishRow" data-id="${d.id}">
+          <div class="dishName">${escapeHtml(d.name)}</div>
+          <button class="miniBtn" data-act="removeMenu">Remove</button>
+        </div>
+      `).join("");
+
+      menuEl.querySelectorAll(".dishRow").forEach(r=>{
+        const id = r.dataset.id;
+        r.querySelector('[data-act="removeMenu"]').onclick = ()=> removeDishFromMenu(id);
+      });
+    }
+
+    // Catalog
+    if(state.dishCatalog.length === 0){
+      catEl.innerHTML = "";
+      dishEmpty.style.display = "";
+    } else {
+      dishEmpty.style.display = "none";
+      const sorted = [...state.dishCatalog].sort((a,b)=> normalizeKey(a.name).localeCompare(normalizeKey(b.name)));
+      catEl.innerHTML = sorted.map(d => `
+        <div class="dishRow" data-id="${d.id}">
+          <div class="dishName">${escapeHtml(d.name)}</div>
+          <button class="miniBtn" data-act="addToMenu">Add to Menu</button>
+          <button class="miniBtn danger" data-act="deleteDish">Delete</button>
+        </div>
+      `).join("");
+
+      catEl.querySelectorAll(".dishRow").forEach(r=>{
+        const id = r.dataset.id;
+        r.querySelector('[data-act="addToMenu"]').onclick = ()=>{
+          // add to menu if not already there
+          if(!state.currentMenu.dishIds.includes(id)){
+            state.currentMenu.dishIds.push(id);
+            state.currentMenu.mode = "manual";
+            state.currentMenu.generatedAt = now();
+            saveState(state);
+            debouncedRender();
+          }
+        };
+
+        r.querySelector('[data-act="deleteDish"]').onclick = ()=>{
+          const dish = state.dishCatalog.find(x=>x.id===id);
+          if(!dish) return;
+
+          // Your required prompt:
+          // "remove from Menu or Catalog"
+          const choice = prompt(
+            `Delete "${dish.name}"?\nType:\nM = remove from Menu only\nC = remove from Catalog\n(Anything else cancels)`
+          );
+
+          if(!choice) return;
+          const c = choice.trim().toUpperCase();
+          if(c === "M") removeDishFromMenu(id);
+          else if(c === "C") removeDishFromCatalog(id);
+        };
+
+        // rename
+        r.querySelector(".dishName").onclick = ()=>{
+          const dish = state.dishCatalog.find(x=>x.id===id);
+          if(!dish) return;
+          const newName = prompt("Rename dish:", dish.name);
+          if(newName && newName.trim() && newName.trim() !== dish.name){
+            dish.name = newName.trim();
+            saveState(state);
+            debouncedRender();
+          }
+        };
+      });
+    }
+  }
+
+  function renderCategories(){
+    const list = document.getElementById("catList");
+    const empty = document.getElementById("catEmpty");
+
+    if(typeof XLSX === "undefined"){
+      setXlsxStatus("XLSX import: add local xlsx.full.min.js to enable offline import.");
+    } else {
+      if(!document.getElementById("xlsxStatus").textContent){
+        setXlsxStatus("XLSX import ready (offline).");
+      }
+    }
+
+    const cats = sortedCategories();
+    if(cats.length === 0){
+      list.innerHTML = "";
+      empty.style.display = "";
+      return;
+    }
+    empty.style.display = "none";
+
+    list.innerHTML = cats.map((c, idx) => `
+      <div class="catRow" data-id="${c.id}">
+        <div class="catName">${escapeHtml(c.name)}</div>
+        <span class="pill gray">${escapeHtml(c.source || "learned")}</span>
+        <button class="miniBtn" data-act="up" ${idx===0?"disabled":""}>↑</button>
+        <button class="miniBtn" data-act="down" ${idx===cats.length-1?"disabled":""}>↓</button>
+        <button class="miniBtn danger" data-act="del">Delete</button>
+      </div>
+    `).join("");
+
+    list.querySelectorAll(".catRow").forEach(r=>{
+      const id = r.dataset.id;
+      const cat = state.categories.find(x=>x.id===id);
+      if(!cat) return;
+
+      r.querySelector('[data-act="up"]').onclick = ()=>{
+        // swap sortIndex with previous in sorted order
+        const arr = sortedCategories();
+        const i = arr.findIndex(x=>x.id===id);
+        if(i<=0) return;
+        const a = arr[i-1], b = arr[i];
+        const tmp = a.sortIndex; a.sortIndex = b.sortIndex; b.sortIndex = tmp;
+        // apply back to state
+        state.categories.forEach(c=>{
+          const m = arr.find(x=>x.id===c.id);
+          if(m) c.sortIndex = m.sortIndex;
+        });
+        saveState(state); debouncedRender();
+      };
+
+      r.querySelector('[data-act="down"]').onclick = ()=>{
+        const arr = sortedCategories();
+        const i = arr.findIndex(x=>x.id===id);
+        if(i<0 || i>=arr.length-1) return;
+        const a = arr[i], b = arr[i+1];
+        const tmp = a.sortIndex; a.sortIndex = b.sortIndex; b.sortIndex = tmp;
+        state.categories.forEach(c=>{
+          const m = arr.find(x=>x.id===c.id);
+          if(m) c.sortIndex = m.sortIndex;
+        });
+        saveState(state); debouncedRender();
+      };
+
+      r.querySelector('[data-act="del"]').onclick = ()=>{
+        // If you delete a category, existing list items keep their categoryId,
+        // but display will show "Uncategorized" (by id lookup).
+        // Safer: ask and then delete.
+        if(!confirm(`Delete category "${cat.name}"?`)) return;
+        state.categories = state.categories.filter(x=>x.id!==id);
+        // Re-pack sortIndex sequentially
+        sortedCategories().forEach((c, i)=> c.sortIndex=i);
+        saveState(state);
+        debouncedRender();
+      };
+
+      // rename on click
+      r.querySelector(".catName").onclick = ()=>{
+        const newName = prompt("Rename category:", cat.name);
+        if(newName && newName.trim() && normalizeKey(newName) !== normalizeKey(cat.name)){
+          cat.name = newName.trim();
+          saveState(state);
+          debouncedRender();
+        }
+      };
+    });
+  }
+
+  function render(){
+    // tab content
+    renderGroceries();
+    renderDishes();
+    renderCategories();
+
+    // show correct tab containers
+    setTab(activeTab);
+  }
 
   // Initial render
   render();
