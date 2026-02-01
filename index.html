@@ -10,49 +10,87 @@
   <style>
     body{ font-family: Arial, Helvetica, sans-serif; margin:0; background:#f6f7fb; }
     header{ padding:14px 16px; background:#111827; color:#fff; font-weight:700; font-size:18px; }
-    .wrap{ padding:14px 14px 90px; max-width:720px; margin:0 auto; }
+    .wrap{ padding:14px 14px 90px; max-width:820px; margin:0 auto; }
     .row{ display:flex; gap:10px; flex-wrap:wrap; }
     button{
       appearance:none; border:0; border-radius:14px; padding:14px 16px;
-      font-size:16px; font-weight:700; cursor:pointer;
+      font-size:16px; font-weight:800; cursor:pointer;
       background:#2563eb; color:#fff;
     }
     button.secondary{ background:#e5e7eb; color:#111827; }
+    button:disabled{ opacity:.5; cursor:not-allowed; }
+
     .card{
       background:#fff; border-radius:16px; padding:12px; margin-top:12px;
       box-shadow: 0 6px 18px rgba(0,0,0,.08);
     }
-    .item{ display:flex; align-items:center; gap:10px; padding:10px 6px; border-bottom:1px solid #eee; }
+    .item{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 6px; border-bottom:1px solid #eee;
+    }
     .item:last-child{ border-bottom:0; }
     .check{ width:26px; height:26px; }
     .name{ flex:1; font-size:16px; }
     .done .name{ text-decoration: line-through; opacity:.55; }
     .qty{ width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
     select{ padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
-    .price{ width:86px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    .total{ font-weight:800; font-size:18px; }
+    .price{ width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    .total{ font-weight:900; font-size:18px; }
+
+    .delBtn{
+      background:#fee2e2; color:#7f1d1d;
+      padding:10px 12px; border-radius:12px; font-weight:900;
+    }
 
     /* Scanner modal */
     .modalBg{
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
+      z-index: 9999;
     }
     .modal{
-      width:min(680px, 100%); background:#fff; border-radius:18px; overflow:hidden;
+      width:min(760px, 100%); background:#fff; border-radius:18px; overflow:hidden;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
     }
-    .modalHead{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#111827; color:#fff; }
+    .modalHead{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 14px; background:#111827; color:#fff;
+    }
     .modalBody{ padding:12px; }
     #reader{ width:100%; }
     .hint{ color:#6b7280; font-size:14px; margin-top:8px; }
+
+    .scanBar{
+      margin-top:10px;
+      background:rgba(17,24,39,.06);
+      border:1px solid rgba(17,24,39,.10);
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .scanMsg{
+      font-weight:900;
+      font-size:16px;
+      color:#111827;
+    }
+    .scanMsg.ok{ color:#065f46; }
+    .scanMsg.warn{ color:#92400e; }
+
+    .scanBtns{ display:flex; gap:10px; flex-wrap:wrap; }
+    .capBtn{ background:#16a34a; }
+    .doneBtn{ background:#e5e7eb; color:#111827; }
   </style>
 
-  <!-- QR scanner library (simple + cross-platform) -->
+  <!-- QR scanner library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 004)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 005)</span></header>
 
   <div class="wrap">
     <div class="row">
@@ -64,28 +102,35 @@
     </div>
 
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
         <div><b>Current List:</b> <span id="listName">Today</span></div>
         <div class="total">Total: $<span id="total">0.00</span></div>
       </div>
     </div>
 
-    <div class="card" id="listCard">
-      <!-- items render here -->
-    </div>
+    <div class="card" id="listCard"></div>
   </div>
 
   <!-- Scanner Modal -->
   <div class="modalBg" id="modalBg">
     <div class="modal">
       <div class="modalHead">
-        <div><b>Scan QR Code</b></div>
-        <button id="btnClose" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
+        <div><b>Scan Items</b></div>
+        <button id="btnCloseTop" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
       </div>
       <div class="modalBody">
         <div id="reader"></div>
+
+        <div class="scanBar">
+          <div id="scanMsg" class="scanMsg">Point at QR and hold still…</div>
+          <div class="scanBtns">
+            <button id="btnCapture" class="capBtn" disabled>CAPTURE</button>
+            <button id="btnDone" class="doneBtn">DONE</button>
+          </div>
+        </div>
+
         <div class="hint">
-          Tip: hold the phone steady 6–10 inches away, good lighting helps.
+          Tip: good lighting + steady hands makes scans much faster.
         </div>
       </div>
     </div>
@@ -95,7 +140,7 @@
   // --- PWA service worker ---
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 
-  // --- Simple local list model ---
+  // --- Local list model ---
   const LS_KEY = "groceryApp_v1";
   const UNITS = ["ea","lb","oz","gal","ct"];
 
@@ -104,10 +149,7 @@
     catch { return null; }
   }
   function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-
-  function newBlankList(name){
-    return { name, items: [], created: Date.now() };
-  }
+  function newBlankList(name){ return { name, items: [], created: Date.now() }; }
 
   let state = loadState() || { current: newBlankList("Today") };
   let lastAddedId = null;
@@ -133,12 +175,20 @@
       unit:"ea",
       price:""
     };
-
     state.current.items.push(item);
     lastAddedId = item.id;
-
     saveState(state);
     render();
+  }
+
+  function deleteItemById(id){
+    const i = state.current.items.findIndex(x => x.id === id);
+    if(i >= 0){
+      state.current.items.splice(i, 1);
+      if(lastAddedId === id) lastAddedId = null;
+      saveState(state);
+      render();
+    }
   }
 
   function render(){
@@ -160,10 +210,10 @@
           ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
         </select>
         <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
+        <button class="delBtn" title="Delete">🗑️</button>
       </div>
     `).join("");
 
-    // wire events
     card.querySelectorAll(".item").forEach(row => {
       const id = row.getAttribute("data-id");
       const it = state.current.items.find(x => x.id === id);
@@ -184,6 +234,9 @@
         it.price = e.target.value;
         saveState(state); render();
       });
+      row.querySelector(".delBtn").addEventListener("click", ()=>{
+        deleteItemById(id);
+      });
     });
   }
 
@@ -193,11 +246,12 @@
     }[m]));
   }
 
-  // --- Buttons ---
+  // --- Buttons (list) ---
   document.getElementById("btnNew").addEventListener("click", ()=>{
     const name = prompt("List name?", "Today");
     if(!name) return;
     state.current = newBlankList(name.trim());
+    lastAddedId = null;
     saveState(state); render();
   });
 
@@ -209,12 +263,7 @@
 
   document.getElementById("btnUndo").addEventListener("click", ()=>{
     if(!lastAddedId) return;
-    const i = state.current.items.findIndex(x => x.id === lastAddedId);
-    if(i >= 0){
-      state.current.items.splice(i, 1);
-      lastAddedId = null;
-      saveState(state); render();
-    }
+    deleteItemById(lastAddedId);
   });
 
   document.getElementById("btnClearDone").addEventListener("click", ()=>{
@@ -225,23 +274,72 @@
     }
   });
 
-  // --- Scanner modal + scanning ---
+  // --- Scanner (manual capture loop) ---
   const modalBg = document.getElementById("modalBg");
   const btnScan = document.getElementById("btnScan");
-  const btnClose = document.getElementById("btnClose");
+  const btnCloseTop = document.getElementById("btnCloseTop");
+  const btnDone = document.getElementById("btnDone");
+  const btnCapture = document.getElementById("btnCapture");
+  const scanMsgEl = document.getElementById("scanMsg");
 
   let qr = null;
 
-  // scan spam protection
-  let lastScanText = "";
-  let lastScanAt = 0;
-  const SCAN_COOLDOWN_MS = 1500;
+  // “Target acquired” state
+  let pendingLabel = "";
+  let pendingRaw = "";
+  let targetLocked = false; // while target is shown, ignore repeats
+
+  // Audio beep
+  let audioCtx = null;
+  function beep(){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      setTimeout(()=> o.stop(), 90);
+    }catch(e){}
+  }
+
+  function setScanMsg(text, cls){
+    scanMsgEl.textContent = text;
+    scanMsgEl.classList.remove("ok","warn");
+    if(cls) scanMsgEl.classList.add(cls);
+  }
+
+  function resetTarget(){
+    pendingLabel = "";
+    pendingRaw = "";
+    targetLocked = false;
+    btnCapture.disabled = true;
+    setScanMsg("Point at QR and hold still…");
+  }
+
+  function parseLabel(decodedText){
+    // Accept:
+    // 1) URL with ?item=milk or ?dish=meatloaf
+    // 2) plain text milk
+    try{
+      const url = new URL(decodedText);
+      const item = url.searchParams.get("item");
+      const dish = url.searchParams.get("dish");
+      if(item) return decodeURIComponent(item);
+      if(dish) return "DISH: " + decodeURIComponent(dish);
+      return decodedText;
+    }catch{
+      return decodedText;
+    }
+  }
 
   function openScanner(){
     modalBg.style.display = "flex";
     document.getElementById("reader").innerHTML = "";
+    resetTarget();
 
-    // Create scanner instance once each open
     qr = new Html5Qrcode("reader", {
       formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
     });
@@ -249,7 +347,6 @@
     Html5Qrcode.getCameras().then(cams => {
       if(!cams || cams.length === 0) throw new Error("No camera found");
 
-      // Prefer rear camera if label exists; else fallback to last camera
       const rear =
         cams.find(c => /back|rear|environment/i.test(c.label || "")) ||
         cams[cams.length - 1];
@@ -260,13 +357,15 @@
         onScanSuccess
       );
     }).catch(err => {
-      alert("Camera/scanner not available here.\n\n" + err);
+      setScanMsg("Scanner error. Tap Close.", "warn");
+      alert("Camera/scanner not available:\n\n" + err);
       closeScanner();
     });
   }
 
   function closeScanner(){
     modalBg.style.display = "none";
+    resetTarget();
     if(qr){
       qr.stop().catch(()=>{}).finally(()=>{
         qr.clear().catch(()=>{});
@@ -279,36 +378,39 @@
   }
 
   function onScanSuccess(decodedText){
-    const now = Date.now();
+    // If we already have a target, ignore until user captures (manual loop)
+    if(targetLocked) return;
 
-    // Prevent rapid-fire duplicates
-    if (decodedText === lastScanText && (now - lastScanAt) < SCAN_COOLDOWN_MS) return;
-    if ((now - lastScanAt) < 350) return;
+    // Acquire target once
+    targetLocked = true;
+    pendingRaw = decodedText;
+    pendingLabel = parseLabel(decodedText);
 
-    lastScanText = decodedText;
-    lastScanAt = now;
+    if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
+    beep();
 
-    if (navigator.vibrate) navigator.vibrate(40);
-
-    // Handle URL QR format:
-    // https://<host>/add?item=milk
-    // https://<host>/add?dish=meatloaf
-    try{
-      const url = new URL(decodedText);
-      const item = url.searchParams.get("item");
-      const dish = url.searchParams.get("dish");
-
-      if(item){ addItem(decodeURIComponent(item)); return; }
-      if(dish){ addItem("DISH: " + decodeURIComponent(dish)); return; }
-
-      addItem(decodedText);
-    }catch{
-      addItem(decodedText);
-    }
+    btnCapture.disabled = false;
+    setScanMsg("Target acquired: " + pendingLabel, "ok");
   }
 
+  btnCapture.addEventListener("click", ()=>{
+    if(!pendingLabel) return;
+
+    addItem(pendingLabel);
+
+    // Confirm capture, keep camera running
+    setScanMsg("✅ Captured: " + pendingLabel, "ok");
+    btnCapture.disabled = true;
+
+    // After a short beat, go back to “Point at QR…”
+    setTimeout(() => {
+      resetTarget();
+    }, 650);
+  });
+
   btnScan.addEventListener("click", openScanner);
-  btnClose.addEventListener("click", closeScanner);
+  btnCloseTop.addEventListener("click", closeScanner);
+  btnDone.addEventListener("click", closeScanner);
   modalBg.addEventListener("click", (e)=>{ if(e.target === modalBg) closeScanner(); });
 
   render();
