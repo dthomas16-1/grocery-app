@@ -630,8 +630,8 @@
       // We cap it so it doesn't become gigantic on big screens.
       const qrboxFunction = (vw, vh) => {
         const min = Math.min(vw, vh);
-        let size = Math.round(min * 0.15);   // was 0.55 (too big)
-        size = Math.max(180, Math.min(size, 320));
+        let size = Math.round(min * 0.32);   // was 0.55 (too big)
+        size = Math.max(150, Math.min(size, 210));
         return { width: size, height: size };
       };
 
