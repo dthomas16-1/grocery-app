@@ -63,13 +63,13 @@
       padding-bottom: env(safe-area-inset-bottom, 12px);
     }
     #reader {
-      width:100%; max-height:45dvh; overflow:hidden; border-radius:16px;
+      width:100%; max-height:50dvh; overflow:hidden; border-radius:16px; background:#000;
     }
     #reader * { max-width:100% !important; box-sizing:border-box; }
     #reader video,
     #reader canvas {
       width:100% !important; height:auto !important;
-      max-height:45dvh !important; object-fit:contain;
+      max-height:50dvh !important; object-fit:contain;
       border-radius:16px; display:block;
     }
     .hint { color:#6b7280; font-size:14px; margin-top:0; }
@@ -94,7 +94,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 008)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 009 – faster scan)</span></header>
   <div class="wrap">
     <div class="row">
       <button id="btnNew">New List</button>
@@ -121,14 +121,14 @@
       <div class="modalBody">
         <div id="reader"></div>
         <div class="scanBar">
-          <div id="scanMsg" class="scanMsg">Point at QR and hold still…</div>
+          <div id="scanMsg" class="scanMsg">Point camera at QR code – hold steady…</div>
           <div class="scanBtns">
             <button id="btnCapture" class="capBtn" disabled>CAPTURE</button>
             <button id="btnDone" class="doneBtn">DONE</button>
           </div>
         </div>
         <div class="hint">
-          Tip: good lighting + steady hands = faster scans
+          Tip: Use good light, hold ~15–30 cm away, slight angle is now OK.
         </div>
       </div>
     </div>
@@ -247,9 +247,7 @@
       const item = state.current.items.find(x => x.id === id);
       if (!item) return;
 
-      row.querySelector(".check").onchange = e => {
-        updateItem(id, { done: e.target.checked });
-      };
+      row.querySelector(".check").onchange = e => updateItem(id, { done: e.target.checked });
 
       row.querySelector(".qty").onchange = e => {
         let v = parseFloat(e.target.value) || 0;
@@ -257,9 +255,7 @@
         updateItem(id, { qty: String(v) });
       };
 
-      row.querySelector(".unit").onchange = e => {
-        updateItem(id, { unit: e.target.value });
-      };
+      row.querySelector(".unit").onchange = e => updateItem(id, { unit: e.target.value });
 
       row.querySelector(".price").onchange = e => {
         let v = parseFloat(e.target.value);
@@ -268,7 +264,6 @@
 
       row.querySelector(".delBtn").onclick = () => deleteItemById(id);
 
-      // Tap name → edit
       row.querySelector(".name").onclick = () => {
         const newName = prompt("Edit item:", item.name);
         if (newName && newName.trim() !== item.name) {
@@ -336,7 +331,7 @@
     pendingLabel = "";
     targetLocked = false;
     document.getElementById("btnCapture").disabled = true;
-    setScanMsg("Point at QR and hold still…");
+    setScanMsg("Point camera at QR code – hold steady…");
   }
 
   function parseLabel(text) {
@@ -359,7 +354,11 @@
     resetTarget();
     document.getElementById("reader").innerHTML = "";
 
-    qr = new Html5Qrcode("reader", { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
+    qr = new Html5Qrcode("reader", {
+      verbose: false,
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true } // try native if available
+    });
 
     try {
       const cameras = await Html5Qrcode.getCameras();
@@ -369,19 +368,25 @@
 
       const qrboxFunction = (vw, vh) => {
         const min = Math.min(vw, vh);
-        const size = Math.round(min * 0.70);
+        const size = Math.round(min * 0.80); // larger = more forgiving
         return { width: size, height: size };
       };
 
       await qr.start(
         rear.id,
-        { fps: 12, qrbox: qrboxFunction },
+        {
+          fps: 15,                      // ↑ faster detection
+          qrbox: qrboxFunction,
+          disableFlip: false,           // allow upside-down
+          rememberLastUsedCamera: true, // faster reopen
+          aspectRatio: 1.777            // try to encourage better framing
+        },
         onScanSuccess
       );
     } catch (err) {
-      setScanMsg("Scanner error. Try again or close.", "warn");
-      console.warn(err);
-      setTimeout(closeScanner, 1800);
+      setScanMsg("Camera error – check permissions / try again.", "warn");
+      console.warn("Scanner start failed:", err);
+      setTimeout(closeScanner, 2200);
     }
   }
 
@@ -395,7 +400,7 @@
       await qr.stop();
       qr.clear();
     } catch (err) {
-      console.warn("Scanner cleanup failed", err);
+      console.warn("Scanner cleanup issue:", err);
     } finally {
       qr = null;
       document.getElementById("reader").innerHTML = "";
@@ -407,11 +412,11 @@
     targetLocked = true;
     pendingLabel = parseLabel(decodedText);
 
-    if (navigator.vibrate) navigator.vibrate([40,40,40]);
+    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
     beep();
 
     document.getElementById("btnCapture").disabled = false;
-    setScanMsg(`Target acquired: ${pendingLabel}`, "ok");
+    setScanMsg(`Detected: ${pendingLabel} → tap Capture`, "ok");
   }
 
   document.getElementById("btnCapture").onclick = () => {
@@ -419,7 +424,7 @@
     addItem(pendingLabel);
     setScanMsg(`✅ Added: ${pendingLabel}`, "ok");
     document.getElementById("btnCapture").disabled = true;
-    setTimeout(resetTarget, 800);
+    setTimeout(resetTarget, 700);
   };
 
   document.getElementById("btnScan").onclick = openScanner;
