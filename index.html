@@ -1,375 +1,730 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Grocery APP</title>
-<link rel="manifest" href="manifest.webmanifest">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Grocery APP</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    html, body { overflow-x: hidden; margin:0; }
+    * { box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; background:#f6f7fb; }
+    header { padding:14px 16px; background:#111827; color:#fff; font-weight:700; font-size:18px; }
+    .wrap { padding:14px 14px 90px; max-width:820px; margin:0 auto; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
 
-<!-- OFFLINE XLSX SUPPORT (place locally, optional but recommended) -->
-<script src="xlsx.full.min.js"></script>
+    button {
+      appearance:none; border:0; border-radius:14px; padding:14px 16px;
+      font-size:16px; font-weight:800; cursor:pointer;
+      background:#2563eb; color:#fff;
+    }
+    button.secondary { background:#e5e7eb; color:#111827; }
+    button.danger { background:#fee2e2; color:#7f1d1d; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
 
-<style>
-html, body { margin:0; overflow-x:hidden; }
-* { box-sizing:border-box; }
-body { font-family:Arial,Helvetica,sans-serif; background:#f6f7fb; }
-header { padding:14px 16px; background:#111827; color:#fff; font-weight:800; font-size:18px; }
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .tabBtn { background:#e5e7eb; color:#111827; }
+    .tabBtn.active { background:#111827; color:#fff; }
 
-.wrap { padding:14px 14px 120px; max-width:920px; margin:0 auto; }
-.row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .card {
+      background:#fff; border-radius:16px; padding:12px; margin-top:12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    .muted { color:#6b7280; }
 
-button{
-  border:0; border-radius:14px; padding:14px 16px;
-  font-size:16px; font-weight:900; cursor:pointer;
-  background:#2563eb; color:#fff;
-}
-button.secondary{ background:#e5e7eb; color:#111827; }
-button.danger{ background:#fee2e2; color:#7f1d1d; }
-button:disabled{ opacity:.5; cursor:not-allowed; }
+    /* Grocery list rows */
+    .item {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 6px; border-bottom:1px solid #eee;
+    }
+    .item:last-child { border-bottom:0; }
+    .check { width:26px; height:26px; }
+    .name { flex:1; font-size:16px; cursor:pointer; }
+    .done .name { text-decoration: line-through; opacity:.55; }
+    .qty { width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
+    .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    .total { font-weight:900; font-size:18px; }
+    .delBtn {
+      background:#fee2e2; color:#7f1d1d;
+      padding:10px 12px; border-radius:12px; font-weight:900;
+    }
 
-.tabs{ display:flex; gap:10px; }
-.tabBtn{ background:#e5e7eb; color:#111827; }
-.tabBtn.active{ background:#111827; color:#fff; }
+    /* Dish list rows */
+    .dishRow{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 6px; border-bottom:1px solid #eee;
+    }
+    .dishRow:last-child{ border-bottom:0; }
+    .dishName{ font-size:16px; font-weight:800; cursor:pointer; }
+    .pill{ font-size:12px; font-weight:900; padding:6px 10px; border-radius:999px; background:#e5e7eb; color:#111827; }
+    .pill.ok{ background:rgba(34,197,94,.18); color:#065f46; }
+    .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
 
-.card{
-  background:#fff; border-radius:16px; padding:12px; margin-top:12px;
-  box-shadow:0 6px 18px rgba(0,0,0,.08);
-}
+    /* Scanner modal */
+    .modalBg {
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; padding:16px;
+      z-index: 9999;
+    }
+    .modal {
+      width:min(760px, 100%);
+      max-width: calc(100vw - 32px);
+      background:#fff; border-radius:18px; overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      max-height: calc(100dvh - 32px);
+      display:flex; flex-direction:column;
+    }
+    .modalHead {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 14px; background:#111827; color:#fff;
+    }
+    .modalBody {
+      padding:12px; display:flex; flex-direction:column; gap:10px;
+      overflow-y:auto; overscroll-behavior: contain;
+      padding-bottom: env(safe-area-inset-bottom, 12px);
+    }
+    #reader {
+      width:100%; max-height:50dvh; overflow:hidden; border-radius:16px; background:#000;
+    }
+    #reader * { max-width:100% !important; box-sizing:border-box; }
+    #reader video,
+    #reader canvas {
+      width:100% !important; height:auto !important;
+      max-height:50dvh !important; object-fit:contain;
+      border-radius:16px; display:block;
+    }
+    .hint { color:#6b7280; font-size:14px; margin-top:0; }
+    .scanBar {
+      margin-top:10px; background:rgba(17,24,39,.06);
+      border:1px solid rgba(17,24,39,.10); border-radius:14px;
+      padding:10px 12px; display:flex; align-items:center;
+      justify-content:space-between; gap:10px; flex-wrap:wrap;
+      position:sticky; bottom:0; z-index:5; background:#fff;
+      box-shadow:0 -6px 18px rgba(0,0,0,.06);
+    }
+    .scanMsg {
+      font-weight:900; font-size:16px; color:#111827;
+      flex:1; min-width:0; overflow-wrap:anywhere;
+    }
+    .scanMsg.ok { color:#065f46; }
+    .scanMsg.warn { color:#92400e; }
+    .scanBtns { display:flex; gap:10px; flex-wrap:wrap; flex:0 0 auto; }
+    .capBtn { background:#16a34a; }
+    .doneBtn { background:#e5e7eb; color:#111827; }
+  </style>
 
-.muted{ color:#6b7280; font-size:14px; }
-.total{ font-weight:900; font-size:18px; }
-
-.item{
-  display:flex; gap:10px; align-items:center;
-  padding:10px 6px; border-bottom:1px solid #eee;
-}
-.item:last-child{ border-bottom:0; }
-.check{ width:26px; height:26px; }
-.name{ flex:1; cursor:pointer; }
-.done .name{ text-decoration:line-through; opacity:.55; }
-
-.qty,.price,select{
-  padding:8px 10px; font-size:16px;
-  border:1px solid #ddd; border-radius:12px;
-}
-.qty{ width:64px; }
-.price{ width:96px; }
-
-.pill{
-  font-size:12px; font-weight:900;
-  padding:4px 10px; border-radius:999px;
-  background:rgba(17,24,39,.08);
-}
-.pill.green{ background:rgba(22,163,74,.15); color:#065f46; }
-
-.catRow,.dishRow{
-  display:flex; gap:10px; align-items:center;
-  padding:10px 6px; border-bottom:1px solid #eee;
-}
-.catRow:last-child,.dishRow:last-child{ border-bottom:0; }
-.catName,.dishName{ flex:1; font-weight:900; cursor:pointer; }
-
-.miniBtn{
-  padding:10px 12px; border-radius:12px;
-  font-weight:900; background:#e5e7eb;
-}
-
-.modalBg{
-  position:fixed; inset:0; background:rgba(0,0,0,.55);
-  display:none; align-items:center; justify-content:center;
-  padding:16px; z-index:9999;
-}
-.modal{
-  width:min(760px,100%); background:#fff; border-radius:18px;
-  max-height:calc(100dvh - 32px); overflow:hidden;
-  display:flex; flex-direction:column;
-}
-.modalHead{
-  background:#111827; color:#fff;
-  padding:12px 14px; display:flex; justify-content:space-between;
-}
-.modalBody{ padding:12px; display:flex; flex-direction:column; gap:10px; }
-#reader{ background:#000; border-radius:16px; overflow:hidden; }
-
-.scanBar{
-  display:flex; gap:10px; align-items:center;
-  padding:10px 12px; border-radius:14px;
-  background:#fff; box-shadow:0 -6px 18px rgba(0,0,0,.06);
-  position:sticky; bottom:0;
-}
-.scanMsg{ font-weight:900; flex:1; }
-.scanMsg.warn{ color:#92400e; }
-.scanMsg.ok{ color:#065f46; }
-.capBtn{ background:#16a34a; }
-</style>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 010 – dishes + smaller scan window)</span></header>
 
-<header>
-  Grocery APP <span style="opacity:.7;font-weight:600;">(build 011)</span>
-</header>
-
-<div class="wrap">
-
-<!-- Tabs -->
-<div class="row tabs">
-  <button class="tabBtn active" data-tab="groceries">Groceries</button>
-  <button class="tabBtn" data-tab="dishes">Dishes</button>
-  <button class="tabBtn" data-tab="categories">Categories</button>
-</div>
-
-<!-- Groceries -->
-<div id="groceriesTab">
-  <div class="card">
-    <div class="row">
-      <button id="btnNew">New List</button>
-      <button id="btnScan">SCAN</button>
-      <button id="btnUndo" class="secondary">Undo</button>
-      <button id="btnClearDone" class="secondary">Clear Purchased</button>
-      <button id="btnAdd" class="secondary">Add Item</button>
+  <div class="wrap">
+    <div class="tabs">
+      <button id="tabGroceries" class="tabBtn active">Groceries</button>
+      <button id="tabDishes" class="tabBtn">Dishes</button>
     </div>
-    <div class="row" style="justify-content:space-between;margin-top:8px;">
-      <div><b>List:</b> <span id="listName">Today</span></div>
-      <div class="total">$<span id="total">0.00</span></div>
-    </div>
-    <div class="muted">Sorted by universal walking order (Excel + learned)</div>
-  </div>
-  <div class="card" id="listCard"></div>
-</div>
 
-<!-- Dishes -->
-<div id="dishesTab" style="display:none;">
-  <div class="card">
-    <div class="row" style="justify-content:space-between;">
-      <div>
-        <b>Current Menu</b>
-        <div class="muted">Random Menu (14) replaces menu</div>
+    <!-- GROCERIES TAB -->
+    <div id="screenGroceries">
+      <div class="row">
+        <button id="btnNew">New List</button>
+        <button id="btnScan">SCAN</button>
+        <button id="btnUndo" class="secondary">Undo</button>
+        <button id="btnClearDone" class="secondary">Clear Purchased</button>
+        <button id="btnAdd" class="secondary">Add Item</button>
       </div>
-      <button id="btnRandom14">Random Menu (14)</button>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div><b>Current List:</b> <span id="listName">Today</span></div>
+          <div class="total">Total: $<span id="total">0.00</span></div>
+        </div>
+      </div>
+
+      <div class="card" id="listCard"></div>
     </div>
-    <div id="menuList"></div>
+
+    <!-- DISHES TAB -->
+    <div id="screenDishes" style="display:none;">
+      <div class="row">
+        <button id="btnScanDish">SCAN DISH</button>
+        <button id="btnRandom14" class="secondary">Random Menu (14)</button>
+        <button id="btnClearMenu" class="secondary">Clear Menu</button>
+        <button id="btnClearCatalog" class="danger">Clear Catalog</button>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div><b>Current Menu:</b> <span class="pill ok"><span id="menuCount">0</span> dishes</span></div>
+          <div class="muted">Scanning a dish adds it to Menu + Catalog.</div>
+        </div>
+      </div>
+      <div class="card" id="menuCard"></div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
+          <div class="muted">Long-press (or tap) a dish to delete (menu or catalog).</div>
+        </div>
+      </div>
+      <div class="card" id="catalogCard"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="row" style="justify-content:space-between;">
-      <b>Dish Catalog</b>
-      <button id="btnAddDish" class="secondary">Add Dish</button>
-    </div>
-    <div id="dishCatalog"></div>
-  </div>
-</div>
-
-<!-- Categories -->
-<div id="categoriesTab" style="display:none;">
-  <div class="card">
-    <div class="row" style="justify-content:space-between;">
-      <b>Categories (Walking Order)</b>
-      <label class="miniBtn">
-        Import XLSX
-        <input id="fileXlsx" type="file" accept=".xlsx" hidden>
-      </label>
-    </div>
-    <div id="catList"></div>
-  </div>
-</div>
-
-</div>
-
-<!-- Scanner -->
-<div class="modalBg" id="modalBg">
-  <div class="modal">
-    <div class="modalHead">
-      <b>Scan QR</b>
-      <button id="btnClose" class="secondary">Close</button>
-    </div>
-    <div class="modalBody">
-      <div id="reader"></div>
-      <div class="scanBar">
-        <div id="scanMsg" class="scanMsg">Point camera at QR…</div>
-        <button id="btnCapture" class="capBtn" disabled>CAPTURE</button>
+  <!-- Scanner Modal -->
+  <div class="modalBg" id="modalBg">
+    <div class="modal">
+      <div class="modalHead">
+        <div><b>Scan</b></div>
+        <button id="btnCloseTop" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
+      </div>
+      <div class="modalBody">
+        <div id="reader"></div>
+        <div class="scanBar">
+          <div id="scanMsg" class="scanMsg">Point camera at QR code – hold steady…</div>
+          <div class="scanBtns">
+            <button id="btnCapture" class="capBtn" disabled>CAPTURE</button>
+            <button id="btnDone" class="doneBtn">DONE</button>
+          </div>
+        </div>
+        <div class="hint">
+          Tip: With the smaller scan window, hold ~6–14 inches away, fill the box with the QR, and keep steady.
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-/* =========================
-   STATE + HELPERS
-========================= */
-const LS_KEY="groceryApp_v3";
-const UNITS=["ea","lb","oz","gal","ct"];
-const MISC_NAME="Misc";
+  <script>
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(console.warn);
 
-function load(){ try{return JSON.parse(localStorage.getItem(LS_KEY))}catch{return null} }
-function save(){ localStorage.setItem(LS_KEY,JSON.stringify(state)); }
-function norm(s){ return String(s||"").trim().toLowerCase(); }
-function id(){ return crypto.randomUUID(); }
-function money(n){ return (Math.round((n||0)*100)/100).toFixed(2); }
+  const LS_KEY = "groceryApp_v2"; // bumped because we're adding dishes/menu
+  const UNITS = ["ea","lb","oz","gal","ct"];
 
-let state=load()||{
-  current:{ name:"Today", items:[] },
-  categories:[],
-  itemCatalog:{},
-  dishCatalog:[],
-  menu:[]
-};
-
-function getOrCreateMisc(){
-  let c=state.categories.find(x=>norm(x.name)===norm(MISC_NAME));
-  if(!c){
-    c={ id:id(), name:MISC_NAME, sort:state.categories.length };
-    state.categories.push(c);
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
+    catch { return null; }
   }
-  return c;
-}
-getOrCreateMisc(); save();
+  function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
 
-/* =========================
-   TABS
-========================= */
-document.querySelectorAll(".tabBtn").forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll(".tabBtn").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    ["groceries","dishes","categories"].forEach(t=>{
-      document.getElementById(t+"Tab").style.display =
-        b.dataset.tab===t ? "" : "none";
-    });
+  function newBlankList(name) { return { name, items: [], created: Date.now() }; }
+
+  // --- State ---
+  let state = loadState() || {
+    current: newBlankList("Today"),
+    dishCatalog: [],   // array of dish names
+    currentMenu: []    // array of dish names
   };
-});
 
-/* =========================
-   GROCERIES
-========================= */
-function addItem(name,catId){
-  state.current.items.push({
-    id:id(), name, cat:catId, qty:"1", unit:"ea", price:"", done:false
-  });
-  save(); render();
-}
+  let lastAddedId = null;
+  let renderTimeout = null;
 
-function render(){
-  document.getElementById("listName").textContent=state.current.name;
-  document.getElementById("total").textContent=money(
-    state.current.items.reduce((s,i)=>s+(+i.qty||1)*(+i.price||0),0)
-  );
+  function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
 
-  const misc=getOrCreateMisc();
-  const cats=[...state.categories].sort((a,b)=>a.sort-b.sort);
-
-  const items=[...state.current.items].sort((a,b)=>{
-    const ca=cats.find(c=>c.id===a.cat)||misc;
-    const cb=cats.find(c=>c.id===b.cat)||misc;
-    if(ca.sort!==cb.sort) return ca.sort-cb.sort;
-    return norm(a.name).localeCompare(norm(b.name));
-  });
-
-  const card=document.getElementById("listCard");
-  if(!items.length){
-    card.innerHTML="<div class='muted'>No items</div>"; return;
+  function computeTotal() {
+    return state.current.items.reduce((sum, it) => {
+      const p = parseFloat(it.price) || 0;
+      const q = parseFloat(it.qty) || 1;
+      return sum + p * q;
+    }, 0);
   }
-  card.innerHTML=items.map(i=>{
-    const c=cats.find(x=>x.id===i.cat)||misc;
-    return `
-    <div class="item ${i.done?"done":""}">
-      <input type="checkbox" class="check" ${i.done?"checked":""}
-        onchange="i.done=this.checked;save();render()">
-      <div class="name" onclick="editItem('${i.id}')">
-        ${i.name}<br><span class="pill">${c.name}</span>
-      </div>
-      <input class="qty" value="${i.qty}"
-        onchange="i.qty=this.value;save();render()">
-      <select onchange="i.unit=this.value;save()">
-        ${UNITS.map(u=>`<option ${u===i.unit?"selected":""}>${u}</option>`)}
-      </select>
-      <input class="price" value="${i.price}"
-        onchange="i.price=this.value;save();render()">
-    </div>`;
-  }).join("");
-}
-function editItem(id){
-  const i=state.current.items.find(x=>x.id===id);
-  const n=prompt("Edit item:",i.name);
-  if(n){ i.name=n; save(); render(); }
-}
-render();
 
-/* =========================
-   SCANNER (BLOCKS INVALID)
-========================= */
-let qr,pending=null,locked=false;
-const modal=document.getElementById("modalBg");
-const msg=document.getElementById("scanMsg");
+  function generateId() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
 
-function parseQR(t){
-  try{
-    const u=new URL(t);
-    if(u.searchParams.get("item"))
-      return {type:"item",name:u.searchParams.get("item"),cat:u.searchParams.get("cat")};
-    if(u.searchParams.get("dish"))
-      return {type:"dish",name:u.searchParams.get("dish")};
-    return {type:"blocked"};
-  }catch{ return {type:"blocked"}; }
-}
+  // --- Groceries ---
+  function addItem(name) {
+    name = String(name ?? "").trim();
+    if (!name) return;
 
-document.getElementById("btnScan").onclick=async()=>{
-  modal.style.display="flex"; locked=false; pending=null;
-  qr=new Html5Qrcode("reader");
-  await qr.start({ facingMode:"environment" },{},txt=>{
-    if(locked) return;
-    const p=parseQR(txt);
-    if(p.type==="blocked"){
-      msg.textContent="Blocked QR (must contain item= or dish=)";
-      msg.className="scanMsg warn";
+    const item = { id: generateId(), name, done:false, qty:"1", unit:"ea", price:"" };
+    state.current.items.push(item);
+    lastAddedId = item.id;
+    saveState(state);
+    debouncedRender();
+  }
+
+  function deleteItemById(id) {
+    const idx = state.current.items.findIndex(x => x.id === id);
+    if (idx === -1) return;
+    state.current.items.splice(idx, 1);
+    if (lastAddedId === id) lastAddedId = null;
+    saveState(state);
+    debouncedRender();
+  }
+
+  function updateItem(id, changes) {
+    const item = state.current.items.find(x => x.id === id);
+    if (!item) return;
+    Object.assign(item, changes);
+    saveState(state);
+    debouncedRender();
+  }
+
+  // --- Dishes ---
+  function normDishName(s){
+    return String(s ?? "").trim().replace(/\s+/g, " ");
+  }
+  function hasDish(arr, name){
+    const n = normDishName(name).toLowerCase();
+    return arr.some(x => normDishName(x).toLowerCase() === n);
+  }
+
+  // B: scan dish -> add to catalog AND menu
+  function addDishToCatalogAndMenu(name){
+    name = normDishName(name);
+    if(!name) return {addedCatalog:false, addedMenu:false};
+
+    let addedCatalog = false, addedMenu = false;
+
+    if(!hasDish(state.dishCatalog, name)){
+      state.dishCatalog.push(name);
+      addedCatalog = true;
+    }
+    if(!hasDish(state.currentMenu, name)){
+      state.currentMenu.push(name);
+      addedMenu = true;
+    }
+
+    saveState(state);
+    debouncedRender();
+    return {addedCatalog, addedMenu};
+  }
+
+  function removeDishFromMenu(name){
+    const n = normDishName(name).toLowerCase();
+    state.currentMenu = state.currentMenu.filter(x => normDishName(x).toLowerCase() !== n);
+    saveState(state);
+    debouncedRender();
+  }
+
+  function removeDishFromCatalog(name){
+    const n = normDishName(name).toLowerCase();
+    state.dishCatalog = state.dishCatalog.filter(x => normDishName(x).toLowerCase() !== n);
+    // also remove from menu if present
+    state.currentMenu = state.currentMenu.filter(x => normDishName(x).toLowerCase() !== n);
+    saveState(state);
+    debouncedRender();
+  }
+
+  function randomMenu14(){
+    const pool = [...state.dishCatalog];
+    // Fisher-Yates shuffle
+    for(let i=pool.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const pick = pool.slice(0, 14);
+    state.currentMenu = pick;
+    saveState(state);
+    debouncedRender();
+  }
+
+  function debouncedRender() {
+    clearTimeout(renderTimeout);
+    renderTimeout = setTimeout(render, 60);
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[m]));
+  }
+
+  function renderGroceries() {
+    document.getElementById("listName").textContent = state.current.name;
+    document.getElementById("total").textContent = money(computeTotal());
+
+    const card = document.getElementById("listCard");
+    if (state.current.items.length === 0) {
+      card.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
+        No items yet.<br>Tap <b>SCAN</b> or <b>Add Item</b>.
+      </div>`;
       return;
     }
-    locked=true; pending=p;
-    msg.textContent="Detected → CAPTURE";
-    msg.className="scanMsg ok";
-    document.getElementById("btnCapture").disabled=false;
-  });
-};
 
-document.getElementById("btnCapture").onclick=()=>{
-  if(!pending) return;
-  if(pending.type==="item"){
-    const misc=getOrCreateMisc();
-    const c=pending.cat ?
-      (state.categories.find(x=>norm(x.name)===norm(pending.cat))||
-       (state.categories.push({id:id(),name:pending.cat,sort:state.categories.length}),
-        state.categories[state.categories.length-1])) : misc;
-    addItem(pending.name,c.id);
+    card.innerHTML = state.current.items.map(it => `
+      <div class="item ${it.done ? "done":""}" data-id="${it.id}">
+        <input class="check" type="checkbox" ${it.done ? "checked":""}>
+        <div class="name">${escapeHtml(it.name)}</div>
+        <input class="qty" type="number" step="0.5" min="0" value="${it.qty}">
+        <select class="unit">
+          ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
+        </select>
+        <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
+        <button class="delBtn" title="Delete">🗑️</button>
+      </div>
+    `).join("");
+
+    card.querySelectorAll(".item").forEach(row => {
+      const id = row.dataset.id;
+      const item = state.current.items.find(x => x.id === id);
+      if (!item) return;
+
+      row.querySelector(".check").onchange = e => updateItem(id, { done: e.target.checked });
+
+      row.querySelector(".qty").onchange = e => {
+        let v = parseFloat(e.target.value) || 0;
+        v = Math.max(0, Math.min(999, v));
+        updateItem(id, { qty: String(v) });
+      };
+
+      row.querySelector(".unit").onchange = e => updateItem(id, { unit: e.target.value });
+
+      row.querySelector(".price").onchange = e => {
+        let v = parseFloat(e.target.value);
+        updateItem(id, { price: isNaN(v) ? "" : String(Math.max(0, v)) });
+      };
+
+      row.querySelector(".delBtn").onclick = () => deleteItemById(id);
+
+      row.querySelector(".name").onclick = () => {
+        const newName = prompt("Edit item:", item.name);
+        if (newName && newName.trim() !== item.name) updateItem(id, { name: newName.trim() });
+      };
+    });
   }
-  if(pending.type==="dish"){
-    if(!state.dishCatalog.find(d=>norm(d)===norm(pending.name)))
-      state.dishCatalog.push(pending.name);
+
+  function dishRowHtml(name, where){
+    // where: "menu" or "catalog"
+    return `
+      <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
+        <div class="dishName">${escapeHtml(name)}</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          ${where==="menu" ? `<span class="pill ok">MENU</span>` : `<span class="pill">CATALOG</span>`}
+          <button class="delBtn" title="Delete">🗑️</button>
+        </div>
+      </div>
+    `;
   }
-  document.getElementById("btnCapture").disabled=true;
-  locked=false; pending=null;
-};
 
-document.getElementById("btnClose").onclick=async()=>{
-  modal.style.display="none";
-  if(qr){ await qr.stop(); qr=null; }
-};
+  function renderDishes(){
+    document.getElementById("menuCount").textContent = state.currentMenu.length;
+    document.getElementById("catalogCount").textContent = state.dishCatalog.length;
 
-/* =========================
-   XLSX IMPORT
-========================= */
-document.getElementById("fileXlsx").onchange=async e=>{
-  if(typeof XLSX==="undefined") return alert("xlsx.full.min.js missing");
-  const wb=XLSX.read(await e.target.files[0].arrayBuffer(),{type:"array"});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-  state.categories=[];
-  rows.slice(1).forEach((r,i)=>{
-    if(r[0]) state.categories.push({id:id(),name:r[0],sort:i});
-  });
-  getOrCreateMisc(); save(); render();
-};
-</script>
+    const menuCard = document.getElementById("menuCard");
+    if(state.currentMenu.length === 0){
+      menuCard.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
+        Menu is empty.<br>Scan a dish QR or tap <b>Random Menu (14)</b>.
+      </div>`;
+    } else {
+      menuCard.innerHTML = state.currentMenu.map(d => dishRowHtml(d, "menu")).join("");
+    }
 
+    const catalogCard = document.getElementById("catalogCard");
+    if(state.dishCatalog.length === 0){
+      catalogCard.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
+        Catalog is empty.<br>Scan dish QR codes to build it.
+      </div>`;
+    } else {
+      catalogCard.innerHTML = state.dishCatalog.map(d => dishRowHtml(d, "catalog")).join("");
+    }
+
+    function bindDishRows(container){
+      container.querySelectorAll(".dishRow").forEach(row=>{
+        const name = row.dataset.name;
+        const where = row.dataset.where;
+
+        row.querySelector(".dishName").onclick = () => {
+          // quick action: if catalog item tapped, add to menu (no dupes)
+          if(where === "catalog"){
+            const r = addDishToCatalogAndMenu(name);
+            // message is handled by normal render
+          } else {
+            // menu dish tapped: optional rename
+            const newName = prompt("Rename dish (updates Catalog + Menu):", name);
+            if(!newName) return;
+            const nn = normDishName(newName);
+            if(!nn) return;
+
+            // remove old
+            removeDishFromCatalog(name);
+            // add new
+            addDishToCatalogAndMenu(nn);
+          }
+        };
+
+        row.querySelector(".delBtn").onclick = () => {
+          // Prompt: remove from Menu or Catalog
+          if(where === "menu"){
+            const choice = prompt(`Delete "${name}"?\nType:\nM = remove from Menu only\nC = remove from Catalog (also removes from Menu)\n(Anything else cancels)`, "M");
+            if(!choice) return;
+            const ch = choice.trim().toUpperCase();
+            if(ch === "M") removeDishFromMenu(name);
+            else if(ch === "C") removeDishFromCatalog(name);
+          } else {
+            const choice = prompt(`Delete "${name}"?\nType:\nC = remove from Catalog (also removes from Menu)\nM = remove from Menu only\n(Anything else cancels)`, "C");
+            if(!choice) return;
+            const ch = choice.trim().toUpperCase();
+            if(ch === "C") removeDishFromCatalog(name);
+            else if(ch === "M") removeDishFromMenu(name);
+          }
+        };
+      });
+    }
+
+    bindDishRows(menuCard);
+    bindDishRows(catalogCard);
+  }
+
+  function render(){
+    renderGroceries();
+    renderDishes();
+  }
+
+  // --- Tabs ---
+  const tabGroceries = document.getElementById("tabGroceries");
+  const tabDishes = document.getElementById("tabDishes");
+  const screenGroceries = document.getElementById("screenGroceries");
+  const screenDishes = document.getElementById("screenDishes");
+
+  function showTab(which){
+    const isG = which === "groceries";
+    screenGroceries.style.display = isG ? "" : "none";
+    screenDishes.style.display = isG ? "none" : "";
+    tabGroceries.classList.toggle("active", isG);
+    tabDishes.classList.toggle("active", !isG);
+  }
+  tabGroceries.onclick = () => showTab("groceries");
+  tabDishes.onclick = () => showTab("dishes");
+
+  // --- Grocery UI actions ---
+  document.getElementById("btnNew").onclick = () => {
+    const name = prompt("List name?", state.current.name);
+    if (!name?.trim()) return;
+    state.current = newBlankList(name.trim());
+    lastAddedId = null;
+    saveState(state);
+    render();
+  };
+
+  document.getElementById("btnAdd").onclick = () => {
+    const name = prompt("Add item:");
+    if (name) addItem(name.trim());
+  };
+
+  document.getElementById("btnUndo").onclick = () => {
+    if (lastAddedId) deleteItemById(lastAddedId);
+  };
+
+  document.getElementById("btnClearDone").onclick = () => {
+    const before = state.current.items.length;
+    state.current.items = state.current.items.filter(x => !x.done);
+    if (state.current.items.length !== before) {
+      saveState(state);
+      render();
+    }
+  };
+
+  // --- Dish UI actions ---
+  document.getElementById("btnRandom14").onclick = () => {
+    if(state.dishCatalog.length === 0){
+      alert("Catalog is empty. Scan some dish QR codes first.");
+      return;
+    }
+    randomMenu14();
+  };
+
+  document.getElementById("btnClearMenu").onclick = () => {
+    if(!confirm("Clear the current menu?")) return;
+    state.currentMenu = [];
+    saveState(state);
+    render();
+  };
+
+  document.getElementById("btnClearCatalog").onclick = () => {
+    if(!confirm("Clear the entire Dish Catalog AND Menu?")) return;
+    state.dishCatalog = [];
+    state.currentMenu = [];
+    saveState(state);
+    render();
+  };
+
+  // --- Scanner logic ---
+  const modalBg = document.getElementById("modalBg");
+  const scanMsgEl = document.getElementById("scanMsg");
+  let qr = null;
+
+  // Pending payload for CAPTURE
+  let pending = null; // { kind:"item"|"dish", name, cat, raw }
+  let targetLocked = false;
+  let audioCtx = null;
+
+  function beep() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine"; osc.frequency.value = 880;
+      gain.gain.value = 0.06;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start();
+      setTimeout(() => osc.stop(), 90);
+    } catch {}
+  }
+
+  function setScanMsg(text, cls = "") {
+    scanMsgEl.textContent = text;
+    scanMsgEl.className = "scanMsg" + (cls ? ` ${cls}` : "");
+  }
+
+  function resetTarget() {
+    pending = null;
+    targetLocked = false;
+    document.getElementById("btnCapture").disabled = true;
+    setScanMsg("Point camera at QR code – hold steady…");
+  }
+
+  function safeDecode(s){
+    try { return decodeURIComponent(s); } catch { return s; }
+  }
+
+  function parseQR(decodedText){
+    // returns: {kind, name, cat, raw}
+    const raw = String(decodedText ?? "").trim().slice(0, 2000);
+    if(!raw) return {kind:"unknown", raw};
+
+    try{
+      const url = new URL(raw);
+      const item = url.searchParams.get("item");
+      const cat  = url.searchParams.get("cat");
+      const dish = url.searchParams.get("dish");
+
+      if(dish){
+        return { kind:"dish", name: safeDecode(dish).trim().slice(0,120), raw };
+      }
+      if(item){
+        return { kind:"item", name: safeDecode(item).trim().slice(0,120), cat: safeDecode(cat||"").trim().slice(0,80), raw };
+      }
+      // not our format
+      return { kind:"unknown", raw: raw.slice(0,140) };
+    } catch {
+      // plain text QR
+      return { kind:"unknown", raw: raw.slice(0,140) };
+    }
+  }
+
+  async function openScanner() {
+    modalBg.style.display = "flex";
+    resetTarget();
+    document.getElementById("reader").innerHTML = "";
+
+    qr = new Html5Qrcode("reader", {
+      verbose: false,
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+    });
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras?.length) throw new Error("No cameras found");
+
+      const rear = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length-1];
+
+      // ✅ Smaller scan window so you don't need to be 1 inch away.
+      // We cap it so it doesn't become gigantic on big screens.
+      const qrboxFunction = (vw, vh) => {
+        const min = Math.min(vw, vh);
+        let size = Math.round(min * 0.55);   // was 0.80 (too big)
+        size = Math.max(180, Math.min(size, 320));
+        return { width: size, height: size };
+      };
+
+      await qr.start(
+        rear.id,
+        {
+          fps: 12,                      // stable
+          qrbox: qrboxFunction,
+          disableFlip: false,
+          rememberLastUsedCamera: true,
+          aspectRatio: 1.777
+        },
+        onScanSuccess
+      );
+    } catch (err) {
+      setScanMsg("Camera error – check permissions / try again.", "warn");
+      console.warn("Scanner start failed:", err);
+      setTimeout(closeScanner, 2200);
+    }
+  }
+
+  async function closeScanner() {
+    modalBg.style.display = "none";
+    resetTarget();
+
+    if (!qr) return;
+    try {
+      await qr.stop();
+      qr.clear();
+    } catch (err) {
+      console.warn("Scanner cleanup issue:", err);
+    } finally {
+      qr = null;
+      document.getElementById("reader").innerHTML = "";
+    }
+  }
+
+  function onScanSuccess(decodedText) {
+    if (targetLocked) return;
+    targetLocked = true;
+
+    pending = parseQR(decodedText);
+
+    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    beep();
+
+    document.getElementById("btnCapture").disabled = false;
+
+    if(pending.kind === "dish"){
+      setScanMsg(`Detected DISH: ${pending.name} → tap Capture`, "ok");
+    } else if(pending.kind === "item"){
+      const cat = pending.cat ? ` (${pending.cat})` : "";
+      setScanMsg(`Detected ITEM: ${pending.name}${cat} → tap Capture`, "ok");
+    } else {
+      setScanMsg(`Detected: ${pending.raw} → tap Capture`, "warn");
+    }
+  }
+
+  document.getElementById("btnCapture").onclick = () => {
+    if (!pending) return;
+
+    if(pending.kind === "dish"){
+      const r = addDishToCatalogAndMenu(pending.name);
+      const msg = (r.addedCatalog || r.addedMenu)
+        ? `✅ Dish added: ${pending.name}`
+        : `ℹ️ Dish already exists: ${pending.name}`;
+      setScanMsg(msg, "ok");
+      showTab("dishes");
+    } else if(pending.kind === "item"){
+      addItem(pending.name);
+      setScanMsg(`✅ Added item: ${pending.name}`, "ok");
+      showTab("groceries");
+    } else {
+      // unknown QR: add as grocery item (your old behavior)
+      addItem(pending.raw);
+      setScanMsg(`✅ Added as item: ${pending.raw}`, "ok");
+      showTab("groceries");
+    }
+
+    document.getElementById("btnCapture").disabled = true;
+    setTimeout(resetTarget, 650);
+  };
+
+  // Buttons to open scanner (both use same scanner; capture routes by QR content)
+  document.getElementById("btnScan").onclick = openScanner;
+  document.getElementById("btnScanDish").onclick = openScanner;
+
+  document.getElementById("btnCloseTop").onclick = closeScanner;
+  document.getElementById("btnDone").onclick = closeScanner;
+  modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
+
+  // Initial render
+  render();
+  </script>
 </body>
 </html>
