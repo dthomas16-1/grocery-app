@@ -629,9 +629,10 @@
       // ✅ Smaller scan window so you don't need to be 1 inch away.
       // We cap it so it doesn't become gigantic on big screens.
       const qrboxFunction = (vw, vh) => {
-        const min = Math.min(vw, vh);
-        let size = Math.round(min * 0.32);   // was 0.55 (too big)
-        size = Math.max(150, Math.min(size, 210));
+        //const min = Math.min(vw, vh);
+        //let size = Math.round(min * 0.32);   // was 0.55 (too big)
+        //size = Math.max(150, Math.min(size, 210));
+        const size = 160;
         return { width: size, height: size };
       };
 
