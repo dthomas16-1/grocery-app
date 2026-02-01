@@ -4,144 +4,97 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Grocery APP</title>
-
   <link rel="manifest" href="manifest.webmanifest">
-
   <style>
-    body{ font-family: Arial, Helvetica, sans-serif; margin:0; background:#f6f7fb; }
-    header{ padding:14px 16px; background:#111827; color:#fff; font-weight:700; font-size:18px; }
-    .wrap{ padding:14px 14px 90px; max-width:820px; margin:0 auto; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
-    button{
+    html, body { overflow-x: hidden; margin:0; }
+    * { box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; background:#f6f7fb; }
+    header { padding:14px 16px; background:#111827; color:#fff; font-weight:700; font-size:18px; }
+    .wrap { padding:14px 14px 90px; max-width:820px; margin:0 auto; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    button {
       appearance:none; border:0; border-radius:14px; padding:14px 16px;
       font-size:16px; font-weight:800; cursor:pointer;
       background:#2563eb; color:#fff;
     }
-    button.secondary{ background:#e5e7eb; color:#111827; }
-    button:disabled{ opacity:.5; cursor:not-allowed; }
-
-    .card{
+    button.secondary { background:#e5e7eb; color:#111827; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .card {
       background:#fff; border-radius:16px; padding:12px; margin-top:12px;
       box-shadow: 0 6px 18px rgba(0,0,0,.08);
     }
-    .item{
+    .item {
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
     }
-    .item:last-child{ border-bottom:0; }
-    .check{ width:26px; height:26px; }
-    .name{ flex:1; font-size:16px; }
-    .done .name{ text-decoration: line-through; opacity:.55; }
-    .qty{ width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    select{ padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
-    .price{ width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    .total{ font-weight:900; font-size:18px; }
-
-    .delBtn{
+    .item:last-child { border-bottom:0; }
+    .check { width:26px; height:26px; }
+    .name { flex:1; font-size:16px; cursor:pointer; }
+    .done .name { text-decoration: line-through; opacity:.55; }
+    .qty { width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
+    .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    .total { font-weight:900; font-size:18px; }
+    .delBtn {
       background:#fee2e2; color:#7f1d1d;
       padding:10px 12px; border-radius:12px; font-weight:900;
     }
-
     /* Scanner modal */
-    .modalBg{
+    .modalBg {
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
       z-index: 9999;
     }
-
-    .modal{
+    .modal {
       width:min(760px, 100%);
-      max-width: calc(100vw - 32px); /* NEW: prevent width overflow */
-      background:#fff;
-      border-radius:18px;
-      overflow:hidden;
+      max-width: calc(100vw - 32px);
+      background:#fff; border-radius:18px; overflow:hidden;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
-
       max-height: calc(100dvh - 32px);
-      display:flex;
-      flex-direction:column;
+      display:flex; flex-direction:column;
     }
-
-    .modalHead{
+    .modalHead {
       display:flex; justify-content:space-between; align-items:center;
       padding:12px 14px; background:#111827; color:#fff;
     }
-
-    .modalBody{
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      overflow:auto;
+    .modalBody {
+      padding:12px; display:flex; flex-direction:column; gap:10px;
+      overflow-y:auto; overscroll-behavior: contain;
+      padding-bottom: env(safe-area-inset-bottom, 12px);
     }
-
-    /* Camera container clamp */
-    #reader{
-      width:100%;
-      max-height: 45dvh;
-      overflow:hidden;
-      border-radius:16px;
+    #reader {
+      width:100%; max-height:45dvh; overflow:hidden; border-radius:16px;
     }
-
-    /* NEW: force injected scanner elements to obey container width */
-    #reader *{
-      max-width: 100% !important;
-      box-sizing: border-box;
-    }
+    #reader * { max-width:100% !important; box-sizing:border-box; }
     #reader video,
-    #reader canvas{
-      width: 100% !important;
-      height: auto !important;
-      max-height: 45dvh !important;
-      object-fit: cover;
-      border-radius:16px;
-      display:block;
+    #reader canvas {
+      width:100% !important; height:auto !important;
+      max-height:45dvh !important; object-fit:contain;
+      border-radius:16px; display:block;
     }
-
-    .hint{ color:#6b7280; font-size:14px; margin-top:0; }
-
-    .scanBar{
-      margin-top:10px;
-      background:rgba(17,24,39,.06);
-      border:1px solid rgba(17,24,39,.10);
-      border-radius:14px;
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
-      background: #fff;
-      box-shadow: 0 -6px 18px rgba(0,0,0,.06);
+    .hint { color:#6b7280; font-size:14px; margin-top:0; }
+    .scanBar {
+      margin-top:10px; background:rgba(17,24,39,.06);
+      border:1px solid rgba(17,24,39,.10); border-radius:14px;
+      padding:10px 12px; display:flex; align-items:center;
+      justify-content:space-between; gap:10px; flex-wrap:wrap;
+      position:sticky; bottom:0; z-index:5; background:#fff;
+      box-shadow:0 -6px 18px rgba(0,0,0,.06);
     }
-
-    /* NEW: prevent long messages from widening modal */
-    .scanMsg{
-      font-weight:900;
-      font-size:16px;
-      color:#111827;
-      flex: 1;
-      min-width: 0;
-      overflow-wrap: anywhere;
+    .scanMsg {
+      font-weight:900; font-size:16px; color:#111827;
+      flex:1; min-width:0; overflow-wrap:anywhere;
     }
-    .scanMsg.ok{ color:#065f46; }
-    .scanMsg.warn{ color:#92400e; }
-
-    .scanBtns{ display:flex; gap:10px; flex-wrap:wrap; flex: 0 0 auto; }
-    .capBtn{ background:#16a34a; }
-    .doneBtn{ background:#e5e7eb; color:#111827; }
+    .scanMsg.ok { color:#065f46; }
+    .scanMsg.warn { color:#92400e; }
+    .scanBtns { display:flex; gap:10px; flex-wrap:wrap; flex:0 0 auto; }
+    .capBtn { background:#16a34a; }
+    .doneBtn { background:#e5e7eb; color:#111827; }
   </style>
-
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
-
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 007)</span></header>
-
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 008)</span></header>
   <div class="wrap">
     <div class="row">
       <button id="btnNew">New List</button>
@@ -150,14 +103,12 @@
       <button id="btnClearDone" class="secondary">Clear Purchased</button>
       <button id="btnAdd" class="secondary">Add Item</button>
     </div>
-
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
         <div><b>Current List:</b> <span id="listName">Today</span></div>
         <div class="total">Total: $<span id="total">0.00</span></div>
       </div>
     </div>
-
     <div class="card" id="listCard"></div>
   </div>
 
@@ -169,7 +120,6 @@
       </div>
       <div class="modalBody">
         <div id="reader"></div>
-
         <div class="scanBar">
           <div id="scanMsg" class="scanMsg">Point at QR and hold still…</div>
           <div class="scanBtns">
@@ -177,74 +127,105 @@
             <button id="btnDone" class="doneBtn">DONE</button>
           </div>
         </div>
-
         <div class="hint">
-          Tip: good lighting + steady hands makes scans much faster.
+          Tip: good lighting + steady hands = faster scans
         </div>
       </div>
     </div>
   </div>
 
   <script>
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(console.warn);
 
   const LS_KEY = "groceryApp_v1";
   const UNITS = ["ea","lb","oz","gal","ct"];
 
-  function loadState(){
+  function loadState() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
     catch { return null; }
   }
-  function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-  function newBlankList(name){ return { name, items: [], created: Date.now() }; }
+
+  function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+  function newBlankList(name) { return { name, items: [], created: Date.now() }; }
 
   let state = loadState() || { current: newBlankList("Today") };
   let lastAddedId = null;
+  let renderTimeout = null;
 
-  function money(n){ return (Math.round(n*100)/100).toFixed(2); }
+  function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
 
-  function computeTotal(){
-    let t = 0;
-    for(const it of state.current.items){
-      const p = parseFloat(it.price || "0");
-      const q = parseFloat(it.qty || "1");
-      if(!isNaN(p) && !isNaN(q)) t += p*q;
-    }
-    return t;
+  function computeTotal() {
+    return state.current.items.reduce((sum, it) => {
+      const p = parseFloat(it.price) || 0;
+      const q = parseFloat(it.qty) || 1;
+      return sum + p * q;
+    }, 0);
   }
 
-  function addItem(name){
+  function generateId() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  function addItem(name) {
+    name = String(name ?? "").trim();
+    if (!name) return;
+
     const item = {
-      id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())),
+      id: generateId(),
       name,
-      done:false,
-      qty:1,
-      unit:"ea",
-      price:""
+      done: false,
+      qty: "1",
+      unit: "ea",
+      price: ""
     };
     state.current.items.push(item);
     lastAddedId = item.id;
     saveState(state);
-    render();
+    debouncedRender();
   }
 
-  function deleteItemById(id){
-    const i = state.current.items.findIndex(x => x.id === id);
-    if(i >= 0){
-      state.current.items.splice(i, 1);
-      if(lastAddedId === id) lastAddedId = null;
-      saveState(state);
-      render();
-    }
+  function deleteItemById(id) {
+    const idx = state.current.items.findIndex(x => x.id === id);
+    if (idx === -1) return;
+    state.current.items.splice(idx, 1);
+    if (lastAddedId === id) lastAddedId = null;
+    saveState(state);
+    debouncedRender();
   }
 
-  function render(){
+  function updateItem(id, changes) {
+    const item = state.current.items.find(x => x.id === id);
+    if (!item) return;
+    Object.assign(item, changes);
+    saveState(state);
+    debouncedRender();
+  }
+
+  function debouncedRender() {
+    clearTimeout(renderTimeout);
+    renderTimeout = setTimeout(render, 80);
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[m]));
+  }
+
+  function render() {
     document.getElementById("listName").textContent = state.current.name;
     document.getElementById("total").textContent = money(computeTotal());
 
     const card = document.getElementById("listCard");
-    if(state.current.items.length === 0){
-      card.innerHTML = `<div style="padding:10px; color:#6b7280;">No items yet. Tap SCAN or Add Item.</div>`;
+    if (state.current.items.length === 0) {
+      card.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
+        No items yet.<br>Tap <b>SCAN</b> or <b>Add Item</b>.
+      </div>`;
       return;
     }
 
@@ -262,195 +243,191 @@
     `).join("");
 
     card.querySelectorAll(".item").forEach(row => {
-      const id = row.getAttribute("data-id");
-      const it = state.current.items.find(x => x.id === id);
+      const id = row.dataset.id;
+      const item = state.current.items.find(x => x.id === id);
+      if (!item) return;
 
-      row.querySelector(".check").addEventListener("change", (e)=>{
-        it.done = e.target.checked;
-        saveState(state); render();
-      });
-      row.querySelector(".qty").addEventListener("change", (e)=>{
-        it.qty = e.target.value;
-        saveState(state); render();
-      });
-      row.querySelector(".unit").addEventListener("change", (e)=>{
-        it.unit = e.target.value;
-        saveState(state); render();
-      });
-      row.querySelector(".price").addEventListener("change", (e)=>{
-        it.price = e.target.value;
-        saveState(state); render();
-      });
-      row.querySelector(".delBtn").addEventListener("click", ()=>{
-        deleteItemById(id);
-      });
+      row.querySelector(".check").onchange = e => {
+        updateItem(id, { done: e.target.checked });
+      };
+
+      row.querySelector(".qty").onchange = e => {
+        let v = parseFloat(e.target.value) || 0;
+        v = Math.max(0, Math.min(999, v));
+        updateItem(id, { qty: String(v) });
+      };
+
+      row.querySelector(".unit").onchange = e => {
+        updateItem(id, { unit: e.target.value });
+      };
+
+      row.querySelector(".price").onchange = e => {
+        let v = parseFloat(e.target.value);
+        updateItem(id, { price: isNaN(v) ? "" : String(Math.max(0, v)) });
+      };
+
+      row.querySelector(".delBtn").onclick = () => deleteItemById(id);
+
+      // Tap name → edit
+      row.querySelector(".name").onclick = () => {
+        const newName = prompt("Edit item:", item.name);
+        if (newName && newName.trim() !== item.name) {
+          updateItem(id, { name: newName.trim() });
+        }
+      };
     });
   }
 
-  function escapeHtml(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
-
-  document.getElementById("btnNew").addEventListener("click", ()=>{
-    const name = prompt("List name?", "Today");
-    if(!name) return;
+  // ── UI actions ────────────────────────────────────────
+  document.getElementById("btnNew").onclick = () => {
+    const name = prompt("List name?", state.current.name);
+    if (!name?.trim()) return;
     state.current = newBlankList(name.trim());
     lastAddedId = null;
-    saveState(state); render();
-  });
+    saveState(state);
+    render();
+  };
 
-  document.getElementById("btnAdd").addEventListener("click", ()=>{
+  document.getElementById("btnAdd").onclick = () => {
     const name = prompt("Add item:");
-    if(!name) return;
-    addItem(name.trim());
-  });
+    if (name) addItem(name.trim());
+  };
 
-  document.getElementById("btnUndo").addEventListener("click", ()=>{
-    if(!lastAddedId) return;
-    deleteItemById(lastAddedId);
-  });
+  document.getElementById("btnUndo").onclick = () => {
+    if (lastAddedId) deleteItemById(lastAddedId);
+  };
 
-  document.getElementById("btnClearDone").addEventListener("click", ()=>{
+  document.getElementById("btnClearDone").onclick = () => {
     const before = state.current.items.length;
     state.current.items = state.current.items.filter(x => !x.done);
-    if(state.current.items.length !== before){
-      saveState(state); render();
+    if (state.current.items.length !== before) {
+      saveState(state);
+      render();
     }
-  });
+  };
 
-  // Scanner
+  // ── Scanner logic ─────────────────────────────────────
   const modalBg = document.getElementById("modalBg");
-  const btnScan = document.getElementById("btnScan");
-  const btnCloseTop = document.getElementById("btnCloseTop");
-  const btnDone = document.getElementById("btnDone");
-  const btnCapture = document.getElementById("btnCapture");
   const scanMsgEl = document.getElementById("scanMsg");
-
   let qr = null;
   let pendingLabel = "";
   let targetLocked = false;
-
   let audioCtx = null;
-  function beep(){
-    try{
-      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = "sine";
-      o.frequency.value = 880;
-      g.gain.value = 0.06;
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start();
-      setTimeout(()=> o.stop(), 90);
-    }catch(e){}
+
+  function beep() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine"; osc.frequency.value = 880;
+      gain.gain.value = 0.06;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start();
+      setTimeout(() => osc.stop(), 90);
+    } catch {}
   }
 
-  function setScanMsg(text, cls){
+  function setScanMsg(text, cls = "") {
     scanMsgEl.textContent = text;
-    scanMsgEl.classList.remove("ok","warn");
-    if(cls) scanMsgEl.classList.add(cls);
+    scanMsgEl.className = "scanMsg" + (cls ? ` ${cls}` : "");
   }
 
-  function resetTarget(){
+  function resetTarget() {
     pendingLabel = "";
     targetLocked = false;
-    btnCapture.disabled = true;
+    document.getElementById("btnCapture").disabled = true;
     setScanMsg("Point at QR and hold still…");
   }
 
-  function parseLabel(decodedText){
-    try{
-      const url = new URL(decodedText);
+  function parseLabel(text) {
+    if (typeof text !== "string" || text.length > 2000) return "Invalid";
+    text = text.trim().slice(0, 120);
+    try {
+      const url = new URL(text);
       const item = url.searchParams.get("item");
+      if (item) return decodeURIComponent(item).trim().slice(0, 100);
       const dish = url.searchParams.get("dish");
-      if(item) return decodeURIComponent(item);
-      if(dish) return "DISH: " + decodeURIComponent(dish);
-      return decodedText;
-    }catch{
-      return decodedText;
+      if (dish) return "DISH: " + decodeURIComponent(dish).trim().slice(0, 80);
+      return text;
+    } catch {
+      return text;
     }
   }
 
-  function openScanner(){
+  async function openScanner() {
     modalBg.style.display = "flex";
-    document.getElementById("reader").innerHTML = "";
     resetTarget();
+    document.getElementById("reader").innerHTML = "";
 
-    qr = new Html5Qrcode("reader", {
-      formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
-    });
+    qr = new Html5Qrcode("reader", { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
 
-    Html5Qrcode.getCameras().then(cams => {
-      if(!cams || cams.length === 0) throw new Error("No camera found");
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras?.length) throw new Error("No cameras found");
 
-      const rear =
-        cams.find(c => /back|rear|environment/i.test(c.label || "")) ||
-        cams[cams.length - 1];
+      const rear = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length-1];
 
-      return qr.start(
+      const qrboxFunction = (vw, vh) => {
+        const min = Math.min(vw, vh);
+        const size = Math.round(min * 0.70);
+        return { width: size, height: size };
+      };
+
+      await qr.start(
         rear.id,
-        { fps: 12, qrbox: { width: 320, height: 320 } },  // UPDATED: easier target
+        { fps: 12, qrbox: qrboxFunction },
         onScanSuccess
       );
-    }).catch(err => {
-      setScanMsg("Scanner error. Tap Close.", "warn");
-      alert("Camera/scanner not available:\n\n" + err);
-      closeScanner();
-    });
+    } catch (err) {
+      setScanMsg("Scanner error. Try again or close.", "warn");
+      console.warn(err);
+      setTimeout(closeScanner, 1800);
+    }
   }
 
-  function closeScanner(){
+  async function closeScanner() {
     modalBg.style.display = "none";
     resetTarget();
 
-    const toStop = qr;
-    qr = null;
+    if (!qr) return;
 
-    setTimeout(() => {
-      const r = document.getElementById("reader");
-      if(toStop){
-        toStop.stop().catch(()=>{}).finally(()=>{
-          toStop.clear().catch(()=>{});
-          if(r) r.innerHTML = "";
-        });
-      } else {
-        if(r) r.innerHTML = "";
-      }
-    }, 60);
+    try {
+      await qr.stop();
+      qr.clear();
+    } catch (err) {
+      console.warn("Scanner cleanup failed", err);
+    } finally {
+      qr = null;
+      document.getElementById("reader").innerHTML = "";
+    }
   }
 
-  function onScanSuccess(decodedText){
-    if(targetLocked) return;
-
+  function onScanSuccess(decodedText) {
+    if (targetLocked) return;
     targetLocked = true;
     pendingLabel = parseLabel(decodedText);
 
-    if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
+    if (navigator.vibrate) navigator.vibrate([40,40,40]);
     beep();
 
-    btnCapture.disabled = false;
-    setScanMsg("Target acquired: " + pendingLabel, "ok");
+    document.getElementById("btnCapture").disabled = false;
+    setScanMsg(`Target acquired: ${pendingLabel}`, "ok");
   }
 
-  btnCapture.addEventListener("click", ()=>{
-    if(!pendingLabel) return;
-
+  document.getElementById("btnCapture").onclick = () => {
+    if (!pendingLabel) return;
     addItem(pendingLabel);
-    setScanMsg("✅ Captured: " + pendingLabel, "ok");
-    btnCapture.disabled = true;
+    setScanMsg(`✅ Added: ${pendingLabel}`, "ok");
+    document.getElementById("btnCapture").disabled = true;
+    setTimeout(resetTarget, 800);
+  };
 
-    setTimeout(() => {
-      resetTarget();
-    }, 650);
-  });
+  document.getElementById("btnScan").onclick = openScanner;
+  document.getElementById("btnCloseTop").onclick = closeScanner;
+  document.getElementById("btnDone").onclick = closeScanner;
+  modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
 
-  btnScan.addEventListener("click", openScanner);
-  btnCloseTop.addEventListener("click", closeScanner);
-  btnDone.addEventListener("click", closeScanner);
-  modalBg.addEventListener("click", (e)=>{ if(e.target === modalBg) closeScanner(); });
-
+  // Initial render
   render();
   </script>
 </body>
