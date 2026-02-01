@@ -1,4 +1,4 @@
-<!doctype html>
+function parseQR<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -585,29 +585,49 @@
   }
 
   function parseQR(decodedText){
-    // returns: {kind, name, cat, raw}
-    const raw = String(decodedText ?? "").trim().slice(0, 2000);
-    if(!raw) return {kind:"unknown", raw};
+  const raw = String(decodedText ?? "").trim().slice(0, 2000);
+  if(!raw) return {kind:"unknown", raw};
 
-    try{
-      const url = new URL(raw);
-      const item = url.searchParams.get("item");
-      const cat  = url.searchParams.get("cat");
-      const dish = url.searchParams.get("dish");
+  const lower = raw.toLowerCase();
 
-      if(dish){
-        return { kind:"dish", name: safeDecode(dish).trim().slice(0,120), raw };
-      }
-      if(item){
-        return { kind:"item", name: safeDecode(item).trim().slice(0,120), cat: safeDecode(cat||"").trim().slice(0,80), raw };
-      }
-      // not our format
-      return { kind:"unknown", raw: raw.slice(0,140) };
-    } catch {
-      // plain text QR
-      return { kind:"unknown", raw: raw.slice(0,140) };
+  // ✅ Plain-text DISH format: "dish=Name Here"
+  if(lower.startsWith("dish=")){
+    const name = raw.slice(5).trim();
+    return { kind:"dish", name: name.slice(0,120), raw };
+  }
+
+  // ✅ Plain-text ITEM format: "item=Milk&cat=Dairy"
+  if(lower.startsWith("item=")){
+    // URLSearchParams can parse query strings without a full URL
+    const sp = new URLSearchParams(raw);
+    const item = sp.get("item");
+    const cat  = sp.get("cat");
+    if(item){
+      return {
+        kind:"item",
+        name: safeDecode(item).trim().slice(0,120),
+        cat:  safeDecode(cat||"").trim().slice(0,80),
+        raw
+      };
     }
   }
+
+  // URL format: "...?dish=..." or "...?item=...&cat=..."
+  try{
+    const url = new URL(raw);
+    const dish = url.searchParams.get("dish");
+    if(dish) return { kind:"dish", name: safeDecode(dish).trim().slice(0,120), raw };
+
+    const item = url.searchParams.get("item");
+    const cat  = url.searchParams.get("cat");
+    if(item) return { kind:"item", name: safeDecode(item).trim().slice(0,120), cat: safeDecode(cat||"").trim().slice(0,80), raw };
+
+    return { kind:"unknown", raw: raw.slice(0,140) };
+  } catch {
+    // Plain text but not in our formats
+    return { kind:"unknown", raw: raw.slice(0,140) };
+  }
+}
 
   async function openScanner() {
     modalBg.style.display = "flex";
