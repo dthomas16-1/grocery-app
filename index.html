@@ -1,4 +1,4 @@
-function parseQR<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -584,50 +584,87 @@ function parseQR<!doctype html>
     try { return decodeURIComponent(s); } catch { return s; }
   }
 
-  function parseQR(decodedText){
-  const raw = String(decodedText ?? "").trim().slice(0, 2000);
-  if(!raw) return {kind:"unknown", raw};
+function parseQR(decodedText){
+  let raw = String(decodedText ?? "");
+  // Normalize common invisible junk
+  raw = raw.replace(/\uFEFF/g, "");          // BOM
+  raw = raw.replace(/\r\n/g, "\n").trim();   // normalize newlines
+  raw = raw.slice(0, 2000);
+
+  if(!raw) return { kind:"unknown", raw:"" };
+
+  // Helper: decode if it looks percent-encoded
+  const maybeDecode = (s) => {
+    s = String(s ?? "");
+    // If it contains percent escapes, try decode
+    if (/%[0-9A-Fa-f]{2}/.test(s)) {
+      try { return decodeURIComponent(s); } catch {}
+    }
+    return s;
+  };
 
   const lower = raw.toLowerCase();
 
-  // ✅ Plain-text DISH format: "dish=Name Here"
-  if(lower.startsWith("dish=")){
-    const name = raw.slice(5).trim();
+  // ── 1) If it's a URL, parse query params normally ─────────
+  try {
+    if (/^[a-z]+:\/\//i.test(raw)) {
+      const url = new URL(raw);
+
+      const dish = url.searchParams.get("dish");
+      if (dish) return { kind:"dish", name: maybeDecode(dish).trim().slice(0,120), raw };
+
+      const item = url.searchParams.get("item");
+      const cat  = url.searchParams.get("cat");
+      if (item) return {
+        kind:"item",
+        name: maybeDecode(item).trim().slice(0,120),
+        cat:  maybeDecode(cat||"").trim().slice(0,80),
+        raw
+      };
+
+      // Some QRs might store the payload in a "text=" param
+      const text = url.searchParams.get("text");
+      if (text) {
+        const inner = maybeDecode(text).trim();
+        // recurse once
+        return parseQR(inner);
+      }
+    }
+  } catch {
+    // not a URL, continue
+  }
+
+  // ── 2) Plain querystring parsing (no URL) ──────────────────
+  // Works for: "dish=Hamburger Fries" and "item=Milk&cat=Dairy"
+  // Also works if there's leading junk like "QR: dish=..."
+  const dishMatch = raw.match(/(?:^|[?&\s])dish=([^&\n]+)/i);
+  if (dishMatch) {
+    const name = maybeDecode(dishMatch[1]).trim();
     return { kind:"dish", name: name.slice(0,120), raw };
   }
 
-  // ✅ Plain-text ITEM format: "item=Milk&cat=Dairy"
-  if(lower.startsWith("item=")){
-    // URLSearchParams can parse query strings without a full URL
-    const sp = new URLSearchParams(raw);
+  const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
+  if (itemMatch) {
+    // Use URLSearchParams on the substring starting at "item="
+    const start = lower.indexOf("item=");
+    const qs = raw.slice(start);
+    const sp = new URLSearchParams(qs);
     const item = sp.get("item");
     const cat  = sp.get("cat");
-    if(item){
+    if (item) {
       return {
         kind:"item",
-        name: safeDecode(item).trim().slice(0,120),
-        cat:  safeDecode(cat||"").trim().slice(0,80),
+        name: maybeDecode(item).trim().slice(0,120),
+        cat:  maybeDecode(cat||"").trim().slice(0,80),
         raw
       };
     }
   }
 
-  // URL format: "...?dish=..." or "...?item=...&cat=..."
-  try{
-    const url = new URL(raw);
-    const dish = url.searchParams.get("dish");
-    if(dish) return { kind:"dish", name: safeDecode(dish).trim().slice(0,120), raw };
-
-    const item = url.searchParams.get("item");
-    const cat  = url.searchParams.get("cat");
-    if(item) return { kind:"item", name: safeDecode(item).trim().slice(0,120), cat: safeDecode(cat||"").trim().slice(0,80), raw };
-
-    return { kind:"unknown", raw: raw.slice(0,140) };
-  } catch {
-    // Plain text but not in our formats
-    return { kind:"unknown", raw: raw.slice(0,140) };
-  }
+  // ── 3) Fallback: unknown ───────────────────────────────────
+  return { kind:"unknown", raw: raw.slice(0,140) };
 }
+
 
   async function openScanner() {
     modalBg.style.display = "flex";
