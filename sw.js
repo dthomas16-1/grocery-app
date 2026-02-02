@@ -1,4 +1,4 @@
-const CACHE = "grocery-app-v26";
+const CACHE = "grocery-app-v27";
 
 self.addEventListener("install", e => {
   e.waitUntil(
