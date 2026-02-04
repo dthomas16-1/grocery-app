@@ -237,7 +237,19 @@
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
   }
-
+// Add this helper function somewhere near the top of <script> (after other helpers)
+function showToast(message, duration = 2000) {
+  const div = document.createElement('div');
+  div.textContent = message;
+  div.style.cssText = `
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    background: #111827; color: white; padding: 12px 24px;
+    border-radius: 12px; z-index: 10000; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25); pointer-events: none;
+  `;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), duration);
+}
   // --- Groceries ---
   function addItem(name) {
     name = String(name ?? "").trim();
@@ -552,20 +564,17 @@ document.getElementById("btnAddDish").onclick = () => {
 
   const normalized = normDishName(name);
   if (!normalized) {
-    alert("Please enter a valid dish name.");
+    showToast("Please enter a valid dish name", 1800);
     return;
   }
 
   const result = addDishToCatalogAndMenu(normalized);
 
   if (result.addedCatalog || result.addedMenu) {
-    alert(`Dish added: "${normalized}"`);
+    showToast(`Added dish: ${normalized}`, 1800);
   } else {
-    alert(`"${normalized}" was already in the catalog and menu.`);
+    showToast(`Already exists: ${normalized}`, 1800);
   }
-
-  // Optional: switch to Dishes tab to see it immediately (already there, but harmless)
-  showTab("dishes");
 };
   // --- Scanner logic ---
   const modalBg = document.getElementById("modalBg");
