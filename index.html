@@ -149,6 +149,7 @@
     <div id="screenDishes" style="display:none;">
       <div class="row">
         <button id="btnScanDish">SCAN DISH</button>
+        <button id="btnAddDish" class="secondary">Add Dish</button>
         <button id="btnRandom14" class="secondary">Random Menu (14)</button>
         <button id="btnClearMenu" class="secondary">Clear Menu</button>
         <button id="btnClearCatalog" class="danger">Clear Catalog</button>
@@ -544,7 +545,28 @@
     saveState(state);
     render();
   };
+ // Manual dish entry
+document.getElementById("btnAddDish").onclick = () => {
+  const name = prompt("Enter dish name:");
+  if (!name) return;
 
+  const normalized = normDishName(name);
+  if (!normalized) {
+    alert("Please enter a valid dish name.");
+    return;
+  }
+
+  const result = addDishToCatalogAndMenu(normalized);
+
+  if (result.addedCatalog || result.addedMenu) {
+    alert(`Dish added: "${normalized}"`);
+  } else {
+    alert(`"${normalized}" was already in the catalog and menu.`);
+  }
+
+  // Optional: switch to Dishes tab to see it immediately (already there, but harmless)
+  showTab("dishes");
+};
   // --- Scanner logic ---
   const modalBg = document.getElementById("modalBg");
   const scanMsgEl = document.getElementById("scanMsg");
