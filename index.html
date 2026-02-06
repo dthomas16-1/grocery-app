@@ -112,12 +112,38 @@
     .scanBtns { display:flex; gap:10px; flex-wrap:wrap; flex:0 0 auto; }
     .capBtn { background:#16a34a; }
     .doneBtn { background:#e5e7eb; color:#111827; }
+
+    /* Add/Edit Grocery modal (category dropdown ONLY here) */
+    .editBg{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; padding:16px;
+      z-index: 10000;
+    }
+    .editModal{
+      width:min(520px, 100%);
+      background:#fff; border-radius:18px; overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      display:flex; flex-direction:column;
+    }
+    .editHead{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 14px; background:#111827; color:#fff;
+    }
+    .editBody{ padding:14px; display:flex; flex-direction:column; gap:10px; }
+    .fieldLabel{ font-weight:900; color:#111827; margin-top:2px; }
+    .textInput{
+      width:100%;
+      padding:10px 12px; border:1px solid #ddd; border-radius:12px;
+      font-size:16px;
+    }
+    .editBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+    .btnFull{ flex:1 1 auto; }
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 010 – dishes + smaller scan window)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 011 – grocery categories + add/edit dropdown)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -139,6 +165,9 @@
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div><b>Current List:</b> <span id="listName">Today</span></div>
           <div class="total">Total: $<span id="total">0.00</span></div>
+        </div>
+        <div class="muted" style="margin-top:6px;">
+          Sorted by category walking order + name.
         </div>
       </div>
 
@@ -196,11 +225,56 @@
     </div>
   </div>
 
+  <!-- Add/Edit Grocery Modal -->
+  <div class="editBg" id="editBg">
+    <div class="editModal">
+      <div class="editHead">
+        <div><b id="editTitle">Add Item</b></div>
+        <button id="btnEditClose" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
+      </div>
+      <div class="editBody">
+        <div class="fieldLabel">Item name</div>
+        <input id="editName" class="textInput" type="text" placeholder="e.g., Milk" />
+
+        <div class="fieldLabel">Category</div>
+        <select id="editCat"></select>
+
+        <div class="editBtns">
+          <button id="btnEditSave" class="btnFull">Save</button>
+          <button id="btnEditCancel" class="secondary btnFull">Cancel</button>
+        </div>
+        <div class="muted" style="font-size:13px;">
+          New categories learned from QR scans are appended to the end automatically.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(console.warn);
 
-  const LS_KEY = "groceryApp_v2"; // bumped because we're adding dishes/menu
+  const LS_KEY = "groceryApp_v2"; // keep same key to preserve your working data
   const UNITS = ["ea","lb","oz","gal","ct"];
+
+  // ✅ Your walking-order categories (authoritative)
+  const DEFAULT_CATEGORIES = [
+    "Produce",
+    "Deli",
+    "Sea food",
+    "Beef",
+    "Pork",
+    "Chicken",
+    "Dairy",
+    "Cheese",
+    "Beverages",
+    "Snacks",
+    "Frozen",
+    "Household",
+    "Bread",
+    "Pet",
+    "Pharmacy",
+    "Misc"
+  ];
 
   function loadState() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
@@ -213,9 +287,28 @@
   // --- State ---
   let state = loadState() || {
     current: newBlankList("Today"),
-    dishCatalog: [],   // array of dish names
-    currentMenu: []    // array of dish names
+    dishCatalog: [],
+    currentMenu: [],
+    categories: [...DEFAULT_CATEGORIES]
   };
+
+  // ---- Safe migration (won't break existing saved data) ----
+  (function migrateState(){
+    if(!state.categories || !Array.isArray(state.categories) || state.categories.length === 0){
+      state.categories = [...DEFAULT_CATEGORIES];
+    }
+    // ensure "Misc" exists
+    if(!state.categories.some(c => String(c).trim().toLowerCase() === "misc")){
+      state.categories.push("Misc");
+    }
+    // ensure each grocery item has a category
+    if(state.current && Array.isArray(state.current.items)){
+      state.current.items.forEach(it => {
+        if(!it.cat || !String(it.cat).trim()) it.cat = "Misc";
+      });
+    }
+    saveState(state);
+  })();
 
   let lastAddedId = null;
   let renderTimeout = null;
@@ -237,25 +330,62 @@
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
   }
-// Add this helper function somewhere near the top of <script> (after other helpers)
-function showToast(message, duration = 2000) {
-  const div = document.createElement('div');
-  div.textContent = message;
-  div.style.cssText = `
-    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-    background: #111827; color: white; padding: 12px 24px;
-    border-radius: 12px; z-index: 10000; font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25); pointer-events: none;
-  `;
-  document.body.appendChild(div);
-  setTimeout(() => div.remove(), duration);
-}
+
+  // Toast
+  function showToast(message, duration = 2000) {
+    const div = document.createElement('div');
+    div.textContent = message;
+    div.style.cssText = `
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: #111827; color: white; padding: 12px 24px;
+      border-radius: 12px; z-index: 10000; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25); pointer-events: none;
+    `;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), duration);
+  }
+
+  // --- Categories helpers ---
+  function normCat(s){
+    return String(s ?? "").trim().replace(/\s+/g, " ");
+  }
+  function ensureCategory(cat){
+    cat = normCat(cat);
+    if(!cat) cat = "Misc";
+
+    // If already exists (case-insensitive), return the canonical stored version
+    const hit = state.categories.find(c => normCat(c).toLowerCase() === cat.toLowerCase());
+    if(hit) return hit;
+
+    // Otherwise learn it (append to end)
+    state.categories.push(cat);
+    saveState(state);
+    return cat;
+  }
+  function catIndex(cat){
+    cat = normCat(cat) || "Misc";
+    const i = state.categories.findIndex(c => normCat(c).toLowerCase() === cat.toLowerCase());
+    if(i >= 0) return i;
+    // Unknown category: treat as end, but don't mutate here
+    return state.categories.length + 999;
+  }
+
   // --- Groceries ---
-  function addItem(name) {
+  function addItem(name, cat) {
     name = String(name ?? "").trim();
     if (!name) return;
 
-    const item = { id: generateId(), name, done:false, qty:"1", unit:"ea", price:"" };
+    const finalCat = ensureCategory(cat || "Misc");
+
+    const item = {
+      id: generateId(),
+      name,
+      cat: finalCat,
+      done:false,
+      qty:"1",
+      unit:"ea",
+      price:""
+    };
     state.current.items.push(item);
     lastAddedId = item.id;
     saveState(state);
@@ -274,6 +404,12 @@ function showToast(message, duration = 2000) {
   function updateItem(id, changes) {
     const item = state.current.items.find(x => x.id === id);
     if (!item) return;
+
+    // If category is being updated, ensure it exists in category list
+    if(Object.prototype.hasOwnProperty.call(changes, "cat")){
+      changes.cat = ensureCategory(changes.cat);
+    }
+
     Object.assign(item, changes);
     saveState(state);
     debouncedRender();
@@ -288,7 +424,6 @@ function showToast(message, duration = 2000) {
     return arr.some(x => normDishName(x).toLowerCase() === n);
   }
 
-  // B: scan dish -> add to catalog AND menu
   function addDishToCatalogAndMenu(name){
     name = normDishName(name);
     if(!name) return {addedCatalog:false, addedMenu:false};
@@ -319,7 +454,6 @@ function showToast(message, duration = 2000) {
   function removeDishFromCatalog(name){
     const n = normDishName(name).toLowerCase();
     state.dishCatalog = state.dishCatalog.filter(x => normDishName(x).toLowerCase() !== n);
-    // also remove from menu if present
     state.currentMenu = state.currentMenu.filter(x => normDishName(x).toLowerCase() !== n);
     saveState(state);
     debouncedRender();
@@ -327,13 +461,11 @@ function showToast(message, duration = 2000) {
 
   function randomMenu14(){
     const pool = [...state.dishCatalog];
-    // Fisher-Yates shuffle
     for(let i=pool.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    const pick = pool.slice(0, 14);
-    state.currentMenu = pick;
+    state.currentMenu = pool.slice(0, 14);
     saveState(state);
     debouncedRender();
   }
@@ -349,6 +481,86 @@ function showToast(message, duration = 2000) {
     }[m]));
   }
 
+  // --- Add/Edit Grocery modal ---
+  const editBg = document.getElementById("editBg");
+  const editTitle = document.getElementById("editTitle");
+  const editName = document.getElementById("editName");
+  const editCat = document.getElementById("editCat");
+  const btnEditClose = document.getElementById("btnEditClose");
+  const btnEditCancel = document.getElementById("btnEditCancel");
+  const btnEditSave = document.getElementById("btnEditSave");
+
+  let editMode = "add"; // "add" | "edit"
+  let editItemId = null;
+  let lastManualCat = "Misc";
+
+  function buildCatOptions(selected){
+    const sel = ensureCategory(selected || "Misc");
+    editCat.innerHTML = state.categories.map(c => {
+      const cc = String(c);
+      const isSel = normCat(cc).toLowerCase() === normCat(sel).toLowerCase();
+      return `<option ${isSel ? "selected":""}>${escapeHtml(cc)}</option>`;
+    }).join("");
+  }
+
+  function openAddEditModal(mode, item){
+    editMode = mode;
+    editItemId = item?.id || null;
+
+    if(mode === "add"){
+      editTitle.textContent = "Add Item";
+      editName.value = "";
+      buildCatOptions(lastManualCat || "Misc");
+      setTimeout(() => editName.focus(), 50);
+    } else {
+      editTitle.textContent = "Edit Item";
+      editName.value = item?.name || "";
+      buildCatOptions(item?.cat || "Misc");
+      setTimeout(() => editName.focus(), 50);
+    }
+
+    editBg.style.display = "flex";
+  }
+
+  function closeAddEditModal(){
+    editBg.style.display = "none";
+    editItemId = null;
+  }
+
+  btnEditClose.onclick = closeAddEditModal;
+  btnEditCancel.onclick = closeAddEditModal;
+  editBg.onclick = (e) => { if(e.target === editBg) closeAddEditModal(); };
+
+  btnEditSave.onclick = () => {
+    const name = String(editName.value ?? "").trim();
+    const cat = String(editCat.value ?? "").trim();
+
+    if(!name){
+      showToast("Please enter an item name", 1600);
+      return;
+    }
+
+    if(editMode === "add"){
+      lastManualCat = ensureCategory(cat);
+      addItem(name, lastManualCat);
+      showToast(`Added: ${name} (${lastManualCat})`, 1500);
+    } else {
+      if(!editItemId) return;
+      updateItem(editItemId, { name, cat: cat });
+      showToast(`Updated: ${name}`, 1400);
+    }
+
+    closeAddEditModal();
+  };
+
+  // Enter key saves
+  editName.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      btnEditSave.click();
+    }
+  });
+
   function renderGroceries() {
     document.getElementById("listName").textContent = state.current.name;
     document.getElementById("total").textContent = money(computeTotal());
@@ -361,10 +573,18 @@ function showToast(message, duration = 2000) {
       return;
     }
 
-    card.innerHTML = state.current.items.map(it => `
+    // ✅ sorted view (walking order) without changing underlying data
+    const view = [...state.current.items].sort((a,b) => {
+      const ai = catIndex(a.cat);
+      const bi = catIndex(b.cat);
+      if(ai !== bi) return ai - bi;
+      return String(a.name||"").localeCompare(String(b.name||""), undefined, { sensitivity:"base" });
+    });
+
+    card.innerHTML = view.map(it => `
       <div class="item ${it.done ? "done":""}" data-id="${it.id}">
         <input class="check" type="checkbox" ${it.done ? "checked":""}>
-        <div class="name">${escapeHtml(it.name)}</div>
+        <div class="name" title="${escapeHtml(it.cat || "Misc")}">${escapeHtml(it.name)}</div>
         <input class="qty" type="number" step="0.5" min="0" value="${it.qty}">
         <select class="unit">
           ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
@@ -396,15 +616,12 @@ function showToast(message, duration = 2000) {
 
       row.querySelector(".delBtn").onclick = () => deleteItemById(id);
 
-      row.querySelector(".name").onclick = () => {
-        const newName = prompt("Edit item:", item.name);
-        if (newName && newName.trim() !== item.name) updateItem(id, { name: newName.trim() });
-      };
+      // ✅ name tap -> Add/Edit modal (name + category dropdown)
+      row.querySelector(".name").onclick = () => openAddEditModal("edit", item);
     });
   }
 
   function dishRowHtml(name, where){
-    // where: "menu" or "catalog"
     return `
       <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
         <div class="dishName">${escapeHtml(name)}</div>
@@ -444,26 +661,19 @@ function showToast(message, duration = 2000) {
         const where = row.dataset.where;
 
         row.querySelector(".dishName").onclick = () => {
-          // quick action: if catalog item tapped, add to menu (no dupes)
           if(where === "catalog"){
-            const r = addDishToCatalogAndMenu(name);
-            // message is handled by normal render
+            addDishToCatalogAndMenu(name);
           } else {
-            // menu dish tapped: optional rename
             const newName = prompt("Rename dish (updates Catalog + Menu):", name);
             if(!newName) return;
             const nn = normDishName(newName);
             if(!nn) return;
-
-            // remove old
             removeDishFromCatalog(name);
-            // add new
             addDishToCatalogAndMenu(nn);
           }
         };
 
         row.querySelector(".delBtn").onclick = () => {
-          // Prompt: remove from Menu or Catalog
           if(where === "menu"){
             const choice = prompt(`Delete "${name}"?\nType:\nM = remove from Menu only\nC = remove from Catalog (also removes from Menu)\n(Anything else cancels)`, "M");
             if(!choice) return;
@@ -511,15 +721,16 @@ function showToast(message, duration = 2000) {
     const name = prompt("List name?", state.current.name);
     if (!name?.trim()) return;
     state.current = newBlankList(name.trim());
+    // keep categories + dishes intact
+    // ensure items array exists
+    state.current.items = [];
     lastAddedId = null;
     saveState(state);
     render();
   };
 
-  document.getElementById("btnAdd").onclick = () => {
-    const name = prompt("Add item:");
-    if (name) addItem(name.trim());
-  };
+  // ✅ Manual add now uses add/edit modal with dropdown
+  document.getElementById("btnAdd").onclick = () => openAddEditModal("add", null);
 
   document.getElementById("btnUndo").onclick = () => {
     if (lastAddedId) deleteItemById(lastAddedId);
@@ -557,31 +768,28 @@ function showToast(message, duration = 2000) {
     saveState(state);
     render();
   };
- // Manual dish entry
-document.getElementById("btnAddDish").onclick = () => {
-  const name = prompt("Enter dish name:");
-  if (!name) return;
 
-  const normalized = normDishName(name);
-  if (!normalized) {
-    showToast("Please enter a valid dish name", 1800);
-    return;
-  }
+  // Manual dish entry
+  document.getElementById("btnAddDish").onclick = () => {
+    const name = prompt("Enter dish name:");
+    if (!name) return;
 
-  const result = addDishToCatalogAndMenu(normalized);
+    const normalized = normDishName(name);
+    if (!normalized) {
+      showToast("Please enter a valid dish name", 1800);
+      return;
+    }
 
-  if (result.addedCatalog || result.addedMenu) {
-    showToast(`Added dish: ${normalized}`, 1800);
-  } else {
-    showToast(`Already exists: ${normalized}`, 1800);
-  }
-};
+    const result = addDishToCatalogAndMenu(normalized);
+    if (result.addedCatalog || result.addedMenu) showToast(`Added dish: ${normalized}`, 1800);
+    else showToast(`Already exists: ${normalized}`, 1800);
+  };
+
   // --- Scanner logic ---
   const modalBg = document.getElementById("modalBg");
   const scanMsgEl = document.getElementById("scanMsg");
   let qr = null;
 
-  // Pending payload for CAPTURE
   let pending = null; // { kind:"item"|"dish", name, cat, raw }
   let targetLocked = false;
   let audioCtx = null;
@@ -611,91 +819,75 @@ document.getElementById("btnAddDish").onclick = () => {
     setScanMsg("Point camera at QR code – hold steady…");
   }
 
-  function safeDecode(s){
-    try { return decodeURIComponent(s); } catch { return s; }
-  }
+  function parseQR(decodedText){
+    let raw = String(decodedText ?? "");
+    raw = raw.replace(/\uFEFF/g, "");
+    raw = raw.replace(/\r\n/g, "\n").trim();
+    raw = raw.slice(0, 2000);
 
-function parseQR(decodedText){
-  let raw = String(decodedText ?? "");
-  // Normalize common invisible junk
-  raw = raw.replace(/\uFEFF/g, "");          // BOM
-  raw = raw.replace(/\r\n/g, "\n").trim();   // normalize newlines
-  raw = raw.slice(0, 2000);
+    if(!raw) return { kind:"unknown", raw:"" };
 
-  if(!raw) return { kind:"unknown", raw:"" };
+    const maybeDecode = (s) => {
+      s = String(s ?? "");
+      if (/%[0-9A-Fa-f]{2}/.test(s)) {
+        try { return decodeURIComponent(s); } catch {}
+      }
+      return s;
+    };
 
-  // Helper: decode if it looks percent-encoded
-  const maybeDecode = (s) => {
-    s = String(s ?? "");
-    // If it contains percent escapes, try decode
-    if (/%[0-9A-Fa-f]{2}/.test(s)) {
-      try { return decodeURIComponent(s); } catch {}
+    const lower = raw.toLowerCase();
+
+    // 1) URL
+    try {
+      if (/^[a-z]+:\/\//i.test(raw)) {
+        const url = new URL(raw);
+
+        const dish = url.searchParams.get("dish");
+        if (dish) return { kind:"dish", name: maybeDecode(dish).trim().slice(0,120), raw };
+
+        const item = url.searchParams.get("item");
+        const cat  = url.searchParams.get("cat");
+        if (item) return {
+          kind:"item",
+          name: maybeDecode(item).trim().slice(0,120),
+          cat:  maybeDecode(cat||"").trim().slice(0,80),
+          raw
+        };
+
+        const text = url.searchParams.get("text");
+        if (text) {
+          const inner = maybeDecode(text).trim();
+          return parseQR(inner);
+        }
+      }
+    } catch {}
+
+    // 2) plain querystring
+    const dishMatch = raw.match(/(?:^|[?&\s])dish=([^&\n]+)/i);
+    if (dishMatch) {
+      const name = maybeDecode(dishMatch[1]).trim();
+      return { kind:"dish", name: name.slice(0,120), raw };
     }
-    return s;
-  };
 
-  const lower = raw.toLowerCase();
-
-  // ── 1) If it's a URL, parse query params normally ─────────
-  try {
-    if (/^[a-z]+:\/\//i.test(raw)) {
-      const url = new URL(raw);
-
-      const dish = url.searchParams.get("dish");
-      if (dish) return { kind:"dish", name: maybeDecode(dish).trim().slice(0,120), raw };
-
-      const item = url.searchParams.get("item");
-      const cat  = url.searchParams.get("cat");
-      if (item) return {
-        kind:"item",
-        name: maybeDecode(item).trim().slice(0,120),
-        cat:  maybeDecode(cat||"").trim().slice(0,80),
-        raw
-      };
-
-      // Some QRs might store the payload in a "text=" param
-      const text = url.searchParams.get("text");
-      if (text) {
-        const inner = maybeDecode(text).trim();
-        // recurse once
-        return parseQR(inner);
+    const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
+    if (itemMatch) {
+      const start = lower.indexOf("item=");
+      const qs = raw.slice(start);
+      const sp = new URLSearchParams(qs);
+      const item = sp.get("item");
+      const cat  = sp.get("cat");
+      if (item) {
+        return {
+          kind:"item",
+          name: maybeDecode(item).trim().slice(0,120),
+          cat:  maybeDecode(cat||"").trim().slice(0,80),
+          raw
+        };
       }
     }
-  } catch {
-    // not a URL, continue
+
+    return { kind:"unknown", raw: raw.slice(0,140) };
   }
-
-  // ── 2) Plain querystring parsing (no URL) ──────────────────
-  // Works for: "dish=Hamburger Fries" and "item=Milk&cat=Dairy"
-  // Also works if there's leading junk like "QR: dish=..."
-  const dishMatch = raw.match(/(?:^|[?&\s])dish=([^&\n]+)/i);
-  if (dishMatch) {
-    const name = maybeDecode(dishMatch[1]).trim();
-    return { kind:"dish", name: name.slice(0,120), raw };
-  }
-
-  const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
-  if (itemMatch) {
-    // Use URLSearchParams on the substring starting at "item="
-    const start = lower.indexOf("item=");
-    const qs = raw.slice(start);
-    const sp = new URLSearchParams(qs);
-    const item = sp.get("item");
-    const cat  = sp.get("cat");
-    if (item) {
-      return {
-        kind:"item",
-        name: maybeDecode(item).trim().slice(0,120),
-        cat:  maybeDecode(cat||"").trim().slice(0,80),
-        raw
-      };
-    }
-  }
-
-  // ── 3) Fallback: unknown ───────────────────────────────────
-  return { kind:"unknown", raw: raw.slice(0,140) };
-}
-
 
   async function openScanner() {
     modalBg.style.display = "flex";
@@ -714,20 +906,15 @@ function parseQR(decodedText){
 
       const rear = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length-1];
 
-      // ✅ Smaller scan window so you don't need to be 1 inch away.
-      // We cap it so it doesn't become gigantic on big screens.
       const qrboxFunction = (vw, vh) => {
-        //const min = Math.min(vw, vh);
-        //let size = Math.round(min * 0.32);   // was 0.55 (too big)
-        //size = Math.max(150, Math.min(size, 210));
-        const size = 70;
+        const size = 70; // keep your current small box
         return { width: size, height: size };
       };
 
       await qr.start(
         rear.id,
         {
-          fps: 12,                      // stable
+          fps: 12,
           qrbox: qrboxFunction,
           disableFlip: false,
           rememberLastUsedCamera: true,
@@ -790,12 +977,13 @@ function parseQR(decodedText){
       setScanMsg(msg, "ok");
       showTab("dishes");
     } else if(pending.kind === "item"){
-      addItem(pending.name);
-      setScanMsg(`✅ Added item: ${pending.name}`, "ok");
+      // ✅ use category from QR if present; learn if new
+      const cat = ensureCategory(pending.cat || "Misc");
+      addItem(pending.name, cat);
+      setScanMsg(`✅ Added item: ${pending.name} (${cat})`, "ok");
       showTab("groceries");
     } else {
-      // unknown QR: add as grocery item (your old behavior)
-      addItem(pending.raw);
+      addItem(pending.raw, "Misc");
       setScanMsg(`✅ Added as item: ${pending.raw}`, "ok");
       showTab("groceries");
     }
@@ -804,7 +992,6 @@ function parseQR(decodedText){
     setTimeout(resetTarget, 650);
   };
 
-  // Buttons to open scanner (both use same scanner; capture routes by QR content)
   document.getElementById("btnScan").onclick = openScanner;
   document.getElementById("btnScanDish").onclick = openScanner;
 
