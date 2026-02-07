@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 052)
+     index.html  (BUILD 053)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -200,14 +200,17 @@
       background: linear-gradient(180deg, var(--scan) 0%, var(--scan2) 100%);
       box-shadow: 0 10px 18px rgba(245,158,11,.22);
     }
-    #btnUndo{
-      padding-left: 8px;
-      padding-right: 8px;
-      background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
-      color:#fff !important;
-      border:0 !important;
-      box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
-    }
+#btnUndo{
+  min-width: 60px !important;   /* ← this actually makes it narrower */
+  padding-left: 6px;
+  padding-right: 6px;
+
+  background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
+  color:#fff !important;
+  border:0 !important;
+  box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
+}
+
     #btnAdd{
       background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
       color:#fff !important;
@@ -370,7 +373,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 052)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 053)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -379,7 +382,7 @@
       <button id="btnClearDone" class="secondary">Clear Purchased</button>
     </div>
 
-    <!-- GROCERIES TAB -->
+<!-- GROCERIES TAB -->
 <div id="screenGroceries">
   <div class="row actionRow">
     <button id="btnNew">New List</button>
@@ -400,45 +403,49 @@
       </div>
     </div>
   </div>
-</div>
-  
 
-      <!-- Shopping list summary -->
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div>
-            <b>Shopping List:</b> <span id="listName">Today</span><br>
-            <span class="muted">Sorted by category walking order + name.</span>
-          </div>
-          <div class="total">Total: $<span id="total">0.00</span></div>
-        </div>
+  <!-- Shopping list summary -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div>
+        <b>Shopping List:</b> <span id="listName">Today</span><br>
+        <span class="muted">Sorted by category walking order + name.</span>
       </div>
-
-      <!-- ✅ Shopping list card FIRST (above Master) -->
-      <div class="card" id="listCard"></div>
-
-      <!-- Master list AFTER shopping list -->
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div>
-            <b>Master Grocery List:</b>
-            <span class="pill"><span id="masterCount">0</span> items</span>
-          </div>
-          <div class="muted">Check items here, then tap <b>ADD SELECTED</b>.</div>
-        </div>
-
-        <div class="spacer"></div>
-
-        <div class="row">
-          <button id="btnMasterAddSelected" class="secondary">ADD SELECTED</button>
-          <button id="btnMasterClearChecks" class="secondary">CLEAR CHECKS</button>
-          <button id="btnMasterClear" class="danger">Clear Master</button>
-        </div>
-
-        <div class="spacer"></div>
-        <div id="masterCard"></div>
-      </div>
+      <div class="total">Total: $<span id="total">0.00</span></div>
     </div>
+  </div>
+
+  <!-- ✅ Shopping list card FIRST (above Master) -->
+  <div class="card" id="listCard"></div>
+
+  <!-- Master list AFTER shopping list -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div>
+        <b>Master Grocery List:</b>
+        <span class="pill"><span id="masterCount">0</span> items</span>
+      </div>
+      <div class="muted">Check items here, then tap <b>ADD SELECTED</b>.</div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="row">
+      <button id="btnMasterAddSelected" class="secondary">ADD SELECTED</button>
+      <button id="btnMasterClearChecks" class="secondary">CLEAR CHECKS</button>
+      <button id="btnMasterClear" class="danger">Clear Master</button>
+    </div>
+
+    <div class="spacer"></div>
+    <div id="masterCard"></div>
+  </div>
+</div>
+
+<!-- DISHES TAB -->
+<div id="screenDishes" style="display:none;">
+  ...
+</div>
+
 
     <!-- DISHES TAB -->
     <div id="screenDishes" style="display:none;">
@@ -525,7 +532,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 52;
+  const APP_VERSION = 53;
 
   // =========================
   // Smart one-time migration helper
