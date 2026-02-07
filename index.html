@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 055)
+     index.html  (BUILD 056)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -373,7 +373,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 055)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 056)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -526,7 +526,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 55;
+  const APP_VERSION = 56;
 
   // =========================
   // Smart one-time migration helper
@@ -680,6 +680,35 @@
     masterGroceries: [],
     upcDB: {}
   };
+// =========================
+// PHASE 1: Dish object migration (SAFE / INVISIBLE)
+// =========================
+(function migrateDishData(){
+  let changed = false;
+
+  // Ensure dishCatalog entries are objects with ingredients[]
+  state.dishCatalog = state.dishCatalog.map(d => {
+    if (typeof d === "string") {
+      changed = true;
+      return { name: d, ingredients: [] };
+    }
+    if (!Array.isArray(d.ingredients)) {
+      changed = true;
+      d.ingredients = [];
+    }
+    return d;
+  });
+
+  // Ensure currentMenu is array of dish names (strings)
+  state.currentMenu = state.currentMenu
+    .map(d => typeof d === "string" ? d : d?.name)
+    .filter(Boolean);
+
+  if (changed) {
+    console.log("[PHASE 1] Dish data migrated");
+    saveState(state);
+  }
+})();
 
   let lastAddedId = null;
   let renderTimeout = null;
