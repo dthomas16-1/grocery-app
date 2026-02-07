@@ -36,23 +36,36 @@
 
     /* ✅ Put variables FIRST so var(--soft) / var(--ink) always resolve */
     :root{
-      --navy:#0b1220;
-      --blue:#2563eb;
-      --blue2:#1d4ed8;
-      --green:#16a34a;
-      --green2:#15803d;
-      --orange:#f59e0b;
-      --orange2:#d97706;
-      --red:#ef4444;
-      --red2:#dc2626;
+  /* Core palette (warmer + friendlier) */
+  --navy:#0b1220;
 
-      --card:#ffffff;
-      --ink:#0f172a;
-      --muted:#64748b;
-      --soft:#eef2ff;         /* soft background tint */
-      --border:rgba(15,23,42,.10);
-      --shadow: 0 10px 24px rgba(2,6,23,.10);
-    }
+  /* “App language” colors */
+  --primary:#2563eb;     /* blue = main actions */
+  --primary2:#1d4ed8;
+  --success:#16a34a;     /* green = positive/progress */
+  --success2:#15803d;
+  --scan:#f59e0b;        /* orange = scanning/discovery */
+  --scan2:#d97706;
+  --danger:#ef4444;      /* red = destructive */
+  --danger2:#dc2626;
+
+  /* Softer neutrals (less industrial than gray) */
+  --card:#ffffff;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --soft:#f3f1ff;        /* subtle lavender tint */
+  --soft2:#eef2ff;
+
+  --border:rgba(15,23,42,.10);
+  --shadow: 0 10px 26px rgba(2,6,23,.10);
+  --shadow2: 0 14px 34px rgba(2,6,23,.12);
+
+  /* Rounding and spacing consistency */
+  --r-lg: 18px;
+  --r-md: 14px;
+  --r-pill: 999px;
+}
+
 
     body{
       font-family: Arial, Helvetica, sans-serif;
@@ -74,45 +87,60 @@
     .row { display:flex; gap:10px; flex-wrap:wrap; }
 
     button{
-      appearance:none;
-      border:0;
-      border-radius:16px;
-      padding:14px 16px;
-      font-size:16px;
-      font-weight:900;
-      cursor:pointer;
-      background: var(--blue);
-      color:#fff;
-      box-shadow: 0 10px 18px rgba(37,99,235,.20);
-      transition: transform .06s ease, filter .12s ease;
-    }
-    button:active{ transform: translateY(1px); }
-    button:hover{ filter: brightness(1.03); }
-    button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; }
+  appearance:none;
+  border:0;
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  color:#fff;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary2) 100%);
+  box-shadow: var(--shadow);
+  transition: transform .08s ease, filter .12s ease, box-shadow .12s ease;
+  letter-spacing: .2px;
+}
+button:active{ transform: translateY(1px); }
+button:hover{ filter: brightness(1.03); box-shadow: var(--shadow2); }
+button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; filter:none; }
 
-    button.secondary { background:#e5e7eb; color:#111827; }
-    button.secondary,
-    button.tabBtn{ box-shadow: none; }
+/* Secondary = softer, less “industrial” than gray */
+button.secondary,
+button.tabBtn{
+  background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
+  color: var(--ink);
+  box-shadow: none;
+  border: 1px solid rgba(15,23,42,.10);
+}
 
-    button.danger { background:#fee2e2; color:#7f1d1d; }
+/* Destructive */
+button.danger{
+  background: linear-gradient(180deg, var(--danger) 0%, var(--danger2) 100%);
+  color:#fff;
+  box-shadow: 0 10px 18px rgba(239,68,68,.18);
+}
 
-    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-    .tabBtn { background:#e5e7eb; color:#111827; }
-    .tabBtn.active { background:#111827; color:#fff; }
+/* Scan buttons (warm + inviting) */
+button.scanQR{
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+}
+button.scanUPC{
+  background: linear-gradient(180deg, var(--scan) 0%, var(--scan2) 100%);
+  box-shadow: 0 10px 18px rgba(245,158,11,.18);
+}
 
-    button.scanQR{
-      background: linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%);
-    }
+/* Small delete buttons in rows: make them “soft danger” */
+.delBtn{
+  background: rgba(239,68,68,.12);
+  color:#7f1d1d;
+  padding:10px 12px;
+  border-radius: 12px;
+  font-weight: 900;
+  box-shadow:none;
+  border: 1px solid rgba(239,68,68,.18);
+}
+.delBtn:hover{ filter: brightness(1.02); }
 
-    button.scanUPC{
-      background: linear-gradient(180deg, var(--orange) 0%, var(--orange2) 100%);
-      box-shadow: 0 10px 18px rgba(245,158,11,.22);
-    }
-
-    button.danger{
-      background: linear-gradient(180deg, var(--red) 0%, var(--red2) 100%);
-      color:#fff;
-    }
 
     .card{
       background: var(--card);
@@ -247,13 +275,150 @@
       border-radius:14px; font-size:16px;
     }
     .miniBtns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; padding:0 14px 14px; }
+    /* =========================================================
+   FRIENDLY UI PASS – v40
+   (added intentionally at end to override earlier styles)
+   ========================================================= */
+
+/* Tabs: softer, pill-style */
+.tabs{
+  display:flex;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.tabBtn{
+  background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
+  color:#0f172a;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 900;
+  border: 1px solid rgba(15,23,42,.12);
+  box-shadow: none;
+}
+
+.tabBtn.active{
+  background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+  color:#ffffff;
+  border: 0;
+  box-shadow: 0 12px 22px rgba(2,6,23,.18);
+}
+
+/* Primary buttons (blue, friendly) */
+button{
+  border-radius: 16px;
+}
+
+/* Scan buttons = warm + inviting */
+button.scanQR{
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+}
+
+button.scanUPC{
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 10px 18px rgba(245,158,11,.22);
+}
+
+/* Secondary buttons = soft lavender instead of gray */
+button.secondary{
+  background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
+  color:#0f172a;
+  border: 1px solid rgba(15,23,42,.12);
+}
+
+/* Destructive buttons = softer red */
+button.danger{
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 10px 18px rgba(239,68,68,.18);
+}
+
+/* Cards: slightly softer feel */
+.card{
+  box-shadow: 0 14px 30px rgba(2,6,23,.10);
+}
+
+/* Empty-state text: warmer + more readable */
+.card div[style*="text-align:center"]{
+  color:#64748b;
+  line-height:1.5;
+}
+/* =========================================================
+   STEP 4 – background + spacing polish
+   ========================================================= */
+
+body{
+  background: linear-gradient(180deg, #fbfbff 0%, #f3f1ff 45%, #eef2ff 100%) !important;
+}
+
+header{
+  border-bottom: 1px solid rgba(255,255,255,.10) !important;
+  letter-spacing: .3px;
+}
+
+.wrap{
+  padding-top: 16px !important;
+}
+
+.row{
+  gap: 12px !important;
+}
+/* =========================================================
+   STEP 5 – cards + typography friendliness
+   ========================================================= */
+
+.card{
+  border-radius: 22px !important;
+  border: 1px solid rgba(15,23,42,.08) !important;
+  box-shadow: 0 16px 34px rgba(2,6,23,.10) !important;
+}
+
+.total{
+  letter-spacing: .2px;
+}
+
+.muted{
+  color:#64748b !important;
+}
+
+.pill,
+.catPill{
+  border-radius: 999px !important;
+  border: 1px solid rgba(15,23,42,.10);
+}
+/* =========================================================
+   STEP 6 – button hierarchy + tap comfort
+   ========================================================= */
+
+/* Make primary buttons feel “pressable” */
+button{
+  border-radius: 18px !important;
+  padding: 14px 18px !important;
+}
+
+/* Make secondary buttons feel lighter */
+button.secondary{
+  box-shadow: 0 10px 18px rgba(2,6,23,.06) !important;
+}
+
+/* Give destructive buttons a little separation */
+button.danger{
+  box-shadow: 0 12px 22px rgba(239,68,68,.16) !important;
+}
+
+/* Row delete buttons: less harsh */
+.delBtn{
+  border-radius: 14px !important;
+  background: rgba(239,68,68,.10) !important;
+  border: 1px solid rgba(239,68,68,.18) !important;
+}
+
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 040)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 041)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -385,7 +550,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 40;
+  const APP_VERSION = 41;
 // =========================
 // Smart one-time migration helper
 // =========================
