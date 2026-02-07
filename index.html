@@ -20,7 +20,7 @@
 
 
 <!-- =========================
-     index.html  (BUILD 045)
+     index.html  (BUILD 046)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -461,6 +461,13 @@ button.danger{
 #btnClearDone{
   margin-left: auto;
 }
+/* =========================================================
+   Spread action buttons across full row width
+   ========================================================= */
+
+#screenGroceries .row{
+  justify-content: space-between;
+}
 
   </style>
 
@@ -468,7 +475,7 @@ button.danger{
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 045)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 046)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -605,7 +612,7 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 45;
+  const APP_VERSION = 46;
 // =========================
 // Smart one-time migration helper
 // =========================
