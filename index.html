@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 059)
+     index.html  (BUILD 060)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -398,7 +398,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 059)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 060)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -575,7 +575,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 59;
+  const APP_VERSION = 60;
 
   // =========================
   // Smart one-time migration helper
@@ -1211,7 +1211,7 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
         <div class="muted">Scan dish QR codes to build it.</div>
       </div>`;
     } else {
-      catalogCard.innerHTML = state.dishCatalog.map(d => dishRowHtml(d, "catalog")).join("");
+      catalogCard.innerHTML = state.dishCatalog.map(d => dishRowHtml(d.name, "catalog")).join("");
     }
 
     function bindDishRows(container){
