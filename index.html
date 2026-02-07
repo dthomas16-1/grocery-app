@@ -412,7 +412,7 @@ button.danger{
   border: 1px solid rgba(239,68,68,.18) !important;
 }
 /* =========================================================
-   v43 – Button intent colors (override)
+   v44 – Button intent colors (override)
    ========================================================= */
 
 /* Utility buttons: calm neutral (not dead gray) */
@@ -453,12 +453,13 @@ button.danger{
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 043)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 044)</span></header>
 
   <div class="wrap">
     <div class="tabs">
       <button id="tabGroceries" class="tabBtn active">Groceries</button>
       <button id="tabDishes" class="tabBtn">Dishes</button>
+      <button id="btnClearDone" class="secondary">Clear Purchased</button>
     </div>
 
     <!-- GROCERIES TAB -->
@@ -468,9 +469,11 @@ button.danger{
   <button id="btnScan" class="scanQR">SCAN QR</button>
   <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
 
-  <button id="btnClearDone" class="secondary">Clear Purchased</button>
   <button id="btnAdd" class="secondary">Add Item</button>
-  <button id="btnUndo" class="secondary">Undo</button>
+  <button id="btnUndo" class="secondary">Undo</button>       
+  
+  
+  
 </div>
 
 
@@ -587,7 +590,7 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 43;
+  const APP_VERSION = 44;
 // =========================
 // Smart one-time migration helper
 // =========================
