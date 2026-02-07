@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 051)
+     index.html  (BUILD 052)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -168,6 +168,7 @@
   border: 0;
   background: transparent;
   cursor: pointer;
+  color: #000;           /* ✅ FIX: always visible text */
 }
 
 .shopItem:hover{
@@ -200,6 +201,8 @@
       box-shadow: 0 10px 18px rgba(245,158,11,.22);
     }
     #btnUndo{
+      padding-left: 8px;
+      padding-right: 8px;
       background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
       color:#fff !important;
       border:0 !important;
@@ -367,7 +370,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 051)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 052)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -522,7 +525,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 51;
+  const APP_VERSION = 52;
 
   // =========================
   // Smart one-time migration helper
