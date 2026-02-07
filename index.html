@@ -411,6 +411,41 @@ button.danger{
   background: rgba(239,68,68,.10) !important;
   border: 1px solid rgba(239,68,68,.18) !important;
 }
+/* =========================================================
+   v42 – Button intent colors (override)
+   ========================================================= */
+
+/* Utility buttons: calm neutral (not dead gray) */
+#btnClearDone,
+#btnMasterClearChecks{
+  background: linear-gradient(180deg, #eef2ff 0%, #e9e7ff 100%) !important;
+  color:#0f172a !important;
+  border: 1px solid rgba(15,23,42,.12) !important;
+}
+
+/* Undo: friendly “recovery” purple */
+#btnUndo{
+  background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
+  color:#ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
+}
+
+/* Add Item: positive green */
+#btnAdd{
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
+  color:#ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 12px 22px rgba(34,197,94,.18) !important;
+}
+
+/* ADD SELECTED: teal (action-forward, but not “danger”) */
+#btnMasterAddSelected{
+  background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%) !important;
+  color:#ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 12px 22px rgba(20,184,166,.18) !important;
+}
 
   </style>
 
@@ -418,7 +453,7 @@ button.danger{
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 041)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 042)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -550,7 +585,7 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 41;
+  const APP_VERSION = 42;
 // =========================
 // Smart one-time migration helper
 // =========================
