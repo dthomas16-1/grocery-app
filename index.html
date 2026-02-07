@@ -18,9 +18,8 @@
   If you forget step #3, the browser may keep serving old code.
 ============================================================ -->
 
-
 <!-- =========================
-     index.html  (BUILD 048)
+     index.html  (BUILD 049)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -34,44 +33,40 @@
     html, body { overflow-x: hidden; margin:0; }
     * { box-sizing: border-box; }
 
-    /* ✅ Put variables FIRST so var(--soft) / var(--ink) always resolve */
     :root{
-  /* Core palette (warmer + friendlier) */
-  --navy:#0b1220;
+      /* Core palette (warmer + friendlier) */
+      --navy:#0b1220;
 
-  /* “App language” colors */
-  --primary:#2563eb;     /* blue = main actions */
-  --primary2:#1d4ed8;
-  --success:#16a34a;     /* green = positive/progress */
-  --success2:#15803d;
-  --scan:#f59e0b;        /* orange = scanning/discovery */
-  --scan2:#d97706;
-  --danger:#ef4444;      /* red = destructive */
-  --danger2:#dc2626;
+      /* “App language” colors */
+      --primary:#2563eb;
+      --primary2:#1d4ed8;
+      --success:#16a34a;
+      --success2:#15803d;
+      --scan:#f59e0b;
+      --scan2:#d97706;
+      --danger:#ef4444;
+      --danger2:#dc2626;
 
-  /* Softer neutrals (less industrial than gray) */
-  --card:#ffffff;
-  --ink:#0f172a;
-  --muted:#64748b;
-  --soft:#f3f1ff;        /* subtle lavender tint */
-  --soft2:#eef2ff;
+      /* Softer neutrals */
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --soft:#f3f1ff;
+      --soft2:#eef2ff;
 
-  --border:rgba(15,23,42,.10);
-  --shadow: 0 10px 26px rgba(2,6,23,.10);
-  --shadow2: 0 14px 34px rgba(2,6,23,.12);
+      --border:rgba(15,23,42,.10);
+      --shadow: 0 10px 26px rgba(2,6,23,.10);
+      --shadow2: 0 14px 34px rgba(2,6,23,.12);
 
-  /* Rounding and spacing consistency */
-  --r-lg: 18px;
-  --r-md: 14px;
-  --r-pill: 999px;
-}
-
+      --r-lg: 22px;
+      --r-md: 18px;
+      --r-pill: 999px;
+    }
 
     body{
       font-family: Arial, Helvetica, sans-serif;
-      /* ✅ fallbacks so page never goes “blank” if vars fail */
-      background: linear-gradient(180deg, #f6f7fb 0%, var(--soft, #eef2ff) 100%);
-      color: var(--ink, #0f172a);
+      background: linear-gradient(180deg, #fbfbff 0%, #f3f1ff 45%, #eef2ff 100%);
+      color: var(--ink);
     }
 
     header{
@@ -80,79 +75,136 @@
       color:#fff;
       font-weight:800;
       font-size:18px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      letter-spacing: .3px;
     }
 
-    .wrap { padding:14px 14px 90px; max-width:820px; margin:0 auto; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .wrap { padding:16px 14px 90px; max-width:820px; margin:0 auto; }
+
+    /* Tabs row */
+    .tabs{
+      display:flex;
+      gap:12px;
+      margin-bottom:14px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .tabBtn{
+      background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
+      color: var(--ink);
+      border-radius: var(--r-pill);
+      padding: 12px 20px;
+      font-weight: 900;
+      border: 1px solid rgba(15,23,42,.12);
+      box-shadow: none;
+      cursor:pointer;
+    }
+
+    .tabBtn.active{
+      background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+      color:#fff;
+      border: 0;
+      box-shadow: 0 12px 22px rgba(2,6,23,.18);
+    }
+
+    /* Push Clear Purchased to the right edge */
+    #btnClearDone{ margin-left:auto; }
+
+    /* Base row */
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+
+    /* ACTION row (Groceries main buttons) should fill width */
+    .actionRow{
+      justify-content: space-between;
+    }
+    .actionRow button{
+      flex: 1 1 150px;  /* grows to fill, wraps nicely */
+      min-width: 140px;
+    }
 
     button{
-  appearance:none;
-  border:0;
-  border-radius: var(--r-md);
-  padding: 14px 16px;
-  font-size: 16px;
-  font-weight: 900;
-  cursor: pointer;
-  color:#fff;
-  background: linear-gradient(180deg, var(--primary) 0%, var(--primary2) 100%);
-  box-shadow: var(--shadow);
-  transition: transform .08s ease, filter .12s ease, box-shadow .12s ease;
-  letter-spacing: .2px;
-}
-button:active{ transform: translateY(1px); }
-button:hover{ filter: brightness(1.03); box-shadow: var(--shadow2); }
-button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; filter:none; }
+      appearance:none;
+      border:0;
+      border-radius: var(--r-md);
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      color:#fff;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary2) 100%);
+      box-shadow: var(--shadow);
+      transition: transform .08s ease, filter .12s ease, box-shadow .12s ease;
+      letter-spacing: .2px;
+    }
+    button:active{ transform: translateY(1px); }
+    button:hover{ filter: brightness(1.03); box-shadow: var(--shadow2); }
+    button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; filter:none; }
 
-/* Secondary = softer, less “industrial” than gray */
-button.secondary,
-button.tabBtn{
-  background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
-  color: var(--ink);
-  box-shadow: none;
-  border: 1px solid rgba(15,23,42,.10);
-}
+    button.secondary{
+      background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
+      color: var(--ink);
+      border: 1px solid rgba(15,23,42,.12);
+      box-shadow: 0 10px 18px rgba(2,6,23,.06);
+    }
 
-/* Destructive */
-button.danger{
-  background: linear-gradient(180deg, var(--danger) 0%, var(--danger2) 100%);
-  color:#fff;
-  box-shadow: 0 10px 18px rgba(239,68,68,.18);
-}
+    button.danger{
+      background: linear-gradient(180deg, var(--danger) 0%, var(--danger2) 100%);
+      color:#fff;
+      box-shadow: 0 12px 22px rgba(239,68,68,.16);
+    }
 
-/* Scan buttons (warm + inviting) */
-button.scanQR{
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-}
-button.scanUPC{
-  background: linear-gradient(180deg, var(--scan) 0%, var(--scan2) 100%);
-  box-shadow: 0 10px 18px rgba(245,158,11,.18);
-}
-
-/* Small delete buttons in rows: make them “soft danger” */
-.delBtn{
-  background: rgba(239,68,68,.12);
-  color:#7f1d1d;
-  padding:10px 12px;
-  border-radius: 12px;
-  font-weight: 900;
-  box-shadow:none;
-  border: 1px solid rgba(239,68,68,.18);
-}
-.delBtn:hover{ filter: brightness(1.02); }
-
+    /* Intent colors */
+    button.scanQR{
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    }
+    button.scanUPC{
+      background: linear-gradient(180deg, var(--scan) 0%, var(--scan2) 100%);
+      box-shadow: 0 10px 18px rgba(245,158,11,.22);
+    }
+    #btnUndo{
+      background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
+      color:#fff !important;
+      border:0 !important;
+      box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
+    }
+    #btnAdd{
+      background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
+      color:#fff !important;
+      border:0 !important;
+      box-shadow: 0 12px 22px rgba(34,197,94,.18) !important;
+    }
+    #btnMasterAddSelected{
+      background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%) !important;
+      color:#fff !important;
+      border:0 !important;
+      box-shadow: 0 12px 22px rgba(20,184,166,.18) !important;
+    }
 
     .card{
       background: var(--card);
-      border-radius:18px;
+      border-radius: var(--r-lg);
       padding:12px;
       margin-top:12px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(15,23,42,.08);
+      box-shadow: 0 16px 34px rgba(2,6,23,.10);
     }
 
-    .muted { color:#6b7280; }
+    .muted { color: var(--muted); }
     .spacer { height:10px; }
+    .total { font-weight:900; font-size:18px; letter-spacing:.2px; }
+
+    /* Rows / pills */
+    .pill,
+    .catPill{
+      font-size:12px; font-weight:900;
+      padding:6px 10px; border-radius:999px;
+      background:#e5e7eb; color:#111827;
+      white-space:nowrap;
+      border: 1px solid rgba(15,23,42,.10);
+    }
+    .pill.ok{ background:rgba(34,197,94,.18); color:#065f46; }
+    .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
 
     /* Grocery list rows */
     .item {
@@ -166,18 +218,6 @@ button.scanUPC{
     .qty { width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
     select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
     .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    .total { font-weight:900; font-size:18px; }
-    .delBtn {
-      background:#fee2e2; color:#7f1d1d;
-      padding:10px 12px; border-radius:12px; font-weight:900;
-      box-shadow:none;
-    }
-    .catPill{
-      font-size:12px; font-weight:900;
-      padding:6px 10px; border-radius:999px;
-      background:#e5e7eb; color:#111827;
-      white-space:nowrap;
-    }
 
     /* Master list rows */
     .masterRow{
@@ -188,16 +228,25 @@ button.scanUPC{
     .mName{ flex:1; font-size:16px; cursor:pointer; font-weight:800; }
     .mCheck{ width:26px; height:26px; }
 
-    /* Dish list rows */
+    /* Dish rows */
     .dishRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
     }
     .dishRow:last-child{ border-bottom:0; }
     .dishName{ font-size:16px; font-weight:800; cursor:pointer; }
-    .pill{ font-size:12px; font-weight:900; padding:6px 10px; border-radius:999px; background:#e5e7eb; color:#111827; }
-    .pill.ok{ background:rgba(34,197,94,.18); color:#065f46; }
-    .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
+
+    /* Row delete buttons: soft danger */
+    .delBtn{
+      background: rgba(239,68,68,.10);
+      color:#7f1d1d;
+      padding:10px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      box-shadow:none;
+      border: 1px solid rgba(239,68,68,.18);
+    }
+    .delBtn:hover{ filter: brightness(1.02); }
 
     /* Scanner modal */
     .modalBg {
@@ -275,232 +324,32 @@ button.scanUPC{
       border-radius:14px; font-size:16px;
     }
     .miniBtns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; padding:0 14px 14px; }
-    /* =========================================================
-   FRIENDLY UI PASS – v40
-   (added intentionally at end to override earlier styles)
-   ========================================================= */
-
-/* Tabs: softer, pill-style */
-.tabs{
-  display:flex;
-  gap:12px;
-  margin-bottom:14px;
-}
-
-.tabBtn{
-  background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
-  color:#0f172a;
-  border-radius: 999px;
-  padding: 12px 20px;
-  font-weight: 900;
-  border: 1px solid rgba(15,23,42,.12);
-  box-shadow: none;
-}
-
-.tabBtn.active{
-  background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
-  color:#ffffff;
-  border: 0;
-  box-shadow: 0 12px 22px rgba(2,6,23,.18);
-}
-
-/* Primary buttons (blue, friendly) */
-button{
-  border-radius: 16px;
-}
-
-/* Scan buttons = warm + inviting */
-button.scanQR{
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-}
-
-button.scanUPC{
-  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
-  box-shadow: 0 10px 18px rgba(245,158,11,.22);
-}
-
-/* Secondary buttons = soft lavender instead of gray */
-button.secondary{
-  background: linear-gradient(180deg, #f4f2ff 0%, #ecebff 100%);
-  color:#0f172a;
-  border: 1px solid rgba(15,23,42,.12);
-}
-
-/* Destructive buttons = softer red */
-button.danger{
-  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 10px 18px rgba(239,68,68,.18);
-}
-
-/* Cards: slightly softer feel */
-.card{
-  box-shadow: 0 14px 30px rgba(2,6,23,.10);
-}
-
-/* Empty-state text: warmer + more readable */
-.card div[style*="text-align:center"]{
-  color:#64748b;
-  line-height:1.5;
-}
-/* =========================================================
-   STEP 4 – background + spacing polish
-   ========================================================= */
-
-body{
-  background: linear-gradient(180deg, #fbfbff 0%, #f3f1ff 45%, #eef2ff 100%) !important;
-}
-
-header{
-  border-bottom: 1px solid rgba(255,255,255,.10) !important;
-  letter-spacing: .3px;
-}
-
-.wrap{
-  padding-top: 16px !important;
-}
-
-.row{
-  gap: 12px !important;
-}
-/* =========================================================
-   STEP 5 – cards + typography friendliness
-   ========================================================= */
-
-.card{
-  border-radius: 22px !important;
-  border: 1px solid rgba(15,23,42,.08) !important;
-  box-shadow: 0 16px 34px rgba(2,6,23,.10) !important;
-}
-
-.total{
-  letter-spacing: .2px;
-}
-
-.muted{
-  color:#64748b !important;
-}
-
-.pill,
-.catPill{
-  border-radius: 999px !important;
-  border: 1px solid rgba(15,23,42,.10);
-}
-/* =========================================================
-   STEP 6 – button hierarchy + tap comfort
-   ========================================================= */
-
-/* Make primary buttons feel “pressable” */
-button{
-  border-radius: 18px !important;
-  padding: 14px 18px !important;
-}
-
-/* Make secondary buttons feel lighter */
-button.secondary{
-  box-shadow: 0 10px 18px rgba(2,6,23,.06) !important;
-}
-
-/* Give destructive buttons a little separation */
-button.danger{
-  box-shadow: 0 12px 22px rgba(239,68,68,.16) !important;
-}
-
-/* Row delete buttons: less harsh */
-.delBtn{
-  border-radius: 14px !important;
-  background: rgba(239,68,68,.10) !important;
-  border: 1px solid rgba(239,68,68,.18) !important;
-}
-/* =========================================================
-   v45 – Button intent colors (override)
-   ========================================================= */
-
-/* Utility buttons: calm neutral (not dead gray) */
-#btnClearDone,
-#btnMasterClearChecks{
-  background: linear-gradient(180deg, #eef2ff 0%, #e9e7ff 100%) !important;
-  color:#0f172a !important;
-  border: 1px solid rgba(15,23,42,.12) !important;
-}
-
-/* Undo: friendly “recovery” purple */
-#btnUndo{
-  background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
-  color:#ffffff !important;
-  border: 0 !important;
-  box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
-}
-
-/* Add Item: positive green */
-#btnAdd{
-  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
-  color:#ffffff !important;
-  border: 0 !important;
-  box-shadow: 0 12px 22px rgba(34,197,94,.18) !important;
-}
-
-/* ADD SELECTED: teal (action-forward, but not “danger”) */
-#btnMasterAddSelected{
-  background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%) !important;
-  color:#ffffff !important;
-  border: 0 !important;
-  box-shadow: 0 12px 22px rgba(20,184,166,.18) !important;
-}
-/* =========================================================
-   Align Tabs row with Action row width
-   ========================================================= */
-
-/* Force tabs to match content width */
-.tabs{
-  max-width: 820px;     /* same as .wrap */
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Push Clear Purchased to the right edge of that width */
-#btnClearDone{
-  margin-left: auto;
-}
-/* =========================================================
-   Spread action buttons across full row width
-   ========================================================= */
-
-#screenGroceries .row{
-  justify-content: space-between;
-}
-
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 048)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 049)</span></header>
 
   <div class="wrap">
     <div class="tabs">
-  <button id="tabGroceries" class="tabBtn active">Groceries</button>
-  <button id="tabDishes" class="tabBtn">Dishes</button>
-
-  <button id="btnClearDone" class="secondary">Clear Purchased</button>
-</div>
-
+      <button id="tabGroceries" class="tabBtn active">Groceries</button>
+      <button id="tabDishes" class="tabBtn">Dishes</button>
+      <button id="btnClearDone" class="secondary">Clear Purchased</button>
+    </div>
 
     <!-- GROCERIES TAB -->
     <div id="screenGroceries">
-      <div class="row">
-  <button id="btnNew">New List</button>
-  <button id="btnScan" class="scanQR">SCAN QR</button>
-  <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
+      <div class="row actionRow">
+        <button id="btnNew">New List</button>
+        <button id="btnScan" class="scanQR">SCAN QR</button>
+        <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
+        <button id="btnAdd" class="secondary">Add Item</button>
+        <button id="btnUndo" class="secondary">Undo</button>
+      </div>
 
-  <button id="btnAdd" class="secondary">Add Item</button>
-  <button id="btnUndo" class="secondary">Undo</button>       
-  
-  
-  
-</div>
-
-
+      <!-- Shopping list summary -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div>
@@ -511,6 +360,10 @@ button.danger{
         </div>
       </div>
 
+      <!-- ✅ Shopping list card FIRST (above Master) -->
+      <div class="card" id="listCard"></div>
+
+      <!-- Master list AFTER shopping list -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div>
@@ -531,8 +384,6 @@ button.danger{
         <div class="spacer"></div>
         <div id="masterCard"></div>
       </div>
-
-      <div class="card" id="listCard"></div>
     </div>
 
     <!-- DISHES TAB -->
@@ -552,21 +403,20 @@ button.danger{
       </div>
       <div class="card" id="menuCard"></div>
 
+      <!-- ✅ Dish Catalog card with Clear Catalog inside it -->
       <div class="card">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-    <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
 
-    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-      <div class="muted">Tap a dish to rename; delete button removes menu/catalog.</div>
-      <button id="btnClearCatalog" class="danger">Clear Catalog</button>
-    </div>
-  </div>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+            <div class="muted">Tap a dish to rename; delete button removes menu/catalog.</div>
+            <button id="btnClearCatalog" class="danger">Clear Catalog</button>
+          </div>
+        </div>
 
-  <div class="spacer"></div>
-  <div id="catalogCard"></div>
-</div>
-
-      <div class="card" id="catalogCard"></div>
+        <div class="spacer"></div>
+        <div id="catalogCard"></div>
+      </div>
     </div>
   </div>
 
@@ -593,7 +443,7 @@ button.danger{
     </div>
   </div>
 
-  <!-- Add/Edit Item Modal (category dropdown only shows here) -->
+  <!-- Add/Edit Item Modal -->
   <div class="miniBg" id="miniBg">
     <div class="mini">
       <div class="miniHead">
@@ -621,73 +471,52 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 48;
-// =========================
-// Smart one-time migration helper
-// =========================
-function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
-  const newKey = `groceryApp_v${APP_VERSION}`;
-  const flagKey = `groceryApp_migrated_to_${newKey}`;
+  const APP_VERSION = 49;
 
-  // Never overwrite existing data
-  if (localStorage.getItem(newKey)) return false;
+  // =========================
+  // Smart one-time migration helper
+  // =========================
+  function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
+    const newKey = `groceryApp_v${APP_VERSION}`;
+    const flagKey = `groceryApp_migrated_to_${newKey}`;
 
-  // Only migrate once per version
-  if (localStorage.getItem(flagKey) === "1") return false;
+    if (localStorage.getItem(newKey)) return false;
+    if (localStorage.getItem(flagKey) === "1") return false;
 
-  // Search backward for newest existing version
-  for (let v = APP_VERSION - 1; v >= Math.max(1, APP_VERSION - maxLookback); v--) {
-    const oldKey = `groceryApp_v${v}`;
-    const oldData = localStorage.getItem(oldKey);
-    if (!oldData) continue;
+    for (let v = APP_VERSION - 1; v >= Math.max(1, APP_VERSION - maxLookback); v--) {
+      const oldKey = `groceryApp_v${v}`;
+      const oldData = localStorage.getItem(oldKey);
+      if (!oldData) continue;
 
-    try {
-      JSON.parse(oldData); // validate JSON
-      localStorage.setItem(newKey, oldData);
-      localStorage.setItem(flagKey, "1");
-      console.log(`[MIGRATE] Copied ${oldKey} -> ${newKey}`);
-      return true;
-    } catch (e) {
-      console.warn(`[MIGRATE] Invalid data in ${oldKey}, skipping`, e);
+      try {
+        JSON.parse(oldData);
+        localStorage.setItem(newKey, oldData);
+        localStorage.setItem(flagKey, "1");
+        console.log(`[MIGRATE] Copied ${oldKey} -> ${newKey}`);
+        return true;
+      } catch (e) {
+        console.warn(`[MIGRATE] Invalid data in ${oldKey}, skipping`, e);
+      }
     }
+    return false;
   }
 
-  return false;
-}
+  smartMigrateLocalStorage();
 
-// Run before LS_KEY is used
-smartMigrateLocalStorage();
-
-
-  // Service worker registration (kept simple and reliable)
+  // Service worker registration
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(console.warn);
   }
 
   // =========================
-  // Build 039 constants
+  // Build constants
   // =========================
   const LS_KEY = `groceryApp_v${APP_VERSION}`;
   const UNITS = ["ea","lb","oz","gal","ct"];
 
-  // Category walking order (edit this list to change sort order)
   const CATEGORIES = [
-    "Produce",
-    "Deli",
-    "Sea food",
-    "Beef",
-    "Pork",
-    "Chicken",
-    "Dairy",
-    "Cheese",
-    "Beverages",
-    "Snacks",
-    "Frozen",
-    "Household",
-    "Bread",
-    "Pet",
-    "Pharmacy",
-    "Misc"
+    "Produce","Deli","Sea food","Beef","Pork","Chicken","Dairy","Cheese",
+    "Beverages","Snacks","Frozen","Household","Bread","Pet","Pharmacy","Misc"
   ];
 
   // =========================
@@ -698,9 +527,7 @@ smartMigrateLocalStorage();
     catch { return null; }
   }
   function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-
   function newBlankList(name) { return { name, items: [], created: Date.now() }; }
-
   function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
 
   function generateId() {
@@ -717,9 +544,7 @@ smartMigrateLocalStorage();
     }[m]));
   }
 
-  function normName(s){
-    return String(s ?? "").trim().replace(/\s+/g, " ");
-  }
+  function normName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
 
   function catIndex(cat){
     const i = CATEGORIES.findIndex(x => x.toLowerCase() === String(cat||"").toLowerCase());
@@ -760,7 +585,6 @@ smartMigrateLocalStorage();
   }
 
   function sameItem(a, b){
-    // Duplicate logic: name match (case-insensitive) AND category match (case-insensitive)
     const an = normName(a.name).toLowerCase();
     const bn = normName(b.name).toLowerCase();
     const ac = normName(a.cat||"Misc").toLowerCase();
@@ -768,9 +592,7 @@ smartMigrateLocalStorage();
     return an === bn && ac === bc;
   }
 
-  function hasItem(arr, cand){
-    return arr.some(x => sameItem(x, cand));
-  }
+  function hasItem(arr, cand){ return arr.some(x => sameItem(x, cand)); }
 
   // =========================
   // State
@@ -779,15 +601,15 @@ smartMigrateLocalStorage();
     current: newBlankList("Today"),
     dishCatalog: [],
     currentMenu: [],
-    masterGroceries: [], // array of { name, cat }
-    upcDB: {}            // map: upc -> { name, cat }
+    masterGroceries: [],
+    upcDB: {}
   };
 
   let lastAddedId = null;
   let renderTimeout = null;
 
   // =========================
-  // Add/Edit Item Modal (category dropdown only here)
+  // Add/Edit Item Modal
   // =========================
   const miniBg = document.getElementById("miniBg");
   const miniTitle = document.getElementById("miniTitle");
@@ -838,8 +660,6 @@ smartMigrateLocalStorage();
     if(!name) return false;
 
     const item = { id: generateId(), name, cat, done:false, qty:"1", unit:"ea", price:"" };
-
-    // prevent duplicates in CURRENT list
     if(hasItem(state.current.items, item)) return false;
 
     state.current.items.push(item);
@@ -894,7 +714,7 @@ smartMigrateLocalStorage();
   }
 
   // =========================
-  // Dishes (unchanged behavior)
+  // Dishes
   // =========================
   function hasDish(arr, name){
     const n = normName(name).toLowerCase();
@@ -959,13 +779,13 @@ smartMigrateLocalStorage();
     document.getElementById("listName").textContent = state.current.name;
     document.getElementById("total").textContent = money(computeTotal());
 
-    // Sort current list by walking order + name
     const sortedCurrent = [...state.current.items].sort((a,b) => sortByCatThenName(a,b));
-
     const card = document.getElementById("listCard");
+
     if (sortedCurrent.length === 0) {
-      card.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
-        No items yet.<br>Tap <b>SCAN QR</b>, <b>SCAN UPC</b>, or <b>Add Item</b>.
+      card.innerHTML = `<div style="padding:16px; text-align:center;">
+        <div class="muted">No items yet.</div>
+        <div class="muted">Tap <b>SCAN QR</b>, <b>SCAN UPC</b>, or <b>Add Item</b>.</div>
       </div>`;
     } else {
       card.innerHTML = sortedCurrent.map(it => `
@@ -1004,19 +824,16 @@ smartMigrateLocalStorage();
 
         row.querySelector(".delBtn").onclick = () => deleteItemById(id);
 
-        // Edit name+category (dropdown only in modal)
         row.querySelector(".name").onclick = async () => {
           const res = await openItemModal("Edit Item", { name: item.name, cat: item.cat || "Misc" });
           if(!res) return;
 
-          // prevent duplicates after edit
           const cand = { name: res.name, cat: res.cat };
           const others = state.current.items.filter(x => x.id !== id);
           if(hasItem(others, cand)){
             showToast("That item already exists in the Shopping List.", 1900);
             return;
           }
-
           updateItem(id, { name: res.name, cat: res.cat });
         };
       });
@@ -1028,8 +845,9 @@ smartMigrateLocalStorage();
 
     const masterCard = document.getElementById("masterCard");
     if(sortedMaster.length === 0){
-      masterCard.innerHTML = `<div style="padding:14px; color:#6b7280; text-align:center;">
-        Master list is empty.<br>Scan QR/UPC or add items to build your master list.
+      masterCard.innerHTML = `<div style="padding:14px; text-align:center;">
+        <div class="muted">Master list is empty.</div>
+        <div class="muted">Scan QR/UPC or add items to build your master list.</div>
       </div>`;
     } else {
       masterCard.innerHTML = sortedMaster.map((m, idx) => `
@@ -1041,24 +859,20 @@ smartMigrateLocalStorage();
         </div>
       `).join("");
 
-      // Bind actions
       const rows = Array.from(masterCard.querySelectorAll(".masterRow"));
       rows.forEach(row => {
         const idx = parseInt(row.dataset.idx, 10);
         const m = sortedMaster[idx];
         if(!m) return;
 
-        // Tap master name -> edit master entry
         row.querySelector(".mName").onclick = async () => {
           const res = await openItemModal("Edit Master Item", { name: m.name, cat: m.cat || "Misc" });
           if(!res) return;
-
           removeFromMaster(m.name, m.cat);
           addToMaster(res.name, res.cat);
           showToast("Master item updated.", 1500);
         };
 
-        // Delete master item
         row.querySelector(".delBtn").onclick = () => {
           const ok = confirm(`Delete from Master?\n\n${m.name} (${m.cat||"Misc"})`);
           if(!ok) return;
@@ -1086,8 +900,9 @@ smartMigrateLocalStorage();
 
     const menuCard = document.getElementById("menuCard");
     if(state.currentMenu.length === 0){
-      menuCard.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
-        Menu is empty.<br>Scan a dish QR or tap <b>Random Menu (14)</b>.
+      menuCard.innerHTML = `<div style="padding:16px; text-align:center;">
+        <div class="muted">Menu is empty.</div>
+        <div class="muted">Scan a dish QR or tap <b>Random Menu (14)</b>.</div>
       </div>`;
     } else {
       menuCard.innerHTML = state.currentMenu.map(d => dishRowHtml(d, "menu")).join("");
@@ -1095,8 +910,9 @@ smartMigrateLocalStorage();
 
     const catalogCard = document.getElementById("catalogCard");
     if(state.dishCatalog.length === 0){
-      catalogCard.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
-        Catalog is empty.<br>Scan dish QR codes to build it.
+      catalogCard.innerHTML = `<div style="padding:16px; text-align:center;">
+        <div class="muted">Catalog is empty.</div>
+        <div class="muted">Scan dish QR codes to build it.</div>
       </div>`;
     } else {
       catalogCard.innerHTML = state.dishCatalog.map(d => dishRowHtml(d, "catalog")).join("");
@@ -1157,19 +973,15 @@ smartMigrateLocalStorage();
   const screenDishes = document.getElementById("screenDishes");
 
   function showTab(which){
-  const isG = which === "groceries";
+    const isG = which === "groceries";
+    screenGroceries.style.display = isG ? "" : "none";
+    screenDishes.style.display = isG ? "none" : "";
+    tabGroceries.classList.toggle("active", isG);
+    tabDishes.classList.toggle("active", !isG);
 
-  screenGroceries.style.display = isG ? "" : "none";
-  screenDishes.style.display = isG ? "none" : "";
-
-  tabGroceries.classList.toggle("active", isG);
-  tabDishes.classList.toggle("active", !isG);
-
-  // Top-right action swap
-  document.getElementById("btnClearDone").style.display = isG ? "" : "none";
-  document.getElementById("btnClearCatalog").style.display = isG ? "none" : "";
-}
-
+    // Top-right action: only for groceries
+    document.getElementById("btnClearDone").style.display = isG ? "" : "none";
+  }
   tabGroceries.onclick = () => showTab("groceries");
   tabDishes.onclick = () => showTab("dishes");
 
@@ -1189,10 +1001,8 @@ smartMigrateLocalStorage();
     const res = await openItemModal("Add Item", { name:"", cat:"Misc" });
     if(!res) return;
 
-    // Add to master always (helps build it)
     addToMaster(res.name, res.cat);
 
-    // Ask: add to current too?
     const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${res.cat})`);
     if(also){
       const ok = addItemToCurrent(res.name, res.cat);
@@ -1215,7 +1025,6 @@ smartMigrateLocalStorage();
     }
   };
 
-  // Master: add selected
   document.getElementById("btnMasterAddSelected").onclick = () => {
     const masterCard = document.getElementById("masterCard");
     const rows = Array.from(masterCard.querySelectorAll(".masterRow"));
@@ -1304,11 +1113,8 @@ smartMigrateLocalStorage();
   const scanHintEl = document.getElementById("scanHint");
   let qr = null;
 
-  // scanMode: "qr" | "upc"
   let scanMode = "qr";
-
-  // Pending payload for CAPTURE
-  let pending = null; // { kind:"dish"|"item"|"upc"|"unknown", ... }
+  let pending = null;
   let targetLocked = false;
   let audioCtx = null;
 
@@ -1337,7 +1143,6 @@ smartMigrateLocalStorage();
     setScanMsg("Point camera at code – hold steady…");
   }
 
-  // QR parsing (dish=..., item=...&cat=...)
   function parseQR(decodedText){
     let raw = String(decodedText ?? "");
     raw = raw.replace(/\uFEFF/g, "");
@@ -1356,7 +1161,6 @@ smartMigrateLocalStorage();
 
     const lower = raw.toLowerCase();
 
-    // URL support
     try {
       if (/^[a-z]+:\/\//i.test(raw)) {
         const url = new URL(raw);
@@ -1378,14 +1182,12 @@ smartMigrateLocalStorage();
       }
     } catch {}
 
-    // Plain dish=
     const dishMatch = raw.match(/(?:^|[?&\s])dish=([^&\n]+)/i);
     if (dishMatch) {
       const name = maybeDecode(dishMatch[1]).trim();
       return { kind:"dish", name: name.slice(0,120), raw };
     }
 
-    // Plain item=
     const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
     if (itemMatch) {
       const start = lower.indexOf("item=");
@@ -1406,7 +1208,6 @@ smartMigrateLocalStorage();
     return { kind:"unknown", raw: raw.slice(0,140) };
   }
 
-  // UPC parsing: keep digits
   function parseUPC(decodedText){
     let raw = String(decodedText ?? "").trim();
     raw = raw.replace(/[^\d]/g, "");
@@ -1426,7 +1227,6 @@ smartMigrateLocalStorage();
       ? "Tip: Center the barcode inside the rectangle and hold steady."
       : "Tip: Fill the square with the QR and hold steady.";
 
-    // Formats by mode
     const formats = (mode === "upc")
       ? [
           Html5QrcodeSupportedFormats.UPC_A,
@@ -1449,16 +1249,9 @@ smartMigrateLocalStorage();
 
       const rear = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length-1];
 
-      // Different capture windows by mode:
-      const qrboxFunction = (vw, vh) => {
-        if(mode === "upc"){
-          // UPC mode: rectangle
-          return { width: 260, height: 110 };
-        } else {
-          // QR mode: square
-          const size = 70;
-          return { width: size, height: size };
-        }
+      const qrboxFunction = () => {
+        if(mode === "upc") return { width: 260, height: 110 };
+        return { width: 70, height: 70 };
       };
 
       await qr.start(
@@ -1583,10 +1376,9 @@ smartMigrateLocalStorage();
     setTimeout(resetTarget, 650);
   };
 
-  // Open scanner buttons
   document.getElementById("btnScan").onclick = () => openScanner("qr");
   document.getElementById("btnScanUPC").onclick = () => openScanner("upc");
-  document.getElementById("btnScanDish").onclick = () => openScanner("qr"); // dish uses QR parsing
+  document.getElementById("btnScanDish").onclick = () => openScanner("qr");
 
   document.getElementById("btnCloseTop").onclick = closeScanner;
   document.getElementById("btnDone").onclick = closeScanner;
