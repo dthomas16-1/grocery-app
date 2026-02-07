@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 058)
+     index.html  (BUILD 059)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -398,7 +398,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 058)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 059)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -575,7 +575,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 58;
+  const APP_VERSION = 59;
 
   // =========================
   // Smart one-time migration helper
@@ -1246,7 +1246,7 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
   }
 
   // where === "menu"
-  const allowed = !!state.menuAddFlags?.[name];
+  const allowed = !!row.querySelector(".ingCheck")?.checked;
 
   if(allowed){
     // ✅ If checked: open ingredient editor (PHASE 2 rule)
