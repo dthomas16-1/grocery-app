@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 062)
+     index.html  (BUILD 063)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -398,7 +398,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 062)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 063)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -576,7 +576,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 62;
+  const APP_VERSION = 63;
 
   // =========================
   // Smart one-time migration helper
@@ -1064,30 +1064,38 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
   return state.dishCatalog.find(d => normName(d.name).toLowerCase() === n) || null;
 }
 
-  function hasDish(arr, name){
-    const n = normName(name).toLowerCase();
-    return arr.some(x => normName(x).toLowerCase() === n);
+  function hasDishObjByName(name){
+  const n = normName(name).toLowerCase();
+  return state.dishCatalog.some(d => normName(d.name).toLowerCase() === n);
+}
+
+function addDishToCatalogAndMenu(name){
+  name = normName(name);
+  if(!name) return {addedCatalog:false, addedMenu:false};
+
+  let addedCatalog = false, addedMenu = false;
+
+  // ensure catalog stores objects
+  if(!hasDishObjByName(name)){
+    state.dishCatalog.push({ name, ingredients: [] });
+    addedCatalog = true;
   }
 
-  function addDishToCatalogAndMenu(name){
-    name = normName(name);
-    if(!name) return {addedCatalog:false, addedMenu:false};
-
-    let addedCatalog = false, addedMenu = false;
-
-    if(!hasDish(state.dishCatalog, name)){
-      state.dishCatalog.push(name);
-      addedCatalog = true;
-    }
-    if(!hasDish(state.currentMenu, name)){
-      state.currentMenu.push(name);
-      addedMenu = true;
-    }
-
-    saveState(state);
-    debouncedRender();
-    return {addedCatalog, addedMenu};
+  // menu stays as strings (dish names)
+  if(!hasDish(state.currentMenu, name)){
+    state.currentMenu.push(name);
+    addedMenu = true;
   }
+
+  // default unchecked
+  if(!state.menuAddFlags) state.menuAddFlags = {};
+  state.menuAddFlags[name] = false;
+
+  saveState(state);
+  debouncedRender();
+  return {addedCatalog, addedMenu};
+}
+
 
   function removeDishFromMenu(name){
     const n = normName(name).toLowerCase();
@@ -1290,7 +1298,7 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
 
     function bindDishRows(container){
   container.querySelectorAll(".dishRow").forEach(row=>{
-    const name = row.dataset.name;
+    const name = row.getAttribute("data-name") || "";
     const where = row.dataset.where;
 
     // ===== PHASE 2: checkbox handler (ADD THIS BLOCK) =====
