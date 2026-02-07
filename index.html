@@ -64,6 +64,10 @@ button:hover{ filter: brightness(1.03); }
 button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; }
 
     button.secondary { background:#e5e7eb; color:#111827; }
+    button.secondary,
+    button.tabBtn{
+    box-shadow: none;
+}
     button.danger { background:#fee2e2; color:#7f1d1d; }
     button:disabled { opacity:.5; cursor:not-allowed; }
 
@@ -235,8 +239,8 @@ button.danger{
     <div id="screenGroceries">
       <div class="row">
         <button id="btnNew">New List</button>
-        <button id="btnScan">SCAN QR</button>
-        <button id="btnScanUPC" class="secondary">SCAN UPC</button>
+        <button id="btnScan" class="scanQR">SCAN QR</button>
+        <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
         <button id="btnUndo" class="secondary">Undo</button>
         <button id="btnClearDone" class="secondary">Clear Purchased</button>
         <button id="btnAdd" class="secondary">Add Item</button>
