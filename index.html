@@ -385,42 +385,43 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 39;
+  const APP_VERSION = 40;
 // =========================
-// One-time migration helper
+// Smart one-time migration helper
 // =========================
-function migrateLocalStorage(prevVersion) {
+function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
   const newKey = `groceryApp_v${APP_VERSION}`;
-  const oldKey = `groceryApp_v${prevVersion}`;
-  const flagKey = `groceryApp_migrated_${oldKey}_to_${newKey}`;
+  const flagKey = `groceryApp_migrated_to_${newKey}`;
 
-  // If new key already exists, do nothing (never overwrite)
-  if (localStorage.getItem(newKey)) return;
+  // Never overwrite existing data
+  if (localStorage.getItem(newKey)) return false;
 
-  // Only migrate once
-  if (localStorage.getItem(flagKey) === "1") return;
+  // Only migrate once per version
+  if (localStorage.getItem(flagKey) === "1") return false;
 
-  const oldData = localStorage.getItem(oldKey);
-  if (!oldData) return;
+  // Search backward for newest existing version
+  for (let v = APP_VERSION - 1; v >= Math.max(1, APP_VERSION - maxLookback); v--) {
+    const oldKey = `groceryApp_v${v}`;
+    const oldData = localStorage.getItem(oldKey);
+    if (!oldData) continue;
 
-  try {
-    // Validate it's JSON before copying
-    JSON.parse(oldData);
-
-    // Copy old -> new
-    localStorage.setItem(newKey, oldData);
-
-    // Mark migration as done
-    localStorage.setItem(flagKey, "1");
-
-    console.log(`[MIGRATE] Copied ${oldKey} -> ${newKey}`);
-  } catch (e) {
-    console.warn(`[MIGRATE] Failed to migrate ${oldKey} -> ${newKey}:`, e);
+    try {
+      JSON.parse(oldData); // validate JSON
+      localStorage.setItem(newKey, oldData);
+      localStorage.setItem(flagKey, "1");
+      console.log(`[MIGRATE] Copied ${oldKey} -> ${newKey}`);
+      return true;
+    } catch (e) {
+      console.warn(`[MIGRATE] Invalid data in ${oldKey}, skipping`, e);
+    }
   }
+
+  return false;
 }
 
-// When you bump to v40, migrate from v39 automatically
-migrateLocalStorage(39);
+// Run before LS_KEY is used
+smartMigrateLocalStorage();
+
 
   // Service worker registration (kept simple and reliable)
   if ("serviceWorker" in navigator) {
