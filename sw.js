@@ -1,33 +1,17 @@
-// ============================================================
-// SERVICE WORKER VERSIONING REMINDER
-// ------------------------------------------------------------
-// Whenever index.html APP_VERSION is changed:
-//
-// 1) Update VERSION below to match
-// 2) Commit sw.js
-// 3) Reload site with DevTools → Update on reload
-//
-// If VERSION is NOT bumped, old cached files may be used.
-// ============================================================
-
-
 // =========================
-// sw.js  (CACHE v##)
+// sw.js  (CACHE v49)
 // =========================
-const VERSION = 48;
+const VERSION = 49;
 const CACHE = `grocery-app-v${VERSION}`;
 
-
-// App shell (cached for offline use)
 const APP_SHELL = [
   "./",
   "./index.html",
   "./sw.js",
   "./manifest.webmanifest",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
 ];
-
 
 // Install: pre-cache shell and take over quickly
 self.addEventListener("install", (e) => {
@@ -65,7 +49,6 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(req)
         .then((resp) => {
-          // Keep a fresh copy of index.html in cache
           const copy = resp.clone();
           caches.open(CACHE).then((cache) => cache.put("./index.html", copy));
           return resp;
@@ -81,9 +64,7 @@ self.addEventListener("fetch", (e) => {
       if (cached) return cached;
 
       return fetch(req).then((resp) => {
-        // Don’t cache opaque/error responses
         if (!resp || resp.status !== 200) return resp;
-
         const copy = resp.clone();
         caches.open(CACHE).then((cache) => cache.put(req, copy));
         return resp;
