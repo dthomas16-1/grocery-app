@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 056)
+     index.html  (BUILD 057)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -349,6 +349,31 @@
       display:none; align-items:center; justify-content:center; padding:16px;
       z-index: 9998;
     }
+    /* PHASE 2: Ingredient rows inside Dish modal */
+.ingRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.ingRow input{
+  flex:1;
+  padding:12px 12px;
+  border:1px solid #ddd;
+  border-radius:14px;
+  font-size:16px;
+}
+.ingRow select{
+  width:160px;
+  padding:12px 12px;
+  border:1px solid #ddd;
+  border-radius:14px;
+  font-size:16px;
+  background:#fff;
+}
+.ingRow .delBtn{
+  padding:10px 12px;
+}
+
     .mini{
       width:min(520px, 100%);
       background:#fff; border-radius:18px; overflow:hidden;
@@ -373,7 +398,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 056)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 057)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -521,12 +546,36 @@
       </div>
     </div>
   </div>
+<!-- Dish Ingredients Modal (PHASE 2) -->
+<div class="miniBg" id="dishBg" style="display:none;">
+  <div class="mini">
+    <div class="miniHead">
+      <div id="dishTitle">Dish Ingredients</div>
+      <button id="dishClose" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
+    </div>
+
+    <div class="miniBody" style="gap:12px;">
+      <div class="muted" style="font-size:14px;">
+        Add ingredients for this dish. These will be used later when you “Add Checked Ingredients”.
+      </div>
+
+      <div id="dishIngList" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+      <button id="dishAddIng" class="secondary" type="button">+ Add Ingredient</button>
+    </div>
+
+    <div class="miniBtns">
+      <button id="dishCancel" class="secondary" type="button">Cancel</button>
+      <button id="dishSave" type="button">Save</button>
+    </div>
+  </div>
+</div>
 
   <script>
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 56;
+  const APP_VERSION = 57;
 
   // =========================
   // Smart one-time migration helper
@@ -680,6 +729,12 @@
     masterGroceries: [],
     upcDB: {}
   };
+  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
+if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
+  state.menuAddFlags = {};
+  saveState(state);
+}
+
 // =========================
 // PHASE 1: Dish object migration (SAFE / INVISIBLE)
 // =========================
@@ -755,6 +810,115 @@
     closeItemModal({ name, cat });
   };
   miniBg.onclick = e => { if(e.target === miniBg) closeItemModal(null); };
+// =========================
+// PHASE 2: Dish Ingredients Modal
+// =========================
+const dishBg = document.getElementById("dishBg");
+const dishTitle = document.getElementById("dishTitle");
+const dishIngList = document.getElementById("dishIngList");
+
+let dishEditingName = null;
+let dishEditingSnapshot = null;
+
+function buildCatSelect(selected){
+  return `
+    <select class="ingCat">
+      ${CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+    </select>
+  `;
+}
+
+function addIngRow({name="", cat="Misc"} = {}){
+  const row = document.createElement("div");
+  row.className = "ingRow";
+  row.innerHTML = `
+    <input class="ingName" type="text" placeholder="Ingredient name" value="${escapeHtml(name)}">
+    ${buildCatSelect(cat || "Misc")}
+    <button class="delBtn" type="button" title="Remove">🗑️</button>
+  `;
+  row.querySelector(".delBtn").onclick = () => row.remove();
+  dishIngList.appendChild(row);
+}
+
+function openDishIngredientsModal(dishName){
+  const dish = getDishObjByName(dishName);
+  if(!dish){
+    showToast("Dish not found in catalog.", 1600);
+    return;
+  }
+
+  dishEditingName = dish.name;
+  dishEditingSnapshot = JSON.stringify(dish.ingredients || []);
+
+  dishTitle.textContent = `Ingredients: ${dish.name}`;
+  dishIngList.innerHTML = "";
+
+  const ings = Array.isArray(dish.ingredients) ? dish.ingredients : [];
+  if(ings.length === 0){
+    // start empty; user can add
+  } else {
+    ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
+  }
+
+  dishBg.style.display = "flex";
+}
+
+function closeDishModal(save){
+  if(!dishEditingName){
+    dishBg.style.display = "none";
+    return;
+  }
+
+  const dish = getDishObjByName(dishEditingName);
+  if(!dish){
+    dishBg.style.display = "none";
+    dishEditingName = null;
+    return;
+  }
+
+  if(!save){
+    // restore snapshot
+    try { dish.ingredients = JSON.parse(dishEditingSnapshot || "[]"); } catch { dish.ingredients = dish.ingredients || []; }
+    dishBg.style.display = "none";
+    dishEditingName = null;
+    dishEditingSnapshot = null;
+    return;
+  }
+
+  // collect rows
+  const out = [];
+  dishIngList.querySelectorAll(".ingRow").forEach(r => {
+    const n = normName(r.querySelector(".ingName")?.value || "");
+    const c = normName(r.querySelector(".ingCat")?.value || "Misc") || "Misc";
+    if(!n) return;
+    out.push({ name: n, cat: c });
+  });
+
+  // de-dupe within dish by name+cat
+  const seen = new Set();
+  dish.ingredients = out.filter(x => {
+    const k = normName(x.name).toLowerCase() + "|" + normName(x.cat).toLowerCase();
+    if(seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+
+  saveState(state);
+  debouncedRender();
+
+  dishBg.style.display = "none";
+  dishEditingName = null;
+  dishEditingSnapshot = null;
+
+  showToast("Ingredients saved.", 1400);
+}
+
+// Modal buttons / close behavior
+document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", cat:"Misc"});
+document.getElementById("dishClose").onclick = () => closeDishModal(false);
+document.getElementById("dishCancel").onclick = () => closeDishModal(false);
+document.getElementById("dishSave").onclick = () => closeDishModal(true);
+dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
 
   // =========================
   // Groceries: Shopping list
@@ -821,6 +985,11 @@
   // =========================
   // Dishes
   // =========================
+  function getDishObjByName(name){
+  const n = normName(name).toLowerCase();
+  return state.dishCatalog.find(d => normName(d.name).toLowerCase() === n) || null;
+}
+
   function hasDish(arr, name){
     const n = normName(name).toLowerCase();
     return arr.some(x => normName(x).toLowerCase() === n);
@@ -868,6 +1037,10 @@
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
     state.currentMenu = pool.slice(0, 14);
+    // PHASE 2: reset menu checkboxes for the new menu (default UNCHECKED)
+    state.menuAddFlags = {};
+    state.currentMenu.forEach(n => state.menuAddFlags[n] = false);
+
     saveState(state);
     debouncedRender();
   }
@@ -988,16 +1161,34 @@
   }
 
   function dishRowHtml(name, where){
-    return `
-      <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
+  const dish = getDishObjByName(name);
+  const hasIng = !!(dish && Array.isArray(dish.ingredients) && dish.ingredients.length);
+
+  // Only MENU rows get the checkbox + 🧂 icon
+  const menuControls = (where === "menu") ? `
+    <label style="display:flex;align-items:center;gap:8px; font-weight:900;">
+      <input class="ingCheck" type="checkbox" ${state.menuAddFlags?.[name] ? "checked":""}>
+      <span title="${hasIng ? "Has ingredients" : "No ingredients yet"}" style="font-size:18px; opacity:${hasIng ? "1":"0.35"};">🧂</span>
+    </label>
+  ` : `
+    <span title="${hasIng ? "Has ingredients" : "No ingredients yet"}" style="font-size:18px; opacity:${hasIng ? "1":"0.35"};">🧂</span>
+  `;
+
+  return `
+    <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
+      <div style="display:flex; align-items:center; gap:12px;">
+        ${menuControls}
         <div class="dishName">${escapeHtml(name)}</div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          ${where==="menu" ? `<span class="pill ok">MENU</span>` : `<span class="pill">CATALOG</span>`}
-          <button class="delBtn" title="Delete">🗑️</button>
-        </div>
       </div>
-    `;
-  }
+
+      <div style="display:flex; gap:8px; align-items:center;">
+        ${where==="menu" ? `<span class="pill ok">MENU</span>` : `<span class="pill">CATALOG</span>`}
+        <button class="delBtn" title="Delete">🗑️</button>
+      </div>
+    </div>
+  `;
+}
+
 
   function renderDishes(){
     document.getElementById("menuCount").textContent = state.currentMenu.length;
@@ -1024,23 +1215,62 @@
     }
 
     function bindDishRows(container){
-      container.querySelectorAll(".dishRow").forEach(row=>{
-        const name = row.dataset.name;
-        const where = row.dataset.where;
+  container.querySelectorAll(".dishRow").forEach(row=>{
+    const name = row.dataset.name;
+    const where = row.dataset.where;
+
+    // ===== PHASE 2: checkbox handler (ADD THIS BLOCK) =====
+    const chk = row.querySelector(".ingCheck");
+    if(chk){
+      // reflect current state (default unchecked if missing)
+      chk.checked = !!state.menuAddFlags?.[name];
+
+      chk.onchange = (e) => {
+        e.stopPropagation();
+        if(!state.menuAddFlags) state.menuAddFlags = {};
+        state.menuAddFlags[name] = !!chk.checked;
+        saveState(state);
+      };
+
+      // prevent checkbox click from triggering dishName click
+      chk.onclick = (e) => e.stopPropagation();
+    }
+    // ===== END PHASE 2 BLOCK =====
+
 
         row.querySelector(".dishName").onclick = () => {
-          if(where === "catalog"){
-            addDishToCatalogAndMenu(name);
-          } else {
-            const newName = prompt("Rename dish (updates Catalog + Menu):", name);
-            if(!newName) return;
-            const nn = normName(newName);
-            if(!nn) return;
+  if(where === "catalog"){
+    // Catalog tap still adds to menu (same as today)
+    addDishToCatalogAndMenu(name);
+    return;
+  }
 
-            removeDishFromCatalog(name);
-            addDishToCatalogAndMenu(nn);
-          }
-        };
+  // where === "menu"
+  const allowed = !!state.menuAddFlags?.[name];
+
+  if(allowed){
+    // ✅ If checked: open ingredient editor (PHASE 2 rule)
+    openDishIngredientsModal(name);
+    return;
+  }
+
+  // ⛔ If NOT checked: bypass ingredient edit (your rule)
+  // Keep your existing rename behavior here:
+  const newName = prompt("Rename dish (updates Catalog + Menu):", name);
+  if(!newName) return;
+  const nn = normName(newName);
+  if(!nn) return;
+
+  removeDishFromCatalog(name);
+  addDishToCatalogAndMenu(nn);
+
+  // Also move checkbox flag to the new name (keep default unchecked)
+  if(state.menuAddFlags){
+    delete state.menuAddFlags[name];
+    state.menuAddFlags[nn] = false;
+    saveState(state);
+  }
+};
 
         row.querySelector(".delBtn").onclick = () => {
           if(where === "menu"){
