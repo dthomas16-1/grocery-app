@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 050)
+     index.html  (BUILD 051)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -137,6 +137,43 @@
       transition: transform .08s ease, filter .12s ease, box-shadow .12s ease;
       letter-spacing: .2px;
     }
+    /* ===== SHOP dropdown (add BELOW button{}) ===== */
+.shopWrap{
+  position: relative;
+  display: inline-block;
+  margin-left: 12px;   /* space between UNDO and SHOP */
+}
+
+.shopMenu{
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  z-index: 9999;
+}
+
+.shopMenu.hidden{
+  display: none;
+}
+
+.shopItem{
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.shopItem:hover{
+  background: rgba(0,0,0,.08);
+}
+
     button:active{ transform: translateY(1px); }
     button:hover{ filter: brightness(1.03); box-shadow: var(--shadow2); }
     button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; filter:none; }
@@ -330,7 +367,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 050)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 051)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -340,14 +377,28 @@
     </div>
 
     <!-- GROCERIES TAB -->
-    <div id="screenGroceries">
-      <div class="row actionRow">
-        <button id="btnNew">New List</button>
-        <button id="btnScan" class="scanQR">SCAN QR</button>
-        <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
-        <button id="btnAdd" class="secondary">Add Item</button>
-        <button id="btnUndo" class="secondary">Undo</button>
+<div id="screenGroceries">
+  <div class="row actionRow">
+    <button id="btnNew">New List</button>
+    <button id="btnScan" class="scanQR">SCAN QR</button>
+    <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
+    <button id="btnAdd" class="secondary">Add Item</button>
+    <button id="btnUndo" class="secondary">Undo</button>
+
+    <!-- ADD: SHOP button + dropdown -->
+    <div class="shopWrap">
+      <button id="btnShop" class="secondary">SHOP</button>
+
+      <div id="shopMenu" class="shopMenu hidden" role="menu" aria-label="Shop links">
+        <button class="shopItem" data-url="https://www.walmart.com/" role="menuitem">Walmart</button>
+        <button class="shopItem" data-url="https://www.publix.com/" role="menuitem">Publix</button>
+        <button class="shopItem" data-url="https://www.kroger.com/" role="menuitem">Kroger</button>
+        <button class="shopItem" data-url="https://www.ingles-markets.com/" role="menuitem">Ingles</button>
       </div>
+    </div>
+  </div>
+</div>
+  
 
       <!-- Shopping list summary -->
       <div class="card">
@@ -471,7 +522,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 50;
+  const APP_VERSION = 51;
 
   // =========================
   // Smart one-time migration helper
@@ -1404,6 +1455,53 @@
   document.getElementById("btnCloseTop").onclick = closeScanner;
   document.getElementById("btnDone").onclick = closeScanner;
   modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
+
+    // ===== ADD: SHOP dropdown behavior =====
+(function initShopMenu(){
+  const btnShop  = document.getElementById("btnShop");
+  const shopMenu = document.getElementById("shopMenu");
+
+  if(!btnShop || !shopMenu) return; // safe if screen not present
+
+  function openMenu(){
+    shopMenu.classList.remove("hidden");
+  }
+  function closeMenu(){
+    shopMenu.classList.add("hidden");
+  }
+  function toggleMenu(){
+    shopMenu.classList.toggle("hidden");
+  }
+
+  btnShop.addEventListener("click", (e) => {
+    e.stopPropagation();  // don't trigger outside-click close
+    toggleMenu();
+  });
+
+  // Click a store -> open in new tab
+  shopMenu.addEventListener("click", (e) => {
+    const item = e.target.closest(".shopItem");
+    if(!item) return;
+    const url = item.getAttribute("data-url");
+    if(url){
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+    closeMenu();
+  });
+
+  // Click anywhere else closes it
+  document.addEventListener("click", () => {
+    closeMenu();
+  });
+
+  // ESC closes it
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape") closeMenu();
+  });
+
+  // If you have screen navigation logic, closing on screen change is nice:
+  // closeMenu();
+})();
 
   // Initial render
   render();
