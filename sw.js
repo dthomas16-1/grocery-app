@@ -1,7 +1,7 @@
 // =========================
-// sw.js  (CACHE v53)
+// sw.js  (CACHE v54)
 // =========================
-const VERSION = 53;
+const VERSION = 54;
 const CACHE = `grocery-app-v${VERSION}`;
 
 const APP_SHELL = [
