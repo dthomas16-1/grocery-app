@@ -9,10 +9,28 @@
   <style>
     html, body { overflow-x: hidden; margin:0; }
     * { box-sizing: border-box; }
-    body{
+     :root{
+  --navy:#0b1220;
+  --blue:#2563eb;
+  --blue2:#1d4ed8;
+  --green:#16a34a;
+  --green2:#15803d;
+  --orange:#f59e0b;
+  --orange2:#d97706;
+  --red:#ef4444;
+  --red2:#dc2626;
+  --card:#ffffff;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --soft:#eef2ff;         /* soft background tint */
+  --border:rgba(15,23,42,.10);
+  --shadow: 0 10px 24px rgba(2,6,23,.10);
+}
+
+  body{
   font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(180deg, #f6f7fb 0%, var(--soft) 100%);
-  color: var(--ink);
+  background: linear-gradient(180deg, #f6f7fb 0%, var(--soft, #eef2ff) 100%);
+  color: var(--ink, #0f172a);
 }
 
     header{
@@ -27,24 +45,6 @@
     .wrap { padding:14px 14px 90px; max-width:820px; margin:0 auto; }
     .row { display:flex; gap:10px; flex-wrap:wrap; }
 
- :root{
-  --navy:#0b1220;
-  --blue:#2563eb;
-  --blue2:#1d4ed8;
-  --green:#16a34a;
-  --green2:#15803d;
-  --orange:#f59e0b;
-  --orange2:#d97706;
-  --red:#ef4444;
-  --red2:#dc2626;
-
-  --card:#ffffff;
-  --ink:#0f172a;
-  --muted:#64748b;
-  --soft:#eef2ff;         /* soft background tint */
-  --border:rgba(15,23,42,.10);
-  --shadow: 0 10px 24px rgba(2,6,23,.10);
-}
    
 button{
   appearance:none;
