@@ -20,7 +20,7 @@
 
 
 <!-- =========================
-     index.html  (BUILD 046)
+     index.html  (BUILD 047)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -475,14 +475,17 @@ button.danger{
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 046)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 047)</span></header>
 
   <div class="wrap">
     <div class="tabs">
-      <button id="tabGroceries" class="tabBtn active">Groceries</button>
-      <button id="tabDishes" class="tabBtn">Dishes</button>
-      <button id="btnClearDone" class="secondary">Clear Purchased</button>
-    </div>
+  <button id="tabGroceries" class="tabBtn active">Groceries</button>
+  <button id="tabDishes" class="tabBtn">Dishes</button>
+
+  <button id="btnClearDone" class="secondary">Clear Purchased</button>
+  <button id="btnClearCatalog" class="danger" style="display:none;">Clear Catalog</button>
+</div>
+
 
     <!-- GROCERIES TAB -->
     <div id="screenGroceries">
@@ -540,7 +543,6 @@ button.danger{
         <button id="btnAddDish" class="secondary">Add Dish</button>
         <button id="btnRandom14" class="secondary">Random Menu (14)</button>
         <button id="btnClearMenu" class="secondary">Clear Menu</button>
-        <button id="btnClearCatalog" class="danger">Clear Catalog</button>
       </div>
 
       <div class="card">
@@ -612,7 +614,7 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 46;
+  const APP_VERSION = 47;
 // =========================
 // Smart one-time migration helper
 // =========================
@@ -1148,12 +1150,19 @@ smartMigrateLocalStorage();
   const screenDishes = document.getElementById("screenDishes");
 
   function showTab(which){
-    const isG = which === "groceries";
-    screenGroceries.style.display = isG ? "" : "none";
-    screenDishes.style.display = isG ? "none" : "";
-    tabGroceries.classList.toggle("active", isG);
-    tabDishes.classList.toggle("active", !isG);
-  }
+  const isG = which === "groceries";
+
+  screenGroceries.style.display = isG ? "" : "none";
+  screenDishes.style.display = isG ? "none" : "";
+
+  tabGroceries.classList.toggle("active", isG);
+  tabDishes.classList.toggle("active", !isG);
+
+  // Top-right action swap
+  document.getElementById("btnClearDone").style.display = isG ? "" : "none";
+  document.getElementById("btnClearCatalog").style.display = isG ? "none" : "";
+}
+
   tabGroceries.onclick = () => showTab("groceries");
   tabDishes.onclick = () => showTab("dishes");
 
