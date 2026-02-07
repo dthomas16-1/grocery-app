@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 063)
+     index.html  (BUILD 064)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -34,10 +34,8 @@
     * { box-sizing: border-box; }
 
     :root{
-      /* Core palette (warmer + friendlier) */
       --navy:#0b1220;
 
-      /* “App language” colors */
       --primary:#2563eb;
       --primary2:#1d4ed8;
       --success:#16a34a;
@@ -47,7 +45,6 @@
       --danger:#ef4444;
       --danger2:#dc2626;
 
-      /* Softer neutrals */
       --card:#ffffff;
       --ink:#0f172a;
       --muted:#64748b;
@@ -81,7 +78,6 @@
 
     .wrap { padding:16px 14px 90px; max-width:820px; margin:0 auto; }
 
-    /* Tabs row */
     .tabs{
       display:flex;
       gap:12px;
@@ -108,18 +104,15 @@
       box-shadow: 0 12px 22px rgba(2,6,23,.18);
     }
 
-    /* Push Clear Purchased to the right edge */
     #btnClearDone{ margin-left:auto; }
 
-    /* Base row */
     .row { display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* ACTION row (Groceries main buttons) should fill width */
     .actionRow{
       justify-content: space-between;
     }
     .actionRow button{
-      flex: 1 1 150px;  /* grows to fill, wraps nicely */
+      flex: 1 1 150px;
       min-width: 140px;
     }
 
@@ -137,43 +130,40 @@
       transition: transform .08s ease, filter .12s ease, box-shadow .12s ease;
       letter-spacing: .2px;
     }
+
     /* ===== SHOP dropdown (add BELOW button{}) ===== */
-.shopWrap{
-  position: relative;
-  display: inline-block;
-  margin-left: 20px;   /* space between UNDO and SHOP */
-}
+    .shopWrap{
+      position: relative;
+      display: inline-block;
+      margin-left: 20px;
+    }
 
-.shopMenu{
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 180px;
-  padding: 8px;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.2);
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  z-index: 9999;
-}
+    .shopMenu{
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 180px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.2);
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      z-index: 9999;
+    }
 
-.shopMenu.hidden{
-  display: none;
-}
+    .shopMenu.hidden{ display: none; }
 
-.shopItem{
-  width: 100%;
-  padding: 10px 12px;
-  text-align: left;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  color: #000;           /* ✅ FIX: always visible text */
-}
+    .shopItem{
+      width: 100%;
+      padding: 10px 12px;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: #000;
+    }
 
-.shopItem:hover{
-  background: rgba(0,0,0,.08);
-}
+    .shopItem:hover{ background: rgba(0,0,0,.08); }
 
     button:active{ transform: translateY(1px); }
     button:hover{ filter: brightness(1.03); box-shadow: var(--shadow2); }
@@ -192,7 +182,6 @@
       box-shadow: 0 12px 22px rgba(239,68,68,.16);
     }
 
-    /* Intent colors */
     button.scanQR{
       background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     }
@@ -200,16 +189,17 @@
       background: linear-gradient(180deg, var(--scan) 0%, var(--scan2) 100%);
       box-shadow: 0 10px 18px rgba(245,158,11,.22);
     }
-#btnUndo{
-  min-width: 60px !important;   /* ← this actually makes it narrower */
-  padding-left: 6px;
-  padding-right: 6px;
 
-  background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
-  color:#fff !important;
-  border:0 !important;
-  box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
-}
+    #btnUndo{
+      min-width: 60px !important;
+      padding-left: 6px;
+      padding-right: 6px;
+
+      background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
+      color:#fff !important;
+      border:0 !important;
+      box-shadow: 0 12px 22px rgba(124,58,237,.18) !important;
+    }
 
     #btnAdd{
       background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
@@ -237,7 +227,6 @@
     .spacer { height:10px; }
     .total { font-weight:900; font-size:18px; letter-spacing:.2px; }
 
-    /* Rows / pills */
     .pill,
     .catPill{
       font-size:12px; font-weight:900;
@@ -249,7 +238,6 @@
     .pill.ok{ background:rgba(34,197,94,.18); color:#065f46; }
     .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
 
-    /* Grocery list rows */
     .item {
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -262,7 +250,6 @@
     select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
     .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
 
-    /* Master list rows */
     .masterRow{
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -271,7 +258,6 @@
     .mName{ flex:1; font-size:16px; cursor:pointer; font-weight:800; }
     .mCheck{ width:26px; height:26px; }
 
-    /* Dish rows */
     .dishRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -279,7 +265,6 @@
     .dishRow:last-child{ border-bottom:0; }
     .dishName{ font-size:16px; font-weight:800; cursor:pointer; }
 
-    /* Row delete buttons: soft danger */
     .delBtn{
       background: rgba(239,68,68,.10);
       color:#7f1d1d;
@@ -291,7 +276,6 @@
     }
     .delBtn:hover{ filter: brightness(1.02); }
 
-    /* Scanner modal */
     .modalBg {
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
@@ -343,36 +327,36 @@
     .capBtn { background:#16a34a; }
     .doneBtn { background:#e5e7eb; color:#111827; }
 
-    /* Add/Edit modal */
     .miniBg{
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
       z-index: 9998;
     }
+
     /* PHASE 2: Ingredient rows inside Dish modal */
-.ingRow{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-.ingRow input{
-  flex:1;
-  padding:12px 12px;
-  border:1px solid #ddd;
-  border-radius:14px;
-  font-size:16px;
-}
-.ingRow select{
-  width:160px;
-  padding:12px 12px;
-  border:1px solid #ddd;
-  border-radius:14px;
-  font-size:16px;
-  background:#fff;
-}
-.ingRow .delBtn{
-  padding:10px 12px;
-}
+    .ingRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .ingRow input{
+      flex:1;
+      padding:12px 12px;
+      border:1px solid #ddd;
+      border-radius:14px;
+      font-size:16px;
+    }
+    .ingRow select{
+      width:160px;
+      padding:12px 12px;
+      border:1px solid #ddd;
+      border-radius:14px;
+      font-size:16px;
+      background:#fff;
+    }
+    .ingRow .delBtn{
+      padding:10px 12px;
+    }
 
     .mini{
       width:min(520px, 100%);
@@ -398,7 +382,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 063)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 064)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -416,7 +400,6 @@
     <button id="btnAdd" class="secondary">Add Item</button>
     <button id="btnUndo" class="secondary">Undo</button>
 
-    <!-- ADD: SHOP button + dropdown -->
     <div class="shopWrap">
       <button id="btnShop" class="secondary">SHOP</button>
 
@@ -429,7 +412,6 @@
     </div>
   </div>
 
-  <!-- Shopping list summary -->
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
       <div>
@@ -440,10 +422,8 @@
     </div>
   </div>
 
-  <!-- ✅ Shopping list card FIRST (above Master) -->
   <div class="card" id="listCard"></div>
 
-  <!-- Master list AFTER shopping list -->
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
       <div>
@@ -484,7 +464,6 @@
       </div>
       <div class="card" id="menuCard"></div>
 
-      <!-- ✅ Dish Catalog card with Clear Catalog inside it -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
@@ -547,6 +526,7 @@
       </div>
     </div>
   </div>
+
 <!-- Dish Ingredients Modal (PHASE 2) -->
 <div class="miniBg" id="dishBg" style="display:none;">
   <div class="mini">
@@ -576,11 +556,8 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 63;
+  const APP_VERSION = 64;
 
-  // =========================
-  // Smart one-time migration helper
-  // =========================
   function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
     const newKey = `groceryApp_v${APP_VERSION}`;
     const flagKey = `groceryApp_migrated_to_${newKey}`;
@@ -608,46 +585,19 @@
 
   smartMigrateLocalStorage();
 
-  // Service worker registration
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(console.warn);
   }
 
-  // =========================
-  // Build constants
-  // =========================
   const LS_KEY = `groceryApp_v${APP_VERSION}`;
   const UNITS = ["ea","lb","oz","gal","ct"];
 
   const CATEGORIES = [
-  "Produce",
-  "Deli",
-  "Bakery",
-  "Seafood",
-  "Beef",
-  "Pork",
-  "Chicken",
-  "Dairy",
-  "Cheese",
-  "Beer/Wine",
-  "Beverages",
-  "Snacks",
-  "Frozen",
-  "Household",
-  "Baking",
-  "Can Vegies",
-  "Can Meat",
-  "Condiments",
-  "Bread",
-  "Pet",
-  "Pharmacy",
-  "Misc"
-];
+    "Produce","Deli","Bakery","Seafood","Beef","Pork","Chicken","Dairy","Cheese",
+    "Beer/Wine","Beverages","Snacks","Frozen","Household","Baking","Can Vegies",
+    "Can Meat","Condiments","Bread","Pet","Pharmacy","Misc"
+  ];
 
-
-  // =========================
-  // Helpers
-  // =========================
   function loadState() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
     catch { return null; }
@@ -717,8 +667,13 @@
     const bc = normName(b.cat||"Misc").toLowerCase();
     return an === bn && ac === bc;
   }
-
   function hasItem(arr, cand){ return arr.some(x => sameItem(x, cand)); }
+
+  // ✅ Missing helper used by dishes
+  function hasDish(arr, name){
+    const n = normName(name).toLowerCase();
+    return (arr || []).some(x => normName(x).toLowerCase() === n);
+  }
 
   // =========================
   // State
@@ -730,41 +685,47 @@
     masterGroceries: [],
     upcDB: {}
   };
-  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
-if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
-  state.menuAddFlags = {};
-  saveState(state);
-}
 
-// =========================
-// PHASE 1: Dish object migration (SAFE / INVISIBLE)
-// =========================
-(function migrateDishData(){
-  let changed = false;
-
-  // Ensure dishCatalog entries are objects with ingredients[]
-  state.dishCatalog = state.dishCatalog.map(d => {
-    if (typeof d === "string") {
-      changed = true;
-      return { name: d, ingredients: [] };
-    }
-    if (!Array.isArray(d.ingredients)) {
-      changed = true;
-      d.ingredients = [];
-    }
-    return d;
-  });
-
-  // Ensure currentMenu is array of dish names (strings)
-  state.currentMenu = state.currentMenu
-    .map(d => typeof d === "string" ? d : d?.name)
-    .filter(Boolean);
-
-  if (changed) {
-    console.log("[PHASE 1] Dish data migrated");
+  if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
+    state.menuAddFlags = {};
     saveState(state);
   }
-})();
+
+  // =========================
+  // PHASE 1: Dish object migration (SAFE / INVISIBLE)
+  // =========================
+  (function migrateDishData(){
+    let changed = false;
+
+    // Ensure dishCatalog entries are objects with ingredients[]
+    state.dishCatalog = (state.dishCatalog || []).map(d => {
+      if (typeof d === "string") {
+        const nm = normName(d);
+        if(!nm) { changed = true; return null; }
+        changed = true;
+        return { name: nm, ingredients: [] };
+      }
+      if (d && typeof d === "object") {
+        const nm = normName(d.name ?? "");
+        if(!nm) { changed = true; return null; }
+        if (!Array.isArray(d.ingredients)) { changed = true; d.ingredients = []; }
+        d.name = nm;
+        return d;
+      }
+      changed = true;
+      return null;
+    }).filter(Boolean);
+
+    // Ensure currentMenu is array of dish names (strings)
+    state.currentMenu = (state.currentMenu || [])
+      .map(d => typeof d === "string" ? normName(d) : normName(d?.name))
+      .filter(Boolean);
+
+    if (changed) {
+      console.log("[PHASE 1] Dish data migrated");
+      saveState(state);
+    }
+  })();
 
   let lastAddedId = null;
   let renderTimeout = null;
@@ -811,191 +772,187 @@ if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
     closeItemModal({ name, cat });
   };
   miniBg.onclick = e => { if(e.target === miniBg) closeItemModal(null); };
-// =========================
-// PHASE 2: Dish Ingredients Modal
-// =========================
-const dishBg = document.getElementById("dishBg");
-const dishTitle = document.getElementById("dishTitle");
-const dishIngList = document.getElementById("dishIngList");
 
-let dishEditingName = null;
-let dishEditingSnapshot = null;
+  // =========================
+  // PHASE 2: Dish Ingredients Modal
+  // =========================
+  const dishBg = document.getElementById("dishBg");
+  const dishTitle = document.getElementById("dishTitle");
+  const dishIngList = document.getElementById("dishIngList");
 
-function buildCatSelect(selected){
-  return `
-    <select class="ingCat">
-      ${CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("")}
-    </select>
-  `;
-}
+  let dishEditingName = null;
+  let dishEditingSnapshot = null;
 
-function addIngRow({name="", cat="Misc"} = {}){
-  const row = document.createElement("div");
-  row.className = "ingRow";
-  row.innerHTML = `
-    <input class="ingName" type="text" placeholder="Ingredient name" value="${escapeHtml(name)}">
-    ${buildCatSelect(cat || "Misc")}
-    <button class="delBtn" type="button" title="Remove">🗑️</button>
-  `;
-  row.querySelector(".delBtn").onclick = () => row.remove();
-  dishIngList.appendChild(row);
-}
-
-function openDishIngredientsModal(dishName){
-  const dish = getDishObjByName(dishName);
-  if(!dish){
-    showToast("Dish not found in catalog.", 1600);
-    return;
+  function buildCatSelect(selected){
+    return `
+      <select class="ingCat">
+        ${CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+      </select>
+    `;
   }
 
-  dishEditingName = dish.name;
-  dishEditingSnapshot = JSON.stringify(dish.ingredients || []);
-
-  dishTitle.textContent = `Ingredients: ${dish.name}`;
-  dishIngList.innerHTML = "";
-
-  const ings = Array.isArray(dish.ingredients) ? dish.ingredients : [];
-  if(ings.length === 0){
-    // start empty; user can add
-  } else {
-    ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
+  function addIngRow({name="", cat="Misc"} = {}){
+    const row = document.createElement("div");
+    row.className = "ingRow";
+    row.innerHTML = `
+      <input class="ingName" type="text" placeholder="Ingredient name" value="${escapeHtml(name)}">
+      ${buildCatSelect(cat || "Misc")}
+      <button class="delBtn" type="button" title="Remove">🗑️</button>
+    `;
+    row.querySelector(".delBtn").onclick = () => row.remove();
+    dishIngList.appendChild(row);
   }
 
-  dishBg.style.display = "flex";
-}
-function addIngredientsForCheckedMenu(){
-  let dishesChecked = 0;
-  let ingAdded = 0;
-  let ingAlready = 0;
-  let ingMissing = 0;
+  function getDishObjByName(name){
+    const n = normName(name).toLowerCase();
+    return state.dishCatalog.find(d => normName(d.name).toLowerCase() === n) || null;
+  }
 
-  // Use the live checkbox state if present; fallback to saved flags.
-  const menuRows = Array.from(document.querySelectorAll("#menuCard .dishRow"));
-
-  // Build a quick map: dishName -> checked?
-  const checkedMap = {};
-  menuRows.forEach(row => {
-    const name = row.dataset.name;
-    const chk = row.querySelector(".ingCheck");
-    checkedMap[name] = !!chk?.checked;
-  });
-
-  state.currentMenu.forEach(dishName => {
-    const isChecked = checkedMap.hasOwnProperty(dishName)
-      ? checkedMap[dishName]
-      : !!state.menuAddFlags?.[dishName];
-
-    if(!isChecked) return;
-
-    dishesChecked++;
-
+  function openDishIngredientsModal(dishName){
     const dish = getDishObjByName(dishName);
-    const ings = dish?.ingredients || [];
-    if(!ings.length){
-      ingMissing++;
+    if(!dish){
+      showToast("Dish not found in catalog.", 1600);
       return;
     }
 
-    ings.forEach(ing => {
-      const n = normName(ing.name);
-      const c = normName(ing.cat || "Misc") || "Misc";
+    dishEditingName = dish.name;
+    dishEditingSnapshot = JSON.stringify(dish.ingredients || []);
+
+    dishTitle.textContent = `Ingredients: ${dish.name}`;
+    dishIngList.innerHTML = "";
+
+    const ings = Array.isArray(dish.ingredients) ? dish.ingredients : [];
+    ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
+
+    dishBg.style.display = "flex";
+  }
+
+  function closeDishModal(save){
+    if(!dishEditingName){
+      dishBg.style.display = "none";
+      return;
+    }
+
+    const dish = getDishObjByName(dishEditingName);
+    if(!dish){
+      dishBg.style.display = "none";
+      dishEditingName = null;
+      return;
+    }
+
+    if(!save){
+      try { dish.ingredients = JSON.parse(dishEditingSnapshot || "[]"); }
+      catch { dish.ingredients = dish.ingredients || []; }
+      dishBg.style.display = "none";
+      dishEditingName = null;
+      dishEditingSnapshot = null;
+      return;
+    }
+
+    const out = [];
+    dishIngList.querySelectorAll(".ingRow").forEach(r => {
+      const n = normName(r.querySelector(".ingName")?.value || "");
+      const c = normName(r.querySelector(".ingCat")?.value || "Misc") || "Misc";
       if(!n) return;
-
-      // Always add to Master
-      addToMaster(n, c);
-
-      // Add to current shopping list (qty=1, unit=ea by your choice)
-      const ok = addItemToCurrent(n, c);
-      if(ok){
-        // ensure defaults are what you want
-        const it = state.current.items.find(x => normName(x.name).toLowerCase()===n.toLowerCase()
-          && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase());
-        if(it){
-          it.qty = "1";
-          it.unit = "ea";
-        }
-        ingAdded++;
-      } else {
-        ingAlready++;
-      }
+      out.push({ name: n, cat: c });
     });
-  });
 
-  saveState(state);
-  debouncedRender();
+    const seen = new Set();
+    dish.ingredients = out.filter(x => {
+      const k = normName(x.name).toLowerCase() + "|" + normName(x.cat).toLowerCase();
+      if(seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
 
-  if(dishesChecked === 0){
-    showToast("No dishes checked.", 1600);
-    return;
-  }
+    saveState(state);
+    debouncedRender();
 
-  const msg =
-    `Checked dishes: ${dishesChecked} • Added: ${ingAdded}` +
-    (ingAlready ? ` • Already: ${ingAlready}` : "") +
-    (ingMissing ? ` • No ingredients: ${ingMissing}` : "");
-
-  showToast(msg, 2600);
-}
-
-function closeDishModal(save){
-  if(!dishEditingName){
-    dishBg.style.display = "none";
-    return;
-  }
-
-  const dish = getDishObjByName(dishEditingName);
-  if(!dish){
-    dishBg.style.display = "none";
-    dishEditingName = null;
-    return;
-  }
-
-  if(!save){
-    // restore snapshot
-    try { dish.ingredients = JSON.parse(dishEditingSnapshot || "[]"); } catch { dish.ingredients = dish.ingredients || []; }
     dishBg.style.display = "none";
     dishEditingName = null;
     dishEditingSnapshot = null;
-    return;
+
+    showToast("Ingredients saved.", 1400);
   }
 
-  // collect rows
-  const out = [];
-  dishIngList.querySelectorAll(".ingRow").forEach(r => {
-    const n = normName(r.querySelector(".ingName")?.value || "");
-    const c = normName(r.querySelector(".ingCat")?.value || "Misc") || "Misc";
-    if(!n) return;
-    out.push({ name: n, cat: c });
-  });
+  document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", cat:"Misc"});
+  document.getElementById("dishClose").onclick = () => closeDishModal(false);
+  document.getElementById("dishCancel").onclick = () => closeDishModal(false);
+  document.getElementById("dishSave").onclick = () => closeDishModal(true);
+  dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
 
-  // de-dupe within dish by name+cat
-  const seen = new Set();
-  dish.ingredients = out.filter(x => {
-    const k = normName(x.name).toLowerCase() + "|" + normName(x.cat).toLowerCase();
-    if(seen.has(k)) return false;
-    seen.add(k);
-    return true;
-  });
+  function addIngredientsForCheckedMenu(){
+    let dishesChecked = 0;
+    let ingAdded = 0;
+    let ingAlready = 0;
+    let ingMissing = 0;
 
-  saveState(state);
-  debouncedRender();
+    const menuRows = Array.from(document.querySelectorAll("#menuCard .dishRow"));
+    const checkedMap = {};
+    menuRows.forEach(row => {
+      const nm = row.dataset.name || "";
+      const chk = row.querySelector(".ingCheck");
+      checkedMap[nm] = !!chk?.checked;
+    });
 
-  dishBg.style.display = "none";
-  dishEditingName = null;
-  dishEditingSnapshot = null;
+    state.currentMenu.forEach(dishName => {
+      const isChecked = Object.prototype.hasOwnProperty.call(checkedMap, dishName)
+        ? checkedMap[dishName]
+        : !!state.menuAddFlags?.[dishName];
 
-  showToast("Ingredients saved.", 1400);
-}
+      if(!isChecked) return;
 
-// Modal buttons / close behavior
-document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", cat:"Misc"});
-document.getElementById("dishClose").onclick = () => closeDishModal(false);
-document.getElementById("dishCancel").onclick = () => closeDishModal(false);
-document.getElementById("dishSave").onclick = () => closeDishModal(true);
-dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
+      dishesChecked++;
+
+      const dish = getDishObjByName(dishName);
+      const ings = dish?.ingredients || [];
+      if(!ings.length){
+        ingMissing++;
+        return;
+      }
+
+      ings.forEach(ing => {
+        const n = normName(ing.name);
+        const c = normName(ing.cat || "Misc") || "Misc";
+        if(!n) return;
+
+        addToMaster(n, c);
+
+        const ok = addItemToCurrent(n, c);
+        if(ok){
+          const it = state.current.items.find(x =>
+            normName(x.name).toLowerCase()===n.toLowerCase()
+            && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase()
+          );
+          if(it){
+            it.qty = "1";
+            it.unit = "ea";
+          }
+          ingAdded++;
+        } else {
+          ingAlready++;
+        }
+      });
+    });
+
+    saveState(state);
+    debouncedRender();
+
+    if(dishesChecked === 0){
+      showToast("No dishes checked.", 1600);
+      return;
+    }
+
+    const msg =
+      `Checked dishes: ${dishesChecked} • Added: ${ingAdded}` +
+      (ingAlready ? ` • Already: ${ingAlready}` : "") +
+      (ingMissing ? ` • No ingredients: ${ingMissing}` : "");
+
+    showToast(msg, 2600);
+  }
 
   // =========================
-  // Groceries: Shopping list
+  // Groceries
   // =========================
   function addItemToCurrent(name, cat="Misc"){
     name = normName(name);
@@ -1030,7 +987,7 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
   }
 
   // =========================
-  // Groceries: Master list
+  // Master list
   // =========================
   function addToMaster(name, cat="Misc"){
     name = normName(name);
@@ -1059,43 +1016,37 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
   // =========================
   // Dishes
   // =========================
-  function getDishObjByName(name){
-  const n = normName(name).toLowerCase();
-  return state.dishCatalog.find(d => normName(d.name).toLowerCase() === n) || null;
-}
-
   function hasDishObjByName(name){
-  const n = normName(name).toLowerCase();
-  return state.dishCatalog.some(d => normName(d.name).toLowerCase() === n);
-}
-
-function addDishToCatalogAndMenu(name){
-  name = normName(name);
-  if(!name) return {addedCatalog:false, addedMenu:false};
-
-  let addedCatalog = false, addedMenu = false;
-
-  // ensure catalog stores objects
-  if(!hasDishObjByName(name)){
-    state.dishCatalog.push({ name, ingredients: [] });
-    addedCatalog = true;
+    const n = normName(name).toLowerCase();
+    return state.dishCatalog.some(d => normName(d.name).toLowerCase() === n);
   }
 
-  // menu stays as strings (dish names)
-  if(!hasDish(state.currentMenu, name)){
-    state.currentMenu.push(name);
-    addedMenu = true;
+  function addDishToCatalogAndMenu(name){
+    name = normName(name);
+    if(!name) return {addedCatalog:false, addedMenu:false};
+
+    let addedCatalog = false, addedMenu = false;
+
+    if(!hasDishObjByName(name)){
+      state.dishCatalog.push({ name, ingredients: [] });
+      addedCatalog = true;
+    }
+
+    if(!hasDish(state.currentMenu, name)){
+      state.currentMenu.push(name);
+      addedMenu = true;
+    }
+
+    // ✅ Do NOT overwrite user's checkbox choice if it already exists
+    if(!state.menuAddFlags) state.menuAddFlags = {};
+    if(typeof state.menuAddFlags[name] === "undefined"){
+      state.menuAddFlags[name] = false; // default unchecked
+    }
+
+    saveState(state);
+    debouncedRender();
+    return {addedCatalog, addedMenu};
   }
-
-  // default unchecked
-  if(!state.menuAddFlags) state.menuAddFlags = {};
-  state.menuAddFlags[name] = false;
-
-  saveState(state);
-  debouncedRender();
-  return {addedCatalog, addedMenu};
-}
-
 
   function removeDishFromMenu(name){
     const n = normName(name).toLowerCase();
@@ -1106,20 +1057,31 @@ function addDishToCatalogAndMenu(name){
 
   function removeDishFromCatalog(name){
     const n = normName(name).toLowerCase();
-    state.dishCatalog = state.dishCatalog.filter(x => normName(x).toLowerCase() !== n);
+
+    // ✅ FIX: catalog is objects -> compare d.name
+    state.dishCatalog = state.dishCatalog.filter(d => normName(d.name).toLowerCase() !== n);
+
     state.currentMenu = state.currentMenu.filter(x => normName(x).toLowerCase() !== n);
+
+    if(state.menuAddFlags){
+      delete state.menuAddFlags[name];
+    }
+
     saveState(state);
     debouncedRender();
   }
 
   function randomMenu14(){
+    // ✅ FIX: pick objects, but menu stores NAMES (strings)
     const pool = [...state.dishCatalog];
     for(let i=pool.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    state.currentMenu = pool.slice(0, 14);
-    // PHASE 2: reset menu checkboxes for the new menu (default UNCHECKED)
+
+    state.currentMenu = pool.slice(0, 14).map(d => d.name);
+
+    // reset menu checkboxes for the new menu (default UNCHECKED)
     state.menuAddFlags = {};
     state.currentMenu.forEach(n => state.menuAddFlags[n] = false);
 
@@ -1199,7 +1161,6 @@ function addDishToCatalogAndMenu(name){
       });
     }
 
-    // Master list
     const sortedMaster = [...state.masterGroceries].sort((a,b)=>sortByCatThenName(a,b));
     document.getElementById("masterCount").textContent = sortedMaster.length;
 
@@ -1243,34 +1204,32 @@ function addDishToCatalogAndMenu(name){
   }
 
   function dishRowHtml(name, where){
-  const dish = getDishObjByName(name);
-  const hasIng = !!(dish && Array.isArray(dish.ingredients) && dish.ingredients.length);
+    const dish = getDishObjByName(name);
+    const hasIng = !!(dish && Array.isArray(dish.ingredients) && dish.ingredients.length);
 
-  // Only MENU rows get the checkbox + 🧂 icon
-  const menuControls = (where === "menu") ? `
-    <label style="display:flex;align-items:center;gap:8px; font-weight:900;">
-      <input class="ingCheck" type="checkbox" ${state.menuAddFlags?.[name] ? "checked":""}>
+    const menuControls = (where === "menu") ? `
+      <label style="display:flex;align-items:center;gap:8px; font-weight:900;">
+        <input class="ingCheck" type="checkbox" ${state.menuAddFlags?.[name] ? "checked":""}>
+        <span title="${hasIng ? "Has ingredients" : "No ingredients yet"}" style="font-size:18px; opacity:${hasIng ? "1":"0.35"};">🧂</span>
+      </label>
+    ` : `
       <span title="${hasIng ? "Has ingredients" : "No ingredients yet"}" style="font-size:18px; opacity:${hasIng ? "1":"0.35"};">🧂</span>
-    </label>
-  ` : `
-    <span title="${hasIng ? "Has ingredients" : "No ingredients yet"}" style="font-size:18px; opacity:${hasIng ? "1":"0.35"};">🧂</span>
-  `;
+    `;
 
-  return `
-    <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
-      <div style="display:flex; align-items:center; gap:12px;">
-        ${menuControls}
-        <div class="dishName">${escapeHtml(name)}</div>
+    return `
+      <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
+        <div style="display:flex; align-items:center; gap:12px;">
+          ${menuControls}
+          <div class="dishName">${escapeHtml(name)}</div>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+          ${where==="menu" ? `<span class="pill ok">MENU</span>` : `<span class="pill">CATALOG</span>`}
+          <button class="delBtn" title="Delete">🗑️</button>
+        </div>
       </div>
-
-      <div style="display:flex; gap:8px; align-items:center;">
-        ${where==="menu" ? `<span class="pill ok">MENU</span>` : `<span class="pill">CATALOG</span>`}
-        <button class="delBtn" title="Delete">🗑️</button>
-      </div>
-    </div>
-  `;
-}
-
+    `;
+  }
 
   function renderDishes(){
     document.getElementById("menuCount").textContent = state.currentMenu.length;
@@ -1297,62 +1256,52 @@ function addDishToCatalogAndMenu(name){
     }
 
     function bindDishRows(container){
-  container.querySelectorAll(".dishRow").forEach(row=>{
-    const name = row.getAttribute("data-name") || "";
-    const where = row.dataset.where;
+      container.querySelectorAll(".dishRow").forEach(row=>{
+        const name = row.dataset.name || "";
+        const where = row.dataset.where;
 
-    // ===== PHASE 2: checkbox handler (ADD THIS BLOCK) =====
-    const chk = row.querySelector(".ingCheck");
-    if(chk){
-      // reflect current state (default unchecked if missing)
-      chk.checked = !!state.menuAddFlags?.[name];
+        const chk = row.querySelector(".ingCheck");
+        if(chk){
+          chk.checked = !!state.menuAddFlags?.[name];
 
-      chk.onchange = (e) => {
-        e.stopPropagation();
-        if(!state.menuAddFlags) state.menuAddFlags = {};
-        state.menuAddFlags[name] = !!chk.checked;
-        saveState(state);
-      };
+          chk.onchange = (e) => {
+            e.stopPropagation();
+            if(!state.menuAddFlags) state.menuAddFlags = {};
+            state.menuAddFlags[name] = !!chk.checked;
+            saveState(state);
+          };
 
-      // prevent checkbox click from triggering dishName click
-      chk.onclick = (e) => e.stopPropagation();
-    }
-    // ===== END PHASE 2 BLOCK =====
-
+          chk.onclick = (e) => e.stopPropagation();
+        }
 
         row.querySelector(".dishName").onclick = () => {
-  if(where === "catalog"){
-    // Catalog tap still adds to menu (same as today)
-    addDishToCatalogAndMenu(name);
-    return;
-  }
+          if(where === "catalog"){
+            addDishToCatalogAndMenu(name);
+            return;
+          }
 
-  // where === "menu"
-  const allowed = !!row.querySelector(".ingCheck")?.checked;
+          const allowed = !!row.querySelector(".ingCheck")?.checked;
+          if(allowed){
+            openDishIngredientsModal(name);
+            return;
+          }
 
-  if(allowed){
-    // ✅ If checked: open ingredient editor (PHASE 2 rule)
-    openDishIngredientsModal(name);
-    return;
-  }
+          const newName = prompt("Rename dish (updates Catalog + Menu):", name);
+          if(!newName) return;
+          const nn = normName(newName);
+          if(!nn) return;
 
-  // ⛔ If NOT checked: bypass ingredient edit (your rule)
-  // Keep your existing rename behavior here:
-  const newName = prompt("Rename dish (updates Catalog + Menu):", name);
-  if(!newName) return;
-  const nn = normName(newName);
-  if(!nn) return;
+          removeDishFromCatalog(name);
+          addDishToCatalogAndMenu(nn);
 
-  removeDishFromCatalog(name);
-  addDishToCatalogAndMenu(nn);
-
-  // Also move checkbox flag to the new name (keep default unchecked)
-  if(state.menuAddFlags){
-    delete state.menuAddFlags[name];
-    state.menuAddFlags[nn] = false;
-    saveState(state);
-  }
-};
+          if(state.menuAddFlags){
+            delete state.menuAddFlags[name];
+            if(typeof state.menuAddFlags[nn] === "undefined"){
+              state.menuAddFlags[nn] = false;
+            }
+            saveState(state);
+          }
+        };
 
         row.querySelector(".delBtn").onclick = () => {
           if(where === "menu"){
@@ -1395,8 +1344,6 @@ function addDishToCatalogAndMenu(name){
     screenDishes.style.display = isG ? "none" : "";
     tabGroceries.classList.toggle("active", isG);
     tabDishes.classList.toggle("active", !isG);
-
-    // Top-right action: only for groceries
     document.getElementById("btnClearDone").style.display = isG ? "" : "none";
   }
   tabGroceries.onclick = () => showTab("groceries");
@@ -1493,9 +1440,10 @@ function addDishToCatalogAndMenu(name){
     }
     randomMenu14();
   };
+
   document.getElementById("btnAddCheckedIng").onclick = () => {
-  addIngredientsForCheckedMenu();
-};
+    addIngredientsForCheckedMenu();
+  };
 
   document.getElementById("btnClearMenu").onclick = () => {
     if(!confirm("Clear the current menu?")) return;
@@ -1508,6 +1456,7 @@ function addDishToCatalogAndMenu(name){
     if(!confirm("Clear the entire Dish Catalog AND Menu?")) return;
     state.dishCatalog = [];
     state.currentMenu = [];
+    state.menuAddFlags = {};
     saveState(state);
     render();
   };
@@ -1579,8 +1528,6 @@ function addDishToCatalogAndMenu(name){
       return s;
     };
 
-    const lower = raw.toLowerCase();
-
     try {
       if (/^[a-z]+:\/\//i.test(raw)) {
         const url = new URL(raw);
@@ -1610,7 +1557,7 @@ function addDishToCatalogAndMenu(name){
 
     const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
     if (itemMatch) {
-      const start = lower.indexOf("item=");
+      const start = raw.toLowerCase().indexOf("item=");
       const qs = raw.slice(start);
       const sp = new URLSearchParams(qs);
       const item = sp.get("item");
@@ -1804,52 +1751,33 @@ function addDishToCatalogAndMenu(name){
   document.getElementById("btnDone").onclick = closeScanner;
   modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
 
-    // ===== ADD: SHOP dropdown behavior =====
-(function initShopMenu(){
-  const btnShop  = document.getElementById("btnShop");
-  const shopMenu = document.getElementById("shopMenu");
+  // ===== SHOP dropdown behavior =====
+  (function initShopMenu(){
+    const btnShop  = document.getElementById("btnShop");
+    const shopMenu = document.getElementById("shopMenu");
+    if(!btnShop || !shopMenu) return;
 
-  if(!btnShop || !shopMenu) return; // safe if screen not present
+    function closeMenu(){ shopMenu.classList.add("hidden"); }
+    function toggleMenu(){ shopMenu.classList.toggle("hidden"); }
 
-  function openMenu(){
-    shopMenu.classList.remove("hidden");
-  }
-  function closeMenu(){
-    shopMenu.classList.add("hidden");
-  }
-  function toggleMenu(){
-    shopMenu.classList.toggle("hidden");
-  }
+    btnShop.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
 
-  btnShop.addEventListener("click", (e) => {
-    e.stopPropagation();  // don't trigger outside-click close
-    toggleMenu();
-  });
+    shopMenu.addEventListener("click", (e) => {
+      const item = e.target.closest(".shopItem");
+      if(!item) return;
+      const url = item.getAttribute("data-url");
+      if(url){
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+      closeMenu();
+    });
 
-  // Click a store -> open in new tab
-  shopMenu.addEventListener("click", (e) => {
-    const item = e.target.closest(".shopItem");
-    if(!item) return;
-    const url = item.getAttribute("data-url");
-    if(url){
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-    closeMenu();
-  });
-
-  // Click anywhere else closes it
-  document.addEventListener("click", () => {
-    closeMenu();
-  });
-
-  // ESC closes it
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") closeMenu();
-  });
-
-  // If you have screen navigation logic, closing on screen change is nice:
-  // closeMenu();
-})();
+    document.addEventListener("click", () => closeMenu());
+    document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeMenu(); });
+  })();
 
   // Initial render
   render();
