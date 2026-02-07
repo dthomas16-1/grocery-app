@@ -13,54 +13,41 @@
     .wrap { padding:14px 14px 90px; max-width:820px; margin:0 auto; }
     .row { display:flex; gap:10px; flex-wrap:wrap; }
 
-    button{
+    button {
       appearance:none; border:0; border-radius:14px; padding:14px 16px;
       font-size:16px; font-weight:800; cursor:pointer;
       background:#2563eb; color:#fff;
     }
-    button.secondary{ background:#e5e7eb; color:#111827; }
-    button.danger{ background:#fee2e2; color:#7f1d1d; }
-    button:disabled{ opacity:.5; cursor:not-allowed; }
+    button.secondary { background:#e5e7eb; color:#111827; }
+    button.danger { background:#fee2e2; color:#7f1d1d; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
 
-    .tabs{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-    .tabBtn{ background:#e5e7eb; color:#111827; }
-    .tabBtn.active{ background:#111827; color:#fff; }
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .tabBtn { background:#e5e7eb; color:#111827; }
+    .tabBtn.active { background:#111827; color:#fff; }
 
-    .card{
+    .card {
       background:#fff; border-radius:16px; padding:12px; margin-top:12px;
       box-shadow: 0 6px 18px rgba(0,0,0,.08);
     }
-    .muted{ color:#6b7280; }
+    .muted { color:#6b7280; }
 
-    /* Shopping list rows */
-    .item{
+    /* Grocery list rows */
+    .item {
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
     }
-    .item:last-child{ border-bottom:0; }
-    .check{ width:26px; height:26px; }
-    .name{ flex:1; font-size:16px; cursor:pointer; }
-    .done .name{ text-decoration: line-through; opacity:.55; }
-    .qty{ width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    select{ padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
-    .price{ width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
-    .total{ font-weight:900; font-size:18px; }
-    .delBtn{
+    .item:last-child { border-bottom:0; }
+    .check { width:26px; height:26px; }
+    .name { flex:1; font-size:16px; cursor:pointer; }
+    .done .name { text-decoration: line-through; opacity:.55; }
+    .qty { width:64px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
+    .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
+    .total { font-weight:900; font-size:18px; }
+    .delBtn {
       background:#fee2e2; color:#7f1d1d;
       padding:10px 12px; border-radius:12px; font-weight:900;
-    }
-
-    /* Master Grocery Catalog rows */
-    .catRow{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 6px; border-bottom:1px solid #eee;
-    }
-    .catRow:last-child{ border-bottom:0; }
-    .catCheck{ width:26px; height:26px; }
-    .catName{ flex:1; font-size:16px; font-weight:800; cursor:pointer; }
-    .tag{
-      font-size:12px; font-weight:900; padding:6px 10px; border-radius:999px;
-      background:#e5e7eb; color:#111827; white-space:nowrap;
     }
 
     /* Dish list rows */
@@ -75,12 +62,12 @@
     .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
 
     /* Scanner modal */
-    .modalBg{
+    .modalBg {
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
       z-index: 9999;
     }
-    .modal{
+    .modal {
       width:min(760px, 100%);
       max-width: calc(100vw - 32px);
       background:#fff; border-radius:18px; overflow:hidden;
@@ -88,27 +75,27 @@
       max-height: calc(100dvh - 32px);
       display:flex; flex-direction:column;
     }
-    .modalHead{
+    .modalHead {
       display:flex; justify-content:space-between; align-items:center;
       padding:12px 14px; background:#111827; color:#fff;
     }
-    .modalBody{
+    .modalBody {
       padding:12px; display:flex; flex-direction:column; gap:10px;
       overflow-y:auto; overscroll-behavior: contain;
       padding-bottom: env(safe-area-inset-bottom, 12px);
     }
-    #reader{
+    #reader {
       width:100%; max-height:50dvh; overflow:hidden; border-radius:16px; background:#000;
     }
-    #reader *{ max-width:100% !important; box-sizing:border-box; }
+    #reader * { max-width:100% !important; box-sizing:border-box; }
     #reader video,
-    #reader canvas{
+    #reader canvas {
       width:100% !important; height:auto !important;
       max-height:50dvh !important; object-fit:contain;
       border-radius:16px; display:block;
     }
-    .hint{ color:#6b7280; font-size:14px; margin-top:0; }
-    .scanBar{
+    .hint { color:#6b7280; font-size:14px; margin-top:0; }
+    .scanBar {
       margin-top:10px; background:rgba(17,24,39,.06);
       border:1px solid rgba(17,24,39,.10); border-radius:14px;
       padding:10px 12px; display:flex; align-items:center;
@@ -116,48 +103,21 @@
       position:sticky; bottom:0; z-index:5; background:#fff;
       box-shadow:0 -6px 18px rgba(0,0,0,.06);
     }
-    .scanMsg{
+    .scanMsg {
       font-weight:900; font-size:16px; color:#111827;
       flex:1; min-width:0; overflow-wrap:anywhere;
     }
-    .scanMsg.ok{ color:#065f46; }
-    .scanMsg.warn{ color:#92400e; }
-    .scanBtns{ display:flex; gap:10px; flex-wrap:wrap; flex:0 0 auto; }
-    .capBtn{ background:#16a34a; }
-    .doneBtn{ background:#e5e7eb; color:#111827; }
-
-    /* Add/Edit Grocery modal (category dropdown ONLY here) */
-    .editBg{
-      position:fixed; inset:0; background:rgba(0,0,0,.55);
-      display:none; align-items:center; justify-content:center; padding:16px;
-      z-index: 10000;
-    }
-    .editModal{
-      width:min(520px, 100%);
-      background:#fff; border-radius:18px; overflow:hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-      display:flex; flex-direction:column;
-    }
-    .editHead{
-      display:flex; justify-content:space-between; align-items:center;
-      padding:12px 14px; background:#111827; color:#fff;
-    }
-    .editBody{ padding:14px; display:flex; flex-direction:column; gap:10px; }
-    .fieldLabel{ font-weight:900; color:#111827; margin-top:2px; }
-    .textInput{
-      width:100%;
-      padding:10px 12px; border:1px solid #ddd; border-radius:12px;
-      font-size:16px;
-    }
-    .editBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
-    .btnFull{ flex:1 1 auto; }
+    .scanMsg.ok { color:#065f46; }
+    .scanMsg.warn { color:#92400e; }
+    .scanBtns { display:flex; gap:10px; flex-wrap:wrap; flex:0 0 auto; }
+    .capBtn { background:#16a34a; }
+    .doneBtn { background:#e5e7eb; color:#111827; }
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
-
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 013 – master pick list + add selected)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 033 – QR + UPC scan modes)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -170,6 +130,8 @@
       <div class="row">
         <button id="btnNew">New List</button>
         <button id="btnScan">SCAN</button>
+        <!-- A) UPC button lives on Groceries tab only -->
+        <button id="btnScanUPC" class="secondary">SCAN UPC</button>
         <button id="btnUndo" class="secondary">Undo</button>
         <button id="btnClearDone" class="secondary">Clear Purchased</button>
         <button id="btnAdd" class="secondary">Add Item</button>
@@ -177,30 +139,12 @@
 
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div><b>Shopping List:</b> <span id="listName">Today</span></div>
+          <div><b>Current List:</b> <span id="listName">Today</span></div>
           <div class="total">Total: $<span id="total">0.00</span></div>
-        </div>
-        <div class="muted" style="margin-top:6px;">
-          Sorted by category walking order + name.
         </div>
       </div>
 
       <div class="card" id="listCard"></div>
-
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div><b>Master Grocery List:</b> <span class="pill"><span id="catalogCount">0</span> items</span></div>
-          <div class="muted">Check items here, then tap <b>ADD SELECTED</b>.</div>
-        </div>
-
-        <div class="row" style="margin-top:10px;">
-          <button id="btnAddSelected" class="secondary">ADD SELECTED</button>
-          <button id="btnClearSelect" class="secondary">CLEAR CHECKS</button>
-          <button id="btnClearCatalog" class="danger">Clear Master</button>
-        </div>
-      </div>
-
-      <div class="card" id="catalogCard"></div>
     </div>
 
     <!-- DISHES TAB -->
@@ -210,7 +154,7 @@
         <button id="btnAddDish" class="secondary">Add Dish</button>
         <button id="btnRandom14" class="secondary">Random Menu (14)</button>
         <button id="btnClearMenu" class="secondary">Clear Menu</button>
-        <button id="btnClearDishCatalog" class="danger">Clear Catalog</button>
+        <button id="btnClearCatalog" class="danger">Clear Catalog</button>
       </div>
 
       <div class="card">
@@ -223,11 +167,11 @@
 
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div><b>Dish Catalog:</b> <span class="pill"><span id="dishCatalogCount">0</span> total</span></div>
-          <div class="muted">Tap to delete (menu or catalog).</div>
+          <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
+          <div class="muted">Long-press (or tap) a dish to delete (menu or catalog).</div>
         </div>
       </div>
-      <div class="card" id="catalogDishCard"></div>
+      <div class="card" id="catalogCard"></div>
     </div>
   </div>
 
@@ -241,102 +185,78 @@
       <div class="modalBody">
         <div id="reader"></div>
         <div class="scanBar">
-          <div id="scanMsg" class="scanMsg">Point camera at QR code – hold steady…</div>
+          <div id="scanMsg" class="scanMsg">Point camera at code – hold steady…</div>
           <div class="scanBtns">
             <button id="btnCapture" class="capBtn" disabled>CAPTURE</button>
             <button id="btnDone" class="doneBtn">DONE</button>
           </div>
         </div>
-        <div class="hint">
-          Tip: With the smaller scan window, hold ~6–14 inches away, fill the box with the QR, and keep steady.
+        <div class="hint" id="scanHint">
+          Tip: Hold ~6–14 inches away, fill the box with the code, and keep steady.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Add/Edit Grocery Modal -->
-  <div class="editBg" id="editBg">
-    <div class="editModal">
-      <div class="editHead">
-        <div><b id="editTitle">Add Item</b></div>
-        <button id="btnEditClose" class="secondary" style="padding:10px 12px; border-radius:12px;">Close</button>
-      </div>
-      <div class="editBody">
-        <div class="fieldLabel">Item name</div>
-        <input id="editName" class="textInput" type="text" placeholder="e.g., Milk" />
-
-        <div class="fieldLabel">Category</div>
-        <select id="editCat"></select>
-
-        <div class="editBtns">
-          <button id="btnEditSave" class="btnFull">Save</button>
-          <button id="btnEditCancel" class="secondary btnFull">Cancel</button>
-        </div>
-        <div class="muted" style="font-size:13px;">
-          Manual add saves to Master + Shopping List.
-        </div>
-      </div>
-    </div>
-  </div>
-
-<script>
+  <script>
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(console.warn);
 
-  const LS_KEY = "groceryApp_v2"; // keep key so your existing data stays
+  const LS_KEY = "groceryApp_v33"; // bump version key so you don't collide with older builds
   const UNITS = ["ea","lb","oz","gal","ct"];
 
-  const DEFAULT_CATEGORIES = [
+  // ======================================================
+  // SCANNER MODES + CAPTURE WINDOWS  (EASY TO FIND/TUNE)
+  // ======================================================
+  // QR codes are square:
+  const QR_SCAN_BOX  = { width: 70,  height: 70 };
+
+  // UPC/barcodes are rectangular (wide + short):
+  const UPC_SCAN_BOX = { width: 260, height: 110 };
+
+  // Active scanner mode: "QR" or "UPC"
+  let scanMode = "QR";
+  // ======================================================
+
+  // Categories (for UPC onboarding; default is Misc)
+  const CATEGORIES = [
     "Produce","Deli","Sea food","Beef","Pork","Chicken","Dairy","Cheese",
     "Beverages","Snacks","Frozen","Household","Bread","Pet","Pharmacy","Misc"
   ];
 
-  function loadState(){
+  function loadState() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
     catch { return null; }
   }
-  function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-  function newBlankList(name){ return { name, items: [], created: Date.now() }; }
+  function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+  function newBlankList(name) { return { name, items: [], created: Date.now() }; }
 
   // --- State ---
+  // Added:
+  // - upcMap: UPC -> {name, cat}
+  // - masterCatalog: list of items (name/cat/upc) to help build your master list
   let state = loadState() || {
     current: newBlankList("Today"),
-    groceryCatalog: [],  // master grocery list
     dishCatalog: [],
     currentMenu: [],
-    categories: [...DEFAULT_CATEGORIES]
+    upcMap: {},          // { "012345678905": {name:"Milk", cat:"Dairy"} }
+    masterCatalog: []    // [{name, cat, upc, created}]
   };
-
-  // ---- Migration / safety ----
-  (function migrate(){
-    if(!Array.isArray(state.categories) || state.categories.length === 0){
-      state.categories = [...DEFAULT_CATEGORIES];
-    }
-    if(!state.categories.some(c => String(c).trim().toLowerCase() === "misc")){
-      state.categories.push("Misc");
-    }
-    if(!Array.isArray(state.groceryCatalog)) state.groceryCatalog = [];
-    if(state.current && Array.isArray(state.current.items)){
-      state.current.items.forEach(it => { if(!it.cat) it.cat = "Misc"; });
-    }
-    saveState(state);
-  })();
-
-  // ✅ Master checkbox selections live only in memory (not saved)
-  const selectedCatalogKeys = new Set(); // key = name|cat lower
 
   let lastAddedId = null;
   let renderTimeout = null;
 
-  function money(n){ return (Math.round((n||0)*100)/100).toFixed(2); }
-  function computeTotal(){
+  function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
+
+  function computeTotal() {
     return state.current.items.reduce((sum, it) => {
       const p = parseFloat(it.price) || 0;
       const q = parseFloat(it.qty) || 1;
-      return sum + p*q;
+      return sum + p * q;
     }, 0);
   }
 
-  function generateId(){
+  function generateId() {
     if (crypto.randomUUID) return crypto.randomUUID();
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0;
@@ -344,7 +264,7 @@
     });
   }
 
-  function showToast(message, duration = 1800){
+  function showToast(message, duration = 2000) {
     const div = document.createElement('div');
     div.textContent = message;
     div.style.cssText = `
@@ -357,96 +277,19 @@
     setTimeout(() => div.remove(), duration);
   }
 
-  // --- Categories helpers ---
-  function normCat(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
-  function ensureCategory(cat){
-    cat = normCat(cat) || "Misc";
-    const hit = state.categories.find(c => normCat(c).toLowerCase() === cat.toLowerCase());
-    if(hit) return hit;
-    state.categories.push(cat);
-    saveState(state);
-    return cat;
-  }
-  function catIndex(cat){
-    cat = normCat(cat) || "Misc";
-    const i = state.categories.findIndex(c => normCat(c).toLowerCase() === cat.toLowerCase());
-    return i >= 0 ? i : (state.categories.length + 999);
-  }
+  // --- Groceries ---
+  function addItem(name) {
+    name = String(name ?? "").trim();
+    if (!name) return;
 
-  // --- Grocery key helpers ---
-  function normName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
-  function keyOf(name, cat){
-    return `${normName(name).toLowerCase()}|${normCat(cat).toLowerCase()}`;
-  }
-  function escapeHtml(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
-
-  // --- Catalog helpers ---
-  function hasCatalogItem(name, cat){
-    const k = keyOf(name, cat);
-    return state.groceryCatalog.some(x => keyOf(x.name, x.cat) === k);
-  }
-  function addToCatalog(name, cat){
-    name = normName(name);
-    cat = ensureCategory(cat);
-    if(!name) return false;
-    if(hasCatalogItem(name, cat)) return false;
-    state.groceryCatalog.push({ name, cat });
-    saveState(state);
-    return true;
-  }
-  function removeFromCatalog(name, cat){
-    const k = keyOf(name, cat);
-    state.groceryCatalog = state.groceryCatalog.filter(x => keyOf(x.name, x.cat) !== k);
+    const item = { id: generateId(), name, done:false, qty:"1", unit:"ea", price:"" };
+    state.current.items.push(item);
+    lastAddedId = item.id;
     saveState(state);
     debouncedRender();
   }
 
-  // --- Shopping list helpers ---
-  function addItemToShopping(name, cat){
-    name = normName(name);
-    if(!name) return false;
-    cat = ensureCategory(cat || "Misc");
-    const k = keyOf(name, cat);
-    if(state.current.items.some(it => keyOf(it.name, it.cat) === k)) return false;
-
-    const item = { id: generateId(), name, cat, done:false, qty:"1", unit:"ea", price:"" };
-    state.current.items.push(item);
-    lastAddedId = item.id;
-    saveState(state);
-    return true;
-  }
-  function removeFromShopping(name, cat){
-    const k = keyOf(name, cat);
-    const before = state.current.items.length;
-    state.current.items = state.current.items.filter(it => keyOf(it.name, it.cat) !== k);
-    if(state.current.items.length !== before){
-      saveState(state);
-      debouncedRender();
-    }
-  }
-
-  // ✅ Deduplicate CURRENT list ONLY (Master untouched)
-  function dedupeCurrentShoppingList(){
-    const seen = new Set();
-    const out = [];
-    for(const it of state.current.items){
-      const k = keyOf(it.name, it.cat);
-      if(seen.has(k)) continue; // drop duplicate
-      seen.add(k);
-      out.push(it);
-    }
-    if(out.length !== state.current.items.length){
-      state.current.items = out;
-      saveState(state);
-    }
-  }
-
-  // --- Update / delete current items by id (existing behavior) ---
-  function deleteItemById(id){
+  function deleteItemById(id) {
     const idx = state.current.items.findIndex(x => x.id === id);
     if (idx === -1) return;
     state.current.items.splice(idx, 1);
@@ -454,265 +297,135 @@
     saveState(state);
     debouncedRender();
   }
-  function updateItem(id, changes){
+
+  function updateItem(id, changes) {
     const item = state.current.items.find(x => x.id === id);
     if (!item) return;
-    if(Object.prototype.hasOwnProperty.call(changes, "cat")){
-      changes.cat = ensureCategory(changes.cat);
-    }
     Object.assign(item, changes);
     saveState(state);
     debouncedRender();
   }
 
-  // --- Dishes (unchanged) ---
-  function normDishName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
+  // --- Dishes ---
+  function normDishName(s){
+    return String(s ?? "").trim().replace(/\s+/g, " ");
+  }
   function hasDish(arr, name){
     const n = normDishName(name).toLowerCase();
     return arr.some(x => normDishName(x).toLowerCase() === n);
   }
+
   function addDishToCatalogAndMenu(name){
     name = normDishName(name);
     if(!name) return {addedCatalog:false, addedMenu:false};
-    let addedCatalog=false, addedMenu=false;
-    if(!hasDish(state.dishCatalog, name)){ state.dishCatalog.push(name); addedCatalog=true; }
-    if(!hasDish(state.currentMenu, name)){ state.currentMenu.push(name); addedMenu=true; }
-    saveState(state); debouncedRender();
+
+    let addedCatalog = false, addedMenu = false;
+
+    if(!hasDish(state.dishCatalog, name)){
+      state.dishCatalog.push(name);
+      addedCatalog = true;
+    }
+    if(!hasDish(state.currentMenu, name)){
+      state.currentMenu.push(name);
+      addedMenu = true;
+    }
+
+    saveState(state);
+    debouncedRender();
     return {addedCatalog, addedMenu};
   }
+
   function removeDishFromMenu(name){
     const n = normDishName(name).toLowerCase();
     state.currentMenu = state.currentMenu.filter(x => normDishName(x).toLowerCase() !== n);
-    saveState(state); debouncedRender();
+    saveState(state);
+    debouncedRender();
   }
+
   function removeDishFromCatalog(name){
     const n = normDishName(name).toLowerCase();
     state.dishCatalog = state.dishCatalog.filter(x => normDishName(x).toLowerCase() !== n);
     state.currentMenu = state.currentMenu.filter(x => normDishName(x).toLowerCase() !== n);
-    saveState(state); debouncedRender();
+    saveState(state);
+    debouncedRender();
   }
+
   function randomMenu14(){
     const pool = [...state.dishCatalog];
     for(let i=pool.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [pool[i],pool[j]]=[pool[j],pool[i]];
+      const j = Math.floor(Math.random()*(i+1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    state.currentMenu = pool.slice(0,14);
-    saveState(state); debouncedRender();
+    state.currentMenu = pool.slice(0, 14);
+    saveState(state);
+    debouncedRender();
   }
 
-  function debouncedRender(){
+  function debouncedRender() {
     clearTimeout(renderTimeout);
     renderTimeout = setTimeout(render, 60);
   }
 
-  // --- Add/Edit Grocery modal ---
-  const editBg = document.getElementById("editBg");
-  const editTitle = document.getElementById("editTitle");
-  const editName = document.getElementById("editName");
-  const editCat = document.getElementById("editCat");
-  const btnEditClose = document.getElementById("btnEditClose");
-  const btnEditCancel = document.getElementById("btnEditCancel");
-  const btnEditSave = document.getElementById("btnEditSave");
-
-  let editMode = "add"; // "add" | "edit"
-  let editItemId = null;
-  let lastManualCat = "Misc";
-
-  function buildCatOptions(selected){
-    const sel = ensureCategory(selected || "Misc");
-    editCat.innerHTML = state.categories.map(c => {
-      const cc = String(c);
-      const isSel = normCat(cc).toLowerCase() === normCat(sel).toLowerCase();
-      return `<option ${isSel ? "selected":""}>${escapeHtml(cc)}</option>`;
-    }).join("");
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[m]));
   }
 
-  function openAddEditModal(mode, item){
-    editMode = mode;
-    editItemId = item?.id || null;
-    if(mode === "add"){
-      editTitle.textContent = "Add Item";
-      editName.value = "";
-      buildCatOptions(lastManualCat || "Misc");
-      setTimeout(() => editName.focus(), 50);
-    } else {
-      editTitle.textContent = "Edit Item";
-      editName.value = item?.name || "";
-      buildCatOptions(item?.cat || "Misc");
-      setTimeout(() => editName.focus(), 50);
-    }
-    editBg.style.display = "flex";
-  }
-
-  function closeAddEditModal(){
-    editBg.style.display = "none";
-    editItemId = null;
-  }
-
-  btnEditClose.onclick = closeAddEditModal;
-  btnEditCancel.onclick = closeAddEditModal;
-  editBg.onclick = (e)=>{ if(e.target === editBg) closeAddEditModal(); };
-
-  btnEditSave.onclick = () => {
-    const name = normName(editName.value);
-    const cat = ensureCategory(editCat.value);
-
-    if(!name){ showToast("Please enter an item name"); return; }
-
-    if(editMode === "add"){
-      lastManualCat = cat;
-      // manual add = Master + Current
-      addToCatalog(name, cat);
-      addItemToShopping(name, cat);
-      dedupeCurrentShoppingList();
-      showToast(`Added: ${name} (${cat})`);
-    } else {
-      if(!editItemId) return;
-      updateItem(editItemId, { name, cat });
-      addToCatalog(name, cat);
-      dedupeCurrentShoppingList();
-      showToast("Updated");
-    }
-    closeAddEditModal();
-  };
-
-  editName.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){ e.preventDefault(); btnEditSave.click(); }
-  });
-
-  // --- Render Groceries ---
-  function renderGroceries(){
+  function renderGroceries() {
     document.getElementById("listName").textContent = state.current.name;
     document.getElementById("total").textContent = money(computeTotal());
 
-    // Shopping list (sorted)
-    const listCard = document.getElementById("listCard");
-    if(state.current.items.length === 0){
-      listCard.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
-        No items yet.<br>Use <b>SCAN</b>, <b>Add Item</b>, or pick from <b>Master Grocery List</b>.
-      </div>`;
-    } else {
-      const view = [...state.current.items].sort((a,b)=>{
-        const ai = catIndex(a.cat);
-        const bi = catIndex(b.cat);
-        if(ai !== bi) return ai - bi;
-        return String(a.name||"").localeCompare(String(b.name||""), undefined, {sensitivity:"base"});
-      });
-
-      listCard.innerHTML = view.map(it => `
-        <div class="item ${it.done ? "done":""}" data-id="${it.id}">
-          <input class="check" type="checkbox" ${it.done ? "checked":""}>
-          <div class="name" title="${escapeHtml(it.cat || "Misc")}">${escapeHtml(it.name)}</div>
-          <input class="qty" type="number" step="0.5" min="0" value="${it.qty}">
-          <select class="unit">
-            ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
-          </select>
-          <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
-          <button class="delBtn" title="Delete">🗑️</button>
-        </div>
-      `).join("");
-
-      listCard.querySelectorAll(".item").forEach(row=>{
-        const id = row.dataset.id;
-        const item = state.current.items.find(x => x.id === id);
-        if(!item) return;
-
-        row.querySelector(".check").onchange = e => updateItem(id, { done: e.target.checked });
-
-        row.querySelector(".qty").onchange = e => {
-          let v = parseFloat(e.target.value) || 0;
-          v = Math.max(0, Math.min(999, v));
-          updateItem(id, { qty: String(v) });
-        };
-
-        row.querySelector(".unit").onchange = e => updateItem(id, { unit: e.target.value });
-
-        row.querySelector(".price").onchange = e => {
-          let v = parseFloat(e.target.value);
-          updateItem(id, { price: isNaN(v) ? "" : String(Math.max(0, v)) });
-        };
-
-        row.querySelector(".delBtn").onclick = () => deleteItemById(id);
-
-        // edit = name + category dropdown
-        row.querySelector(".name").onclick = () => openAddEditModal("edit", item);
-      });
-    }
-
-    // Master catalog (sorted)
-    document.getElementById("catalogCount").textContent = state.groceryCatalog.length;
-
-    const catalogCard = document.getElementById("catalogCard");
-    if(state.groceryCatalog.length === 0){
-      catalogCard.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
-        Master list is empty.<br>Scan a grocery item QR or use <b>Add Item</b>.
+    const card = document.getElementById("listCard");
+    if (state.current.items.length === 0) {
+      card.innerHTML = `<div style="padding:16px; color:#6b7280; text-align:center;">
+        No items yet.<br>Tap <b>SCAN</b>, <b>SCAN UPC</b>, or <b>Add Item</b>.
       </div>`;
       return;
     }
 
-    const catView = [...state.groceryCatalog].sort((a,b)=>{
-      const ai = catIndex(a.cat);
-      const bi = catIndex(b.cat);
-      if(ai !== bi) return ai - bi;
-      return String(a.name||"").localeCompare(String(b.name||""), undefined, {sensitivity:"base"});
-    });
+    card.innerHTML = state.current.items.map(it => `
+      <div class="item ${it.done ? "done":""}" data-id="${it.id}">
+        <input class="check" type="checkbox" ${it.done ? "checked":""}>
+        <div class="name">${escapeHtml(it.name)}</div>
+        <input class="qty" type="number" step="0.5" min="0" value="${it.qty}">
+        <select class="unit">
+          ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${u}</option>`).join("")}
+        </select>
+        <input class="price" type="number" step="0.01" min="0" placeholder="$" value="${escapeHtml(it.price)}">
+        <button class="delBtn" title="Delete">🗑️</button>
+      </div>
+    `).join("");
 
-    catalogCard.innerHTML = catView.map(ci => {
-      const k = keyOf(ci.name, ci.cat);
-      const checked = selectedCatalogKeys.has(k);
-      return `
-        <div class="catRow" data-name="${escapeHtml(ci.name)}" data-cat="${escapeHtml(ci.cat)}">
-          <input class="catCheck" type="checkbox" ${checked ? "checked":""}>
-          <div class="catName">${escapeHtml(ci.name)}</div>
-          <span class="tag">${escapeHtml(ci.cat || "Misc")}</span>
-          <button class="delBtn" title="Delete">🗑️</button>
-        </div>
-      `;
-    }).join("");
+    card.querySelectorAll(".item").forEach(row => {
+      const id = row.dataset.id;
+      const item = state.current.items.find(x => x.id === id);
+      if (!item) return;
 
-    catalogCard.querySelectorAll(".catRow").forEach(row=>{
-      const name = row.dataset.name;
-      const cat = row.dataset.cat;
-      const k = keyOf(name, cat);
-      const cb = row.querySelector(".catCheck");
+      row.querySelector(".check").onchange = e => updateItem(id, { done: e.target.checked });
 
-      cb.onchange = () => {
-        if(cb.checked) selectedCatalogKeys.add(k);
-        else selectedCatalogKeys.delete(k);
+      row.querySelector(".qty").onchange = e => {
+        let v = parseFloat(e.target.value) || 0;
+        v = Math.max(0, Math.min(999, v));
+        updateItem(id, { qty: String(v) });
       };
 
-      // tap name toggles checkbox for fast selecting
-      row.querySelector(".catName").onclick = () => {
-        cb.checked = !cb.checked;
-        cb.onchange();
+      row.querySelector(".unit").onchange = e => updateItem(id, { unit: e.target.value });
+
+      row.querySelector(".price").onchange = e => {
+        let v = parseFloat(e.target.value);
+        updateItem(id, { price: isNaN(v) ? "" : String(Math.max(0, v)) });
       };
 
-      // delete prompt like dish catalog behavior
-      row.querySelector(".delBtn").onclick = () => {
-        const choice = prompt(
-`Delete "${name}" (${cat})?
-Type:
-M = remove from Current list only
-C = remove from Master list (also removes from Current)
-(Anything else cancels)`, "C"
-        );
-        if(!choice) return;
-        const ch = choice.trim().toUpperCase();
-        if(ch === "M"){
-          removeFromShopping(name, cat);
-          showToast(`Removed from current: ${name}`);
-        } else if(ch === "C"){
-          selectedCatalogKeys.delete(k);
-          removeFromCatalog(name, cat);
-          removeFromShopping(name, cat);
-          showToast(`Removed from master: ${name}`);
-        }
+      row.querySelector(".delBtn").onclick = () => deleteItemById(id);
+
+      row.querySelector(".name").onclick = () => {
+        const newName = prompt("Edit item:", item.name);
+        if (newName && newName.trim() !== item.name) updateItem(id, { name: newName.trim() });
       };
     });
   }
 
-  // --- Render Dishes ---
   function dishRowHtml(name, where){
     return `
       <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
@@ -727,21 +440,21 @@ C = remove from Master list (also removes from Current)
 
   function renderDishes(){
     document.getElementById("menuCount").textContent = state.currentMenu.length;
-    document.getElementById("dishCatalogCount").textContent = state.dishCatalog.length;
+    document.getElementById("catalogCount").textContent = state.dishCatalog.length;
 
     const menuCard = document.getElementById("menuCard");
     menuCard.innerHTML = state.currentMenu.length
       ? state.currentMenu.map(d => dishRowHtml(d, "menu")).join("")
       : `<div style="padding:16px; color:#6b7280; text-align:center;">
           Menu is empty.<br>Scan a dish QR or tap <b>Random Menu (14)</b>.
-        </div>`;
+         </div>`;
 
-    const catalogCard = document.getElementById("catalogDishCard");
+    const catalogCard = document.getElementById("catalogCard");
     catalogCard.innerHTML = state.dishCatalog.length
       ? state.dishCatalog.map(d => dishRowHtml(d, "catalog")).join("")
       : `<div style="padding:16px; color:#6b7280; text-align:center;">
           Catalog is empty.<br>Scan dish QR codes to build it.
-        </div>`;
+         </div>`;
 
     function bindDishRows(container){
       container.querySelectorAll(".dishRow").forEach(row=>{
@@ -814,7 +527,10 @@ C = remove from Master list (also removes from Current)
     render();
   };
 
-  document.getElementById("btnAdd").onclick = () => openAddEditModal("add", null);
+  document.getElementById("btnAdd").onclick = () => {
+    const name = prompt("Add item:");
+    if (name) addItem(name.trim());
+  };
 
   document.getElementById("btnUndo").onclick = () => {
     if (lastAddedId) deleteItemById(lastAddedId);
@@ -827,48 +543,6 @@ C = remove from Master list (also removes from Current)
       saveState(state);
       render();
     }
-  };
-
-  // ✅ Add Selected from Master → Current, then clear checks + dedupe
-  document.getElementById("btnAddSelected").onclick = () => {
-    if(selectedCatalogKeys.size === 0){
-      showToast("No items selected");
-      return;
-    }
-
-    let added = 0;
-    for(const k of selectedCatalogKeys){
-      const [n, c] = k.split("|");
-      // Find exact-cased entry from catalog for nicer display (optional)
-      const hit = state.groceryCatalog.find(x => keyOf(x.name, x.cat) === k);
-      const name = hit ? hit.name : n;
-      const cat  = hit ? hit.cat  : c;
-      if(addItemToShopping(name, cat)) added++;
-    }
-
-    dedupeCurrentShoppingList();
-
-    // Clear checks automatically (your requirement)
-    selectedCatalogKeys.clear();
-
-    saveState(state);
-    render();
-
-    showToast(added ? `Added ${added} item(s)` : "Nothing new to add");
-  };
-
-  document.getElementById("btnClearSelect").onclick = () => {
-    selectedCatalogKeys.clear();
-    render();
-    showToast("Checks cleared");
-  };
-
-  document.getElementById("btnClearCatalog").onclick = () => {
-    if(!confirm("Clear the entire Master Grocery List?\n(This does NOT clear your Shopping List)")) return;
-    state.groceryCatalog = [];
-    selectedCatalogKeys.clear();
-    saveState(state);
-    render();
   };
 
   // --- Dish UI actions ---
@@ -887,7 +561,7 @@ C = remove from Master list (also removes from Current)
     render();
   };
 
-  document.getElementById("btnClearDishCatalog").onclick = () => {
+  document.getElementById("btnClearCatalog").onclick = () => {
     if(!confirm("Clear the entire Dish Catalog AND Menu?")) return;
     state.dishCatalog = [];
     state.currentMenu = [];
@@ -899,43 +573,89 @@ C = remove from Master list (also removes from Current)
     const name = prompt("Enter dish name:");
     if (!name) return;
     const normalized = normDishName(name);
-    if (!normalized) { showToast("Please enter a valid dish name"); return; }
+    if (!normalized) {
+      showToast("Please enter a valid dish name", 1800);
+      return;
+    }
     const result = addDishToCatalogAndMenu(normalized);
-    showToast((result.addedCatalog || result.addedMenu) ? `Added dish: ${normalized}` : `Already exists: ${normalized}`);
+    showToast((result.addedCatalog || result.addedMenu) ? `Added dish: ${normalized}` : `Already exists: ${normalized}`, 1800);
   };
 
-  // --- Scanner logic (same scanning, items go to Master + Current) ---
+  // ======================================================
+  // UPC MASTER / LOOKUP HELPERS
+  // ======================================================
+  function normUpc(code){
+    // Keep digits only (handles spaces, hyphens, etc.)
+    const digits = String(code ?? "").replace(/[^\d]/g, "");
+    // Typical UPC/EAN lengths: 8, 12, 13, 14. We accept >=6 as "something".
+    return digits;
+  }
+
+  function ensureMasterItem(upc, name, cat){
+    const u = normUpc(upc);
+    const nm = String(name ?? "").trim();
+    const ct = String(cat ?? "Misc").trim() || "Misc";
+    if(!u || !nm) return false;
+
+    // Save mapping (authoritative)
+    state.upcMap[u] = { name: nm, cat: ct };
+
+    // Add to masterCatalog if this UPC isn't already there
+    const exists = state.masterCatalog.some(x => String(x.upc) === u);
+    if(!exists){
+      state.masterCatalog.push({ upc: u, name: nm, cat: ct, created: Date.now() });
+    }
+
+    saveState(state);
+    return true;
+  }
+
+  function pickCategoryPrompt(defaultCat="Misc"){
+    const list = CATEGORIES.join(", ");
+    const typed = prompt(`Category? (type one)\n\nCommon:\n${list}`, defaultCat);
+    const t = String(typed ?? "").trim();
+    if(!t) return defaultCat;
+
+    // If they typed something new, we still accept it (you can tighten later)
+    return t;
+  }
+  // ======================================================
+
+  // --- Scanner logic ---
   const modalBg = document.getElementById("modalBg");
   const scanMsgEl = document.getElementById("scanMsg");
+  const scanHintEl = document.getElementById("scanHint");
   let qr = null;
 
+  // Pending payload for CAPTURE
+  // kinds: "item" | "dish" | "upc" | "unknown"
   let pending = null;
   let targetLocked = false;
   let audioCtx = null;
 
-  function beep(){
-    try{
-      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function beep() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = "sine"; osc.frequency.value = 880;
       gain.gain.value = 0.06;
       osc.connect(gain); gain.connect(audioCtx.destination);
       osc.start();
-      setTimeout(()=>osc.stop(), 90);
-    }catch{}
+      setTimeout(() => osc.stop(), 90);
+    } catch {}
   }
 
-  function setScanMsg(text, cls=""){
+  function setScanMsg(text, cls = "") {
     scanMsgEl.textContent = text;
     scanMsgEl.className = "scanMsg" + (cls ? ` ${cls}` : "");
   }
 
-  function resetTarget(){
+  function resetTarget() {
     pending = null;
     targetLocked = false;
     document.getElementById("btnCapture").disabled = true;
-    setScanMsg("Point camera at QR code – hold steady…");
+    setScanMsg("Point camera at code – hold steady…");
   }
 
   function parseQR(decodedText){
@@ -943,6 +663,7 @@ C = remove from Master list (also removes from Current)
     raw = raw.replace(/\uFEFF/g, "");
     raw = raw.replace(/\r\n/g, "\n").trim();
     raw = raw.slice(0, 2000);
+
     if(!raw) return { kind:"unknown", raw:"" };
 
     const maybeDecode = (s) => {
@@ -953,82 +674,129 @@ C = remove from Master list (also removes from Current)
       return s;
     };
 
-    const lower = raw.toLowerCase();
-
-    try{
-      if(/^[a-z]+:\/\//i.test(raw)){
+    // URL form
+    try {
+      if (/^[a-z]+:\/\//i.test(raw)) {
         const url = new URL(raw);
 
         const dish = url.searchParams.get("dish");
-        if(dish) return { kind:"dish", name: maybeDecode(dish).trim().slice(0,120), raw };
+        if (dish) return { kind:"dish", name: maybeDecode(dish).trim().slice(0,120), raw };
 
         const item = url.searchParams.get("item");
         const cat  = url.searchParams.get("cat");
-        if(item) return { kind:"item", name: maybeDecode(item).trim().slice(0,120), cat: maybeDecode(cat||"").trim().slice(0,80), raw };
+        if (item) return {
+          kind:"item",
+          name: maybeDecode(item).trim().slice(0,120),
+          cat:  maybeDecode(cat||"").trim().slice(0,80),
+          raw
+        };
 
         const text = url.searchParams.get("text");
-        if(text) return parseQR(maybeDecode(text).trim());
+        if (text) return parseQR(maybeDecode(text).trim());
       }
     } catch {}
 
+    // Plain dish= / item=
     const dishMatch = raw.match(/(?:^|[?&\s])dish=([^&\n]+)/i);
-    if(dishMatch){
+    if (dishMatch) {
       const name = maybeDecode(dishMatch[1]).trim();
       return { kind:"dish", name: name.slice(0,120), raw };
     }
 
+    const lower = raw.toLowerCase();
     const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
-    if(itemMatch){
+    if (itemMatch) {
       const start = lower.indexOf("item=");
       const qs = raw.slice(start);
       const sp = new URLSearchParams(qs);
       const item = sp.get("item");
       const cat  = sp.get("cat");
-      if(item) return { kind:"item", name: maybeDecode(item).trim().slice(0,120), cat: maybeDecode(cat||"").trim().slice(0,80), raw };
+      if (item) {
+        return {
+          kind:"item",
+          name: maybeDecode(item).trim().slice(0,120),
+          cat:  maybeDecode(cat||"").trim().slice(0,80),
+          raw
+        };
+      }
     }
 
     return { kind:"unknown", raw: raw.slice(0,140) };
   }
 
-  async function openScanner(){
+  function parseUPC(decodedText){
+    const raw = String(decodedText ?? "").trim().slice(0, 2000);
+    const code = normUpc(raw);
+    if(!code) return { kind:"unknown", raw: raw.slice(0,140) };
+    return { kind:"upc", upc: code, raw };
+  }
+
+  async function openScanner() {
     modalBg.style.display = "flex";
     resetTarget();
     document.getElementById("reader").innerHTML = "";
 
+    // Hint text per mode
+    if(scanMode === "UPC"){
+      scanHintEl.textContent = "Tip: For UPC, hold ~6–12 inches away. Keep the barcode inside the wide box and steady.";
+    } else {
+      scanHintEl.textContent = "Tip: For QR, hold ~6–14 inches away, fill the box with the QR, and keep steady.";
+    }
+
+    // IMPORTANT: formats depend on mode so QR vs UPC do not fight each other
     qr = new Html5Qrcode("reader", {
       verbose: false,
-      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+      formatsToSupport:
+        scanMode === "UPC"
+          ? [
+              Html5QrcodeSupportedFormats.EAN_13,
+              Html5QrcodeSupportedFormats.UPC_A,
+              Html5QrcodeSupportedFormats.UPC_E,
+              Html5QrcodeSupportedFormats.EAN_8,
+              Html5QrcodeSupportedFormats.CODE_128
+            ]
+          : [Html5QrcodeSupportedFormats.QR_CODE],
       experimentalFeatures: { useBarCodeDetectorIfSupported: true }
     });
 
-    try{
+    try {
       const cameras = await Html5Qrcode.getCameras();
-      if(!cameras?.length) throw new Error("No cameras found");
+      if (!cameras?.length) throw new Error("No cameras found");
 
       const rear = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length-1];
 
-      const qrboxFunction = () => ({ width: 70, height: 70 });
+      // Choose scan box based on mode (EASY TO TUNE ABOVE)
+      const qrboxFunction = () => {
+        return scanMode === "UPC" ? UPC_SCAN_BOX : QR_SCAN_BOX;
+      };
 
       await qr.start(
         rear.id,
-        { fps: 12, qrbox: qrboxFunction, disableFlip:false, rememberLastUsedCamera:true, aspectRatio: 1.777 },
+        {
+          fps: 12,
+          qrbox: qrboxFunction,
+          disableFlip: false,
+          rememberLastUsedCamera: true,
+          aspectRatio: 1.777
+        },
         onScanSuccess
       );
-    } catch(err){
+    } catch (err) {
       setScanMsg("Camera error – check permissions / try again.", "warn");
       console.warn("Scanner start failed:", err);
       setTimeout(closeScanner, 2200);
     }
   }
 
-  async function closeScanner(){
+  async function closeScanner() {
     modalBg.style.display = "none";
     resetTarget();
-    if(!qr) return;
-    try{
+
+    if (!qr) return;
+    try {
       await qr.stop();
       qr.clear();
-    } catch(err){
+    } catch (err) {
       console.warn("Scanner cleanup issue:", err);
     } finally {
       qr = null;
@@ -1036,16 +804,24 @@ C = remove from Master list (also removes from Current)
     }
   }
 
-  function onScanSuccess(decodedText){
-    if(targetLocked) return;
+  function onScanSuccess(decodedText) {
+    if (targetLocked) return;
     targetLocked = true;
 
-    pending = parseQR(decodedText);
+    pending = (scanMode === "UPC") ? parseUPC(decodedText) : parseQR(decodedText);
 
-    if(navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
     beep();
 
     document.getElementById("btnCapture").disabled = false;
+
+    if(pending.kind === "upc"){
+      const known = !!state.upcMap[pending.upc];
+      setScanMsg(known
+        ? `Detected UPC (known): ${pending.upc} → tap Capture`
+        : `Detected UPC (new): ${pending.upc} → tap Capture`, "ok");
+      return;
+    }
 
     if(pending.kind === "dish"){
       setScanMsg(`Detected DISH: ${pending.name} → tap Capture`, "ok");
@@ -1058,62 +834,89 @@ C = remove from Master list (also removes from Current)
   }
 
   document.getElementById("btnCapture").onclick = () => {
-    if(!pending) return;
+    if (!pending) return;
+
+    if(pending.kind === "upc"){
+      const upc = pending.upc;
+      const hit = state.upcMap[upc];
+
+      if(hit && hit.name){
+        // KNOWN UPC -> auto add to current shopping list
+        addItem(hit.name);
+        setScanMsg(`✅ Added (UPC): ${hit.name}`, "ok");
+        showTab("groceries");
+      } else {
+        // UNKNOWN UPC -> onboard into Master, then ask if add to Current too
+        const name = prompt(`New UPC detected: ${upc}\n\nItem name?`, "");
+        const nm = String(name ?? "").trim();
+        if(!nm){
+          setScanMsg(`⚠️ Canceled new UPC: ${upc}`, "warn");
+          document.getElementById("btnCapture").disabled = true;
+          setTimeout(resetTarget, 650);
+          return;
+        }
+
+        const cat = pickCategoryPrompt("Misc");
+        ensureMasterItem(upc, nm, cat);
+
+        const addNow = confirm(`Add to Current Shopping List?\n\n${nm}\nCategory: ${cat}\nUPC: ${upc}`);
+        if(addNow){
+          addItem(nm);
+          setScanMsg(`✅ Added to Master + Current: ${nm}`, "ok");
+          showTab("groceries");
+        } else {
+          setScanMsg(`✅ Added to Master only: ${nm}`, "ok");
+        }
+      }
+
+      document.getElementById("btnCapture").disabled = true;
+      setTimeout(resetTarget, 650);
+      return;
+    }
 
     if(pending.kind === "dish"){
       const r = addDishToCatalogAndMenu(pending.name);
-      setScanMsg((r.addedCatalog || r.addedMenu) ? `✅ Dish added: ${pending.name}` : `ℹ️ Dish already exists: ${pending.name}`, "ok");
+      const msg = (r.addedCatalog || r.addedMenu)
+        ? `✅ Dish added: ${pending.name}`
+        : `ℹ️ Dish already exists: ${pending.name}`;
+      setScanMsg(msg, "ok");
       showTab("dishes");
     } else if(pending.kind === "item"){
-      const cat = ensureCategory(pending.cat || "Misc");
-      addToCatalog(pending.name, cat);
-      addItemToShopping(pending.name, cat);
-      dedupeCurrentShoppingList();
-      saveState(state);
-      setScanMsg(`✅ Added: ${pending.name} (${cat})`, "ok");
+      addItem(pending.name);
+      setScanMsg(`✅ Added item: ${pending.name}`, "ok");
       showTab("groceries");
-      render();
     } else {
-      const cat = "Misc";
-      addToCatalog(pending.raw, cat);
-      addItemToShopping(pending.raw, cat);
-      dedupeCurrentShoppingList();
-      saveState(state);
+      addItem(pending.raw);
       setScanMsg(`✅ Added as item: ${pending.raw}`, "ok");
       showTab("groceries");
-      render();
     }
 
     document.getElementById("btnCapture").disabled = true;
     setTimeout(resetTarget, 650);
   };
 
-  document.getElementById("btnScan").onclick = openScanner;
-  document.getElementById("btnScanDish").onclick = openScanner;
+  // Buttons to open scanner
+  document.getElementById("btnScan").onclick = () => {
+    scanMode = "QR";
+    openScanner();
+  };
+
+  document.getElementById("btnScanDish").onclick = () => {
+    scanMode = "QR";
+    openScanner();
+  };
+
+  document.getElementById("btnScanUPC").onclick = () => {
+    scanMode = "UPC";
+    openScanner();
+  };
 
   document.getElementById("btnCloseTop").onclick = closeScanner;
   document.getElementById("btnDone").onclick = closeScanner;
-  modalBg.onclick = e => { if(e.target === modalBg) closeScanner(); };
+  modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
 
-  // --- Tabs init ---
-  const tabGroceries = document.getElementById("tabGroceries");
-  const tabDishes = document.getElementById("tabDishes");
-  const screenGroceries = document.getElementById("screenGroceries");
-  const screenDishes = document.getElementById("screenDishes");
-
-  function showTab(which){
-    const isG = which === "groceries";
-    screenGroceries.style.display = isG ? "" : "none";
-    screenDishes.style.display = isG ? "none" : "";
-    tabGroceries.classList.toggle("active", isG);
-    tabDishes.classList.toggle("active", !isG);
-  }
-  tabGroceries.onclick = () => showTab("groceries");
-  tabDishes.onclick = () => showTab("dishes");
-
-  // --- Render + start ---
+  // Initial render
   render();
-</script>
-
+  </script>
 </body>
 </html>
