@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 064)
+     index.html  (BUILD 065)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -382,7 +382,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 064)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 065)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -556,7 +556,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 64;
+  const APP_VERSION = 65;
 
   function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
     const newKey = `groceryApp_v${APP_VERSION}`;
@@ -867,6 +867,20 @@
 
     saveState(state);
     debouncedRender();
+
+      // ✅ Auto-uncheck dishes after adding ingredients
+  state.currentMenu.forEach(dishName => {
+    if(state.menuAddFlags && Object.prototype.hasOwnProperty.call(state.menuAddFlags, dishName)){
+      state.menuAddFlags[dishName] = false;
+    }
+  });
+
+  // Also uncheck any live checkboxes currently on-screen
+  document.querySelectorAll("#menuCard .ingCheck").forEach(cb => cb.checked = false);
+
+  saveState(state);
+  debouncedRender();
+
 
     dishBg.style.display = "none";
     dishEditingName = null;
