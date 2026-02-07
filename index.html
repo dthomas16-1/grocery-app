@@ -20,7 +20,7 @@
 
 
 <!-- =========================
-     index.html  (BUILD 047)
+     index.html  (BUILD 048)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -475,7 +475,7 @@ button.danger{
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 047)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 048)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -483,7 +483,6 @@ button.danger{
   <button id="tabDishes" class="tabBtn">Dishes</button>
 
   <button id="btnClearDone" class="secondary">Clear Purchased</button>
-  <button id="btnClearCatalog" class="danger" style="display:none;">Clear Catalog</button>
 </div>
 
 
@@ -554,11 +553,19 @@ button.danger{
       <div class="card" id="menuCard"></div>
 
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
-          <div class="muted">Tap a dish to rename; delete button removes menu/catalog.</div>
-        </div>
-      </div>
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+    <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
+
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+      <div class="muted">Tap a dish to rename; delete button removes menu/catalog.</div>
+      <button id="btnClearCatalog" class="danger">Clear Catalog</button>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+  <div id="catalogCard"></div>
+</div>
+
       <div class="card" id="catalogCard"></div>
     </div>
   </div>
@@ -614,7 +621,7 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 47;
+  const APP_VERSION = 48;
 // =========================
 // Smart one-time migration helper
 // =========================
