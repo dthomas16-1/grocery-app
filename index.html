@@ -1,3 +1,6 @@
+<!-- =========================
+     index.html  (BUILD 039)
+     ========================= -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -229,7 +232,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 033 – master + QR + UPC scan modes)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(build 039 – master + QR + UPC scan modes)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -358,12 +361,20 @@
   </div>
 
   <script>
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(console.warn);
+  // =========================
+  // Consistency: Build / Version
+  // =========================
+  const APP_VERSION = 39;
+
+  // Service worker registration (kept simple and reliable)
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(console.warn);
+  }
 
   // =========================
-  // Build 033 constants
+  // Build 039 constants
   // =========================
-  const LS_KEY = "groceryApp_v33";
+  const LS_KEY = `groceryApp_v${APP_VERSION}`;
   const UNITS = ["ea","lb","oz","gal","ct"];
 
   // Category walking order (edit this list to change sort order)
@@ -1141,18 +1152,10 @@
       // Different capture windows by mode:
       const qrboxFunction = (vw, vh) => {
         if(mode === "upc"){
-          // =========================
-          // UPC MODE BOX (rectangle)
-          // =========================
-          // UPC mode: { width: 260, height: 110 }
-          const width = 260;
-          const height = 110;
-          return { width, height };
+          // UPC mode: rectangle
+          return { width: 260, height: 110 };
         } else {
-          // =========================
-          // QR MODE BOX (square)
-          // =========================
-          // QR mode: { width: 70, height: 70 }
+          // QR mode: square
           const size = 70;
           return { width: size, height: size };
         }
