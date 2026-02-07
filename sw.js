@@ -4,7 +4,7 @@
 const VERSION = 39;
 const CACHE = `grocery-app-v${VERSION}`;
 
-// Minimal app-shell for now (we’ll add icons after we confirm filenames)
+
 // App shell (cached for offline use)
 const APP_SHELL = [
   "./",
