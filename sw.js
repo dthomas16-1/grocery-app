@@ -12,9 +12,9 @@
 
 
 // =========================
-// sw.js  (CACHE v39)
+// sw.js  (CACHE v##)
 // =========================
-const VERSION = 39;
+const VERSION = 40;
 const CACHE = `grocery-app-v${VERSION}`;
 
 
