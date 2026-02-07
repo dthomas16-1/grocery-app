@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 060)
+     index.html  (BUILD 061)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -398,7 +398,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 060)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 061)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -472,6 +472,7 @@
         <button id="btnScanDish">SCAN DISH</button>
         <button id="btnAddDish" class="secondary">Add Dish</button>
         <button id="btnRandom14" class="secondary">Random Menu (14)</button>
+        <button id="btnAddCheckedIng" class="secondary">ADD IF CHECKED</button>
         <button id="btnClearMenu" class="secondary">Clear Menu</button>
       </div>
 
@@ -575,7 +576,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 60;
+  const APP_VERSION = 61;
 
   // =========================
   // Smart one-time migration helper
@@ -861,6 +862,79 @@ function openDishIngredientsModal(dishName){
   }
 
   dishBg.style.display = "flex";
+}
+function addIngredientsForCheckedMenu(){
+  let dishesChecked = 0;
+  let ingAdded = 0;
+  let ingAlready = 0;
+  let ingMissing = 0;
+
+  // Use the live checkbox state if present; fallback to saved flags.
+  const menuRows = Array.from(document.querySelectorAll("#menuCard .dishRow"));
+
+  // Build a quick map: dishName -> checked?
+  const checkedMap = {};
+  menuRows.forEach(row => {
+    const name = row.dataset.name;
+    const chk = row.querySelector(".ingCheck");
+    checkedMap[name] = !!chk?.checked;
+  });
+
+  state.currentMenu.forEach(dishName => {
+    const isChecked = checkedMap.hasOwnProperty(dishName)
+      ? checkedMap[dishName]
+      : !!state.menuAddFlags?.[dishName];
+
+    if(!isChecked) return;
+
+    dishesChecked++;
+
+    const dish = getDishObjByName(dishName);
+    const ings = dish?.ingredients || [];
+    if(!ings.length){
+      ingMissing++;
+      return;
+    }
+
+    ings.forEach(ing => {
+      const n = normName(ing.name);
+      const c = normName(ing.cat || "Misc") || "Misc";
+      if(!n) return;
+
+      // Always add to Master
+      addToMaster(n, c);
+
+      // Add to current shopping list (qty=1, unit=ea by your choice)
+      const ok = addItemToCurrent(n, c);
+      if(ok){
+        // ensure defaults are what you want
+        const it = state.current.items.find(x => normName(x.name).toLowerCase()===n.toLowerCase()
+          && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase());
+        if(it){
+          it.qty = "1";
+          it.unit = "ea";
+        }
+        ingAdded++;
+      } else {
+        ingAlready++;
+      }
+    });
+  });
+
+  saveState(state);
+  debouncedRender();
+
+  if(dishesChecked === 0){
+    showToast("No dishes checked.", 1600);
+    return;
+  }
+
+  const msg =
+    `Checked dishes: ${dishesChecked} • Added: ${ingAdded}` +
+    (ingAlready ? ` • Already: ${ingAlready}` : "") +
+    (ingMissing ? ` • No ingredients: ${ingMissing}` : "");
+
+  showToast(msg, 2600);
 }
 
 function closeDishModal(save){
@@ -1411,6 +1485,9 @@ dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
     }
     randomMenu14();
   };
+  document.getElementById("btnAddCheckedIng").onclick = () => {
+  addIngredientsForCheckedMenu();
+};
 
   document.getElementById("btnClearMenu").onclick = () => {
     if(!confirm("Clear the current menu?")) return;
