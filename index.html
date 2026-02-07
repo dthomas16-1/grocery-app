@@ -412,7 +412,7 @@ button.danger{
   border: 1px solid rgba(239,68,68,.18) !important;
 }
 /* =========================================================
-   v42 – Button intent colors (override)
+   v43 – Button intent colors (override)
    ========================================================= */
 
 /* Utility buttons: calm neutral (not dead gray) */
@@ -453,7 +453,7 @@ button.danger{
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 042)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 043)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -464,13 +464,15 @@ button.danger{
     <!-- GROCERIES TAB -->
     <div id="screenGroceries">
       <div class="row">
-        <button id="btnNew">New List</button>
-        <button id="btnScan" class="scanQR">SCAN QR</button>
-        <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
-        <button id="btnUndo" class="secondary">Undo</button>
-        <button id="btnClearDone" class="secondary">Clear Purchased</button>
-        <button id="btnAdd" class="secondary">Add Item</button>
-      </div>
+  <button id="btnNew">New List</button>
+  <button id="btnScan" class="scanQR">SCAN QR</button>
+  <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
+
+  <button id="btnClearDone" class="secondary">Clear Purchased</button>
+  <button id="btnAdd" class="secondary">Add Item</button>
+  <button id="btnUndo" class="secondary">Undo</button>
+</div>
+
 
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -585,7 +587,7 @@ button.danger{
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 42;
+  const APP_VERSION = 43;
 // =========================
 // Smart one-time migration helper
 // =========================
