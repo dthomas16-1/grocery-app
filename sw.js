@@ -1,3 +1,16 @@
+// ============================================================
+// SERVICE WORKER VERSIONING REMINDER
+// ------------------------------------------------------------
+// Whenever index.html APP_VERSION is changed:
+//
+// 1) Update VERSION below to match
+// 2) Commit sw.js
+// 3) Reload site with DevTools → Update on reload
+//
+// If VERSION is NOT bumped, old cached files may be used.
+// ============================================================
+
+
 // =========================
 // sw.js  (CACHE v39)
 // =========================
