@@ -5,12 +5,16 @@ const VERSION = 39;
 const CACHE = `grocery-app-v${VERSION}`;
 
 // Minimal app-shell for now (we’ll add icons after we confirm filenames)
+// App shell (cached for offline use)
 const APP_SHELL = [
   "./",
   "./index.html",
   "./sw.js",
   "./manifest.webmanifest",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
+
 
 // Install: pre-cache shell and take over quickly
 self.addEventListener("install", (e) => {
