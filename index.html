@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 065)
+     index.html  (BUILD 066)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -34,8 +34,10 @@
     * { box-sizing: border-box; }
 
     :root{
+      /* Core palette (warmer + friendlier) */
       --navy:#0b1220;
 
+      /* “App language” colors */
       --primary:#2563eb;
       --primary2:#1d4ed8;
       --success:#16a34a;
@@ -45,6 +47,7 @@
       --danger:#ef4444;
       --danger2:#dc2626;
 
+      /* Softer neutrals */
       --card:#ffffff;
       --ink:#0f172a;
       --muted:#64748b;
@@ -78,6 +81,7 @@
 
     .wrap { padding:16px 14px 90px; max-width:820px; margin:0 auto; }
 
+    /* Tabs row */
     .tabs{
       display:flex;
       gap:12px;
@@ -104,15 +108,25 @@
       box-shadow: 0 12px 22px rgba(2,6,23,.18);
     }
 
+    /* Push right-side buttons to the edge */
     #btnClearDone{ margin-left:auto; }
+    #btnMore{
+      padding: 10px 14px;
+      border-radius: var(--r-pill);
+      font-weight: 900;
+      line-height: 1;
+      min-width: 48px;
+    }
 
+    /* Base row */
     .row { display:flex; gap:12px; flex-wrap:wrap; }
 
+    /* ACTION row (Groceries main buttons) should fill width */
     .actionRow{
       justify-content: space-between;
     }
     .actionRow button{
-      flex: 1 1 150px;
+      flex: 1 1 150px;  /* grows to fill, wraps nicely */
       min-width: 140px;
     }
 
@@ -135,7 +149,7 @@
     .shopWrap{
       position: relative;
       display: inline-block;
-      margin-left: 20px;
+      margin-left: 20px;   /* space between UNDO and SHOP */
     }
 
     .shopMenu{
@@ -160,7 +174,7 @@
       border: 0;
       background: transparent;
       cursor: pointer;
-      color: #000;
+      color: #000;           /* ✅ FIX: always visible text */
     }
 
     .shopItem:hover{ background: rgba(0,0,0,.08); }
@@ -182,6 +196,7 @@
       box-shadow: 0 12px 22px rgba(239,68,68,.16);
     }
 
+    /* Intent colors */
     button.scanQR{
       background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     }
@@ -194,7 +209,6 @@
       min-width: 60px !important;
       padding-left: 6px;
       padding-right: 6px;
-
       background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%) !important;
       color:#fff !important;
       border:0 !important;
@@ -227,6 +241,7 @@
     .spacer { height:10px; }
     .total { font-weight:900; font-size:18px; letter-spacing:.2px; }
 
+    /* Rows / pills */
     .pill,
     .catPill{
       font-size:12px; font-weight:900;
@@ -238,6 +253,7 @@
     .pill.ok{ background:rgba(34,197,94,.18); color:#065f46; }
     .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
 
+    /* Grocery list rows */
     .item {
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -250,6 +266,7 @@
     select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
     .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
 
+    /* Master list rows */
     .masterRow{
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -258,6 +275,7 @@
     .mName{ flex:1; font-size:16px; cursor:pointer; font-weight:800; }
     .mCheck{ width:26px; height:26px; }
 
+    /* Dish rows */
     .dishRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -265,6 +283,7 @@
     .dishRow:last-child{ border-bottom:0; }
     .dishName{ font-size:16px; font-weight:800; cursor:pointer; }
 
+    /* Row delete buttons: soft danger */
     .delBtn{
       background: rgba(239,68,68,.10);
       color:#7f1d1d;
@@ -276,6 +295,7 @@
     }
     .delBtn:hover{ filter: brightness(1.02); }
 
+    /* Scanner modal */
     .modalBg {
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
@@ -327,6 +347,7 @@
     .capBtn { background:#16a34a; }
     .doneBtn { background:#e5e7eb; color:#111827; }
 
+    /* Add/Edit modal */
     .miniBg{
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
@@ -354,9 +375,7 @@
       font-size:16px;
       background:#fff;
     }
-    .ingRow .delBtn{
-      padding:10px 12px;
-    }
+    .ingRow .delBtn{ padding:10px 12px; }
 
     .mini{
       width:min(520px, 100%);
@@ -376,75 +395,110 @@
       border-radius:14px; font-size:16px;
     }
     .miniBtns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; padding:0 14px 14px; }
+
+    /* Tools screen */
+    .toolRow{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    .toolRow button{ flex: 1 1 220px; min-width: 200px; }
+    .smallNote{ font-size: 13px; color: var(--muted); line-height: 1.35; }
+    .reportBox{
+      white-space: pre-wrap;
+      background: rgba(17,24,39,.04);
+      border: 1px solid rgba(17,24,39,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #111827;
+    }
+    .toggleRow{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      padding: 10px 12px;
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,.7);
+    }
+    .toggleRow label{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 900;
+    }
+    .toggleRow input[type="checkbox"]{ width: 22px; height: 22px; }
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 065)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 066)</span></header>
 
   <div class="wrap">
     <div class="tabs">
       <button id="tabGroceries" class="tabBtn active">Groceries</button>
       <button id="tabDishes" class="tabBtn">Dishes</button>
+
+      <!-- ⋯ More button (Groceries -> Tools) -->
+      <button id="btnMore" class="secondary" title="More / Import / Export">⋯</button>
+
       <button id="btnClearDone" class="secondary">Clear Purchased</button>
     </div>
 
-<!-- GROCERIES TAB -->
-<div id="screenGroceries">
-  <div class="row actionRow">
-    <button id="btnNew">New List</button>
-    <button id="btnScan" class="scanQR">SCAN QR</button>
-    <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
-    <button id="btnAdd" class="secondary">Add Item</button>
-    <button id="btnUndo" class="secondary">Undo</button>
+    <!-- GROCERIES TAB -->
+    <div id="screenGroceries">
+      <div class="row actionRow">
+        <button id="btnNew">New List</button>
+        <button id="btnScan" class="scanQR">SCAN QR</button>
+        <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
+        <button id="btnAdd" class="secondary">Add Item</button>
+        <button id="btnUndo" class="secondary">Undo</button>
 
-    <div class="shopWrap">
-      <button id="btnShop" class="secondary">SHOP</button>
+        <!-- SHOP button + dropdown -->
+        <div class="shopWrap">
+          <button id="btnShop" class="secondary">SHOP</button>
+          <div id="shopMenu" class="shopMenu hidden" role="menu" aria-label="Shop links">
+            <button class="shopItem" data-url="https://www.walmart.com/" role="menuitem">Walmart</button>
+            <button class="shopItem" data-url="https://www.publix.com/" role="menuitem">Publix</button>
+            <button class="shopItem" data-url="https://www.kroger.com/" role="menuitem">Kroger</button>
+            <button class="shopItem" data-url="https://www.ingles-markets.com/" role="menuitem">Ingles</button>
+          </div>
+        </div>
+      </div>
 
-      <div id="shopMenu" class="shopMenu hidden" role="menu" aria-label="Shop links">
-        <button class="shopItem" data-url="https://www.walmart.com/" role="menuitem">Walmart</button>
-        <button class="shopItem" data-url="https://www.publix.com/" role="menuitem">Publix</button>
-        <button class="shopItem" data-url="https://www.kroger.com/" role="menuitem">Kroger</button>
-        <button class="shopItem" data-url="https://www.ingles-markets.com/" role="menuitem">Ingles</button>
+      <!-- Shopping list summary -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div>
+            <b>Shopping List:</b> <span id="listName">Today</span><br>
+            <span class="muted">Sorted by category walking order + name.</span>
+          </div>
+          <div class="total">Total: $<span id="total">0.00</span></div>
+        </div>
+      </div>
+
+      <!-- Shopping list card FIRST (above Master) -->
+      <div class="card" id="listCard"></div>
+
+      <!-- Master list AFTER shopping list -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div>
+            <b>Master Grocery List:</b>
+            <span class="pill"><span id="masterCount">0</span> items</span>
+          </div>
+          <div class="muted">Check items here, then tap <b>ADD SELECTED</b>.</div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="row">
+          <button id="btnMasterAddSelected" class="secondary">ADD SELECTED</button>
+          <button id="btnMasterClearChecks" class="secondary">CLEAR CHECKS</button>
+          <button id="btnMasterClear" class="danger">Clear Master</button>
+        </div>
+
+        <div class="spacer"></div>
+        <div id="masterCard"></div>
       </div>
     </div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-      <div>
-        <b>Shopping List:</b> <span id="listName">Today</span><br>
-        <span class="muted">Sorted by category walking order + name.</span>
-      </div>
-      <div class="total">Total: $<span id="total">0.00</span></div>
-    </div>
-  </div>
-
-  <div class="card" id="listCard"></div>
-
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-      <div>
-        <b>Master Grocery List:</b>
-        <span class="pill"><span id="masterCount">0</span> items</span>
-      </div>
-      <div class="muted">Check items here, then tap <b>ADD SELECTED</b>.</div>
-    </div>
-
-    <div class="spacer"></div>
-
-    <div class="row">
-      <button id="btnMasterAddSelected" class="secondary">ADD SELECTED</button>
-      <button id="btnMasterClearChecks" class="secondary">CLEAR CHECKS</button>
-      <button id="btnMasterClear" class="danger">Clear Master</button>
-    </div>
-
-    <div class="spacer"></div>
-    <div id="masterCard"></div>
-  </div>
-</div>
 
     <!-- DISHES TAB -->
     <div id="screenDishes" style="display:none;">
@@ -464,6 +518,7 @@
       </div>
       <div class="card" id="menuCard"></div>
 
+      <!-- Dish Catalog card with Clear Catalog inside it -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
@@ -476,6 +531,63 @@
 
         <div class="spacer"></div>
         <div id="catalogCard"></div>
+      </div>
+    </div>
+
+    <!-- TOOLS / IMPORT EXPORT SCREEN -->
+    <div id="screenTools" style="display:none;">
+      <div class="row">
+        <button id="btnToolsBack" class="secondary">← Back</button>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div><b>More / Tools</b></div>
+          <div class="muted">Export/Import for multi-device manual sync.</div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="miniRow">
+          <label for="deviceName">Device name (included in export file)</label>
+          <input id="deviceName" type="text" placeholder="e.g., Dave-iPhone, Kitchen-iPad, Laptop" />
+          <div class="smallNote">Tip: Use a unique name per device so you can tell exports apart.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <b>Export</b>
+        <div class="spacer"></div>
+        <div class="toolRow">
+          <button id="btnExportAll" class="secondary">Export ALL (recommended)</button>
+          <button id="btnExportMaster" class="secondary">Export Master Groceries</button>
+          <button id="btnExportDishes" class="secondary">Export Dish Catalog</button>
+          <button id="btnExportUPC" class="secondary">Export UPC DB</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="smallNote">
+          Export creates a JSON file you can AirDrop/email/text to your other device, then import there.
+        </div>
+      </div>
+
+      <div class="card">
+        <b>Import (MERGE)</b>
+        <div class="spacer"></div>
+
+        <div class="toggleRow">
+          <label><input id="impOverwriteUPC" type="checkbox"> Overwrite UPC conflicts (default: skip conflicts)</label>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="toolRow">
+          <button id="btnImport" class="secondary">Import JSON (merge)</button>
+        </div>
+
+        <input id="importFile" type="file" accept=".json,application/json" style="display:none;" />
+
+        <div class="spacer"></div>
+        <div class="reportBox" id="importReport">No import yet.</div>
       </div>
     </div>
   </div>
@@ -527,37 +639,40 @@
     </div>
   </div>
 
-<!-- Dish Ingredients Modal (PHASE 2) -->
-<div class="miniBg" id="dishBg" style="display:none;">
-  <div class="mini">
-    <div class="miniHead">
-      <div id="dishTitle">Dish Ingredients</div>
-      <button id="dishClose" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
-    </div>
-
-    <div class="miniBody" style="gap:12px;">
-      <div class="muted" style="font-size:14px;">
-        Add ingredients for this dish. These will be used later when you “Add Checked Ingredients”.
+  <!-- Dish Ingredients Modal (PHASE 2) -->
+  <div class="miniBg" id="dishBg" style="display:none;">
+    <div class="mini">
+      <div class="miniHead">
+        <div id="dishTitle">Dish Ingredients</div>
+        <button id="dishClose" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
       </div>
 
-      <div id="dishIngList" style="display:flex; flex-direction:column; gap:10px;"></div>
+      <div class="miniBody" style="gap:12px;">
+        <div class="muted" style="font-size:14px;">
+          Add ingredients for this dish. These will be used when you “Add ING. To Shopping List”.
+        </div>
 
-      <button id="dishAddIng" class="secondary" type="button">+ Add Ingredient</button>
-    </div>
+        <div id="dishIngList" style="display:flex; flex-direction:column; gap:10px;"></div>
 
-    <div class="miniBtns">
-      <button id="dishCancel" class="secondary" type="button">Cancel</button>
-      <button id="dishSave" type="button">Save</button>
+        <button id="dishAddIng" class="secondary" type="button">+ Add Ingredient</button>
+      </div>
+
+      <div class="miniBtns">
+        <button id="dishCancel" class="secondary" type="button">Cancel</button>
+        <button id="dishSave" type="button">Save</button>
+      </div>
     </div>
   </div>
-</div>
 
   <script>
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 65;
+  const APP_VERSION = 66;
 
+  // =========================
+  // Smart one-time migration helper
+  // =========================
   function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
     const newKey = `groceryApp_v${APP_VERSION}`;
     const flagKey = `groceryApp_migrated_to_${newKey}`;
@@ -585,19 +700,26 @@
 
   smartMigrateLocalStorage();
 
+  // Service worker registration
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(console.warn);
   }
 
+  // =========================
+  // Build constants
+  // =========================
   const LS_KEY = `groceryApp_v${APP_VERSION}`;
   const UNITS = ["ea","lb","oz","gal","ct"];
 
   const CATEGORIES = [
-    "Produce","Deli","Bakery","Seafood","Beef","Pork","Chicken","Dairy","Cheese",
-    "Beer/Wine","Beverages","Snacks","Frozen","Household","Baking","Can Vegies",
-    "Can Meat","Condiments","Bread","Pet","Pharmacy","Misc"
+    "Produce","Deli","Bakery","Seafood","Beef","Pork","Chicken","Dairy","Cheese","Beer/Wine",
+    "Beverages","Snacks","Frozen","Household","Baking","Can Vegies","Can Meat","Condiments",
+    "Bread","Pet","Pharmacy","Misc"
   ];
 
+  // =========================
+  // Helpers
+  // =========================
   function loadState() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
     catch { return null; }
@@ -667,12 +789,21 @@
     const bc = normName(b.cat||"Misc").toLowerCase();
     return an === bn && ac === bc;
   }
+
   function hasItem(arr, cand){ return arr.some(x => sameItem(x, cand)); }
 
-  // ✅ Missing helper used by dishes
+  // Dish helpers
+  function sameDishName(a, b){
+    return normName(a).toLowerCase() === normName(b).toLowerCase();
+  }
   function hasDish(arr, name){
-    const n = normName(name).toLowerCase();
-    return (arr || []).some(x => normName(x).toLowerCase() === n);
+    return (arr||[]).some(x => sameDishName(x, name));
+  }
+
+  // Safe key encoding for dataset attributes
+  function dishKey(name){ return encodeURIComponent(String(name ?? "")); }
+  function undishKey(k){
+    try { return decodeURIComponent(String(k ?? "")); } catch { return String(k ?? ""); }
   }
 
   // =========================
@@ -683,9 +814,22 @@
     dishCatalog: [],
     currentMenu: [],
     masterGroceries: [],
-    upcDB: {}
+    upcDB: {},
+    deviceName: ""
   };
 
+  // Ensure deviceName exists
+  if(typeof state.deviceName !== "string"){
+    state.deviceName = "";
+  }
+  if(!state.deviceName.trim()){
+    // default suggestion (user can edit)
+    const plat = (navigator.platform || "").replace(/\s+/g," ").trim();
+    state.deviceName = plat ? plat : "My Device";
+    saveState(state);
+  }
+
+  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
   if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
     state.menuAddFlags = {};
     saveState(state);
@@ -700,25 +844,27 @@
     // Ensure dishCatalog entries are objects with ingredients[]
     state.dishCatalog = (state.dishCatalog || []).map(d => {
       if (typeof d === "string") {
-        const nm = normName(d);
-        if(!nm) { changed = true; return null; }
         changed = true;
-        return { name: nm, ingredients: [] };
+        return { name: d, ingredients: [] };
       }
-      if (d && typeof d === "object") {
-        const nm = normName(d.name ?? "");
-        if(!nm) { changed = true; return null; }
-        if (!Array.isArray(d.ingredients)) { changed = true; d.ingredients = []; }
-        d.name = nm;
-        return d;
+      if (!d || typeof d !== "object") {
+        changed = true;
+        return { name: String(d ?? ""), ingredients: [] };
       }
-      changed = true;
-      return null;
-    }).filter(Boolean);
+      if (!("name" in d)) {
+        changed = true;
+        d.name = String(d.name ?? "");
+      }
+      if (!Array.isArray(d.ingredients)) {
+        changed = true;
+        d.ingredients = [];
+      }
+      return d;
+    }).filter(d => normName(d.name));
 
     // Ensure currentMenu is array of dish names (strings)
     state.currentMenu = (state.currentMenu || [])
-      .map(d => typeof d === "string" ? normName(d) : normName(d?.name))
+      .map(d => typeof d === "string" ? d : d?.name)
       .filter(Boolean);
 
     if (changed) {
@@ -803,11 +949,6 @@
     dishIngList.appendChild(row);
   }
 
-  function getDishObjByName(name){
-    const n = normName(name).toLowerCase();
-    return state.dishCatalog.find(d => normName(d.name).toLowerCase() === n) || null;
-  }
-
   function openDishIngredientsModal(dishName){
     const dish = getDishObjByName(dishName);
     if(!dish){
@@ -822,7 +963,9 @@
     dishIngList.innerHTML = "";
 
     const ings = Array.isArray(dish.ingredients) ? dish.ingredients : [];
-    ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
+    if(ings.length){
+      ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
+    }
 
     dishBg.style.display = "flex";
   }
@@ -841,6 +984,7 @@
     }
 
     if(!save){
+      // restore snapshot
       try { dish.ingredients = JSON.parse(dishEditingSnapshot || "[]"); }
       catch { dish.ingredients = dish.ingredients || []; }
       dishBg.style.display = "none";
@@ -849,6 +993,7 @@
       return;
     }
 
+    // collect rows
     const out = [];
     dishIngList.querySelectorAll(".ingRow").forEach(r => {
       const n = normName(r.querySelector(".ingName")?.value || "");
@@ -857,6 +1002,7 @@
       out.push({ name: n, cat: c });
     });
 
+    // de-dupe within dish by name+cat
     const seen = new Set();
     dish.ingredients = out.filter(x => {
       const k = normName(x.name).toLowerCase() + "|" + normName(x.cat).toLowerCase();
@@ -867,20 +1013,6 @@
 
     saveState(state);
     debouncedRender();
-
-      // ✅ Auto-uncheck dishes after adding ingredients
-  state.currentMenu.forEach(dishName => {
-    if(state.menuAddFlags && Object.prototype.hasOwnProperty.call(state.menuAddFlags, dishName)){
-      state.menuAddFlags[dishName] = false;
-    }
-  });
-
-  // Also uncheck any live checkboxes currently on-screen
-  document.querySelectorAll("#menuCard .ingCheck").forEach(cb => cb.checked = false);
-
-  saveState(state);
-  debouncedRender();
-
 
     dishBg.style.display = "none";
     dishEditingName = null;
@@ -895,78 +1027,8 @@
   document.getElementById("dishSave").onclick = () => closeDishModal(true);
   dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
 
-  function addIngredientsForCheckedMenu(){
-    let dishesChecked = 0;
-    let ingAdded = 0;
-    let ingAlready = 0;
-    let ingMissing = 0;
-
-    const menuRows = Array.from(document.querySelectorAll("#menuCard .dishRow"));
-    const checkedMap = {};
-    menuRows.forEach(row => {
-      const nm = row.dataset.name || "";
-      const chk = row.querySelector(".ingCheck");
-      checkedMap[nm] = !!chk?.checked;
-    });
-
-    state.currentMenu.forEach(dishName => {
-      const isChecked = Object.prototype.hasOwnProperty.call(checkedMap, dishName)
-        ? checkedMap[dishName]
-        : !!state.menuAddFlags?.[dishName];
-
-      if(!isChecked) return;
-
-      dishesChecked++;
-
-      const dish = getDishObjByName(dishName);
-      const ings = dish?.ingredients || [];
-      if(!ings.length){
-        ingMissing++;
-        return;
-      }
-
-      ings.forEach(ing => {
-        const n = normName(ing.name);
-        const c = normName(ing.cat || "Misc") || "Misc";
-        if(!n) return;
-
-        addToMaster(n, c);
-
-        const ok = addItemToCurrent(n, c);
-        if(ok){
-          const it = state.current.items.find(x =>
-            normName(x.name).toLowerCase()===n.toLowerCase()
-            && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase()
-          );
-          if(it){
-            it.qty = "1";
-            it.unit = "ea";
-          }
-          ingAdded++;
-        } else {
-          ingAlready++;
-        }
-      });
-    });
-
-    saveState(state);
-    debouncedRender();
-
-    if(dishesChecked === 0){
-      showToast("No dishes checked.", 1600);
-      return;
-    }
-
-    const msg =
-      `Checked dishes: ${dishesChecked} • Added: ${ingAdded}` +
-      (ingAlready ? ` • Already: ${ingAlready}` : "") +
-      (ingMissing ? ` • No ingredients: ${ingMissing}` : "");
-
-    showToast(msg, 2600);
-  }
-
   // =========================
-  // Groceries
+  // Groceries: Shopping list
   // =========================
   function addItemToCurrent(name, cat="Misc"){
     name = normName(name);
@@ -1001,7 +1063,7 @@
   }
 
   // =========================
-  // Master list
+  // Groceries: Master list
   // =========================
   function addToMaster(name, cat="Misc"){
     name = normName(name);
@@ -1030,9 +1092,14 @@
   // =========================
   // Dishes
   // =========================
+  function getDishObjByName(name){
+    const n = normName(name).toLowerCase();
+    return (state.dishCatalog || []).find(d => normName(d.name).toLowerCase() === n) || null;
+  }
+
   function hasDishObjByName(name){
     const n = normName(name).toLowerCase();
-    return state.dishCatalog.some(d => normName(d.name).toLowerCase() === n);
+    return (state.dishCatalog || []).some(d => normName(d.name).toLowerCase() === n);
   }
 
   function addDishToCatalogAndMenu(name){
@@ -1041,21 +1108,21 @@
 
     let addedCatalog = false, addedMenu = false;
 
+    // ensure catalog stores objects
     if(!hasDishObjByName(name)){
       state.dishCatalog.push({ name, ingredients: [] });
       addedCatalog = true;
     }
 
+    // menu stays as strings (dish names)
     if(!hasDish(state.currentMenu, name)){
       state.currentMenu.push(name);
       addedMenu = true;
     }
 
-    // ✅ Do NOT overwrite user's checkbox choice if it already exists
+    // default unchecked
     if(!state.menuAddFlags) state.menuAddFlags = {};
-    if(typeof state.menuAddFlags[name] === "undefined"){
-      state.menuAddFlags[name] = false; // default unchecked
-    }
+    state.menuAddFlags[name] = false;
 
     saveState(state);
     debouncedRender();
@@ -1064,35 +1131,27 @@
 
   function removeDishFromMenu(name){
     const n = normName(name).toLowerCase();
-    state.currentMenu = state.currentMenu.filter(x => normName(x).toLowerCase() !== n);
+    state.currentMenu = (state.currentMenu || []).filter(x => normName(x).toLowerCase() !== n);
     saveState(state);
     debouncedRender();
   }
 
   function removeDishFromCatalog(name){
     const n = normName(name).toLowerCase();
-
-    // ✅ FIX: catalog is objects -> compare d.name
-    state.dishCatalog = state.dishCatalog.filter(d => normName(d.name).toLowerCase() !== n);
-
-    state.currentMenu = state.currentMenu.filter(x => normName(x).toLowerCase() !== n);
-
-    if(state.menuAddFlags){
-      delete state.menuAddFlags[name];
-    }
-
+    state.dishCatalog = (state.dishCatalog || []).filter(d => normName(d.name).toLowerCase() !== n);
+    state.currentMenu = (state.currentMenu || []).filter(x => normName(x).toLowerCase() !== n);
+    if(state.menuAddFlags) delete state.menuAddFlags[name];
     saveState(state);
     debouncedRender();
   }
 
   function randomMenu14(){
-    // ✅ FIX: pick objects, but menu stores NAMES (strings)
-    const pool = [...state.dishCatalog];
+    const pool = [...(state.dishCatalog || [])];
     for(let i=pool.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-
+    // ✅ menu is strings
     state.currentMenu = pool.slice(0, 14).map(d => d.name);
 
     // reset menu checkboxes for the new menu (default UNCHECKED)
@@ -1106,6 +1165,95 @@
   function debouncedRender() {
     clearTimeout(renderTimeout);
     renderTimeout = setTimeout(render, 60);
+  }
+
+  // =========================
+  // Add Ingredients from checked menu dishes
+  // (also auto-UNcheck after adding)  ✅ v65 behavior
+  // =========================
+  function addIngredientsForCheckedMenu(){
+    let dishesChecked = 0;
+    let ingAdded = 0;
+    let ingAlready = 0;
+    let ingMissing = 0;
+
+    const menuRows = Array.from(document.querySelectorAll("#menuCard .dishRow"));
+
+    // dishName -> checked?
+    const checkedMap = {};
+    menuRows.forEach(row => {
+      const key = row.dataset.key || "";
+      const name = undishKey(key);
+      const chk = row.querySelector(".ingCheck");
+      checkedMap[name] = !!chk?.checked;
+    });
+
+    state.currentMenu.forEach(dishName => {
+      const isChecked = Object.prototype.hasOwnProperty.call(checkedMap, dishName)
+        ? checkedMap[dishName]
+        : !!state.menuAddFlags?.[dishName];
+
+      if(!isChecked) return;
+
+      dishesChecked++;
+
+      const dish = getDishObjByName(dishName);
+      const ings = dish?.ingredients || [];
+      if(!ings.length){
+        ingMissing++;
+        return;
+      }
+
+      ings.forEach(ing => {
+        const n = normName(ing.name);
+        const c = normName(ing.cat || "Misc") || "Misc";
+        if(!n) return;
+
+        // Always add to Master
+        addToMaster(n, c);
+
+        // Add to current shopping list (qty=1, unit=ea)
+        const ok = addItemToCurrent(n, c);
+        if(ok){
+          const it = state.current.items.find(x =>
+            normName(x.name).toLowerCase()===n.toLowerCase()
+            && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase()
+          );
+          if(it){
+            it.qty = "1";
+            it.unit = "ea";
+          }
+          ingAdded++;
+        } else {
+          ingAlready++;
+        }
+      });
+    });
+
+    // ✅ Auto-uncheck the menu dishes after adding ingredients (your request)
+    menuRows.forEach(row => {
+      const chk = row.querySelector(".ingCheck");
+      if(chk && chk.checked){
+        chk.checked = false;
+      }
+      const name = undishKey(row.dataset.key || "");
+      if(state.menuAddFlags && name) state.menuAddFlags[name] = false;
+    });
+
+    saveState(state);
+    debouncedRender();
+
+    if(dishesChecked === 0){
+      showToast("No dishes checked.", 1600);
+      return;
+    }
+
+    const msg =
+      `Checked dishes: ${dishesChecked} • Added: ${ingAdded}` +
+      (ingAlready ? ` • Already: ${ingAlready}` : "") +
+      (ingMissing ? ` • No ingredients: ${ingMissing}` : "");
+
+    showToast(msg, 2600);
   }
 
   // =========================
@@ -1175,6 +1323,7 @@
       });
     }
 
+    // Master list
     const sortedMaster = [...state.masterGroceries].sort((a,b)=>sortByCatThenName(a,b));
     document.getElementById("masterCount").textContent = sortedMaster.length;
 
@@ -1231,7 +1380,7 @@
     `;
 
     return `
-      <div class="dishRow" data-name="${escapeHtml(name)}" data-where="${where}">
+      <div class="dishRow" data-key="${dishKey(name)}" data-where="${where}">
         <div style="display:flex; align-items:center; gap:12px;">
           ${menuControls}
           <div class="dishName">${escapeHtml(name)}</div>
@@ -1246,11 +1395,11 @@
   }
 
   function renderDishes(){
-    document.getElementById("menuCount").textContent = state.currentMenu.length;
-    document.getElementById("catalogCount").textContent = state.dishCatalog.length;
+    document.getElementById("menuCount").textContent = (state.currentMenu || []).length;
+    document.getElementById("catalogCount").textContent = (state.dishCatalog || []).length;
 
     const menuCard = document.getElementById("menuCard");
-    if(state.currentMenu.length === 0){
+    if(!state.currentMenu || state.currentMenu.length === 0){
       menuCard.innerHTML = `<div style="padding:16px; text-align:center;">
         <div class="muted">Menu is empty.</div>
         <div class="muted">Scan a dish QR or tap <b>Random Menu (14)</b>.</div>
@@ -1260,7 +1409,7 @@
     }
 
     const catalogCard = document.getElementById("catalogCard");
-    if(state.dishCatalog.length === 0){
+    if(!state.dishCatalog || state.dishCatalog.length === 0){
       catalogCard.innerHTML = `<div style="padding:16px; text-align:center;">
         <div class="muted">Catalog is empty.</div>
         <div class="muted">Scan dish QR codes to build it.</div>
@@ -1271,9 +1420,10 @@
 
     function bindDishRows(container){
       container.querySelectorAll(".dishRow").forEach(row=>{
-        const name = row.dataset.name || "";
+        const name = undishKey(row.dataset.key || "");
         const where = row.dataset.where;
 
+        // Checkbox handler
         const chk = row.querySelector(".ingCheck");
         if(chk){
           chk.checked = !!state.menuAddFlags?.[name];
@@ -1294,12 +1444,15 @@
             return;
           }
 
+          // where === "menu"
           const allowed = !!row.querySelector(".ingCheck")?.checked;
+
           if(allowed){
             openDishIngredientsModal(name);
             return;
           }
 
+          // Rename behavior when NOT checked
           const newName = prompt("Rename dish (updates Catalog + Menu):", name);
           if(!newName) return;
           const nn = normName(newName);
@@ -1310,9 +1463,7 @@
 
           if(state.menuAddFlags){
             delete state.menuAddFlags[name];
-            if(typeof state.menuAddFlags[nn] === "undefined"){
-              state.menuAddFlags[nn] = false;
-            }
+            state.menuAddFlags[nn] = false;
             saveState(state);
           }
         };
@@ -1342,26 +1493,43 @@
   function render(){
     renderGroceries();
     renderDishes();
+    renderTools();
   }
 
   // =========================
-  // Tabs
+  // Tabs / Screens
   // =========================
   const tabGroceries = document.getElementById("tabGroceries");
   const tabDishes = document.getElementById("tabDishes");
   const screenGroceries = document.getElementById("screenGroceries");
   const screenDishes = document.getElementById("screenDishes");
+  const screenTools = document.getElementById("screenTools");
+  const btnMore = document.getElementById("btnMore");
 
   function showTab(which){
     const isG = which === "groceries";
+    const isD = which === "dishes";
+    const isT = which === "tools";
+
     screenGroceries.style.display = isG ? "" : "none";
-    screenDishes.style.display = isG ? "none" : "";
+    screenDishes.style.display   = isD ? "" : "none";
+    screenTools.style.display    = isT ? "" : "none";
+
     tabGroceries.classList.toggle("active", isG);
-    tabDishes.classList.toggle("active", !isG);
+    tabDishes.classList.toggle("active", isD);
+
+    // Top-right action: only for groceries
     document.getElementById("btnClearDone").style.display = isG ? "" : "none";
+
+    // ⋯ button only on groceries (as requested)
+    btnMore.style.display = isG ? "" : "none";
   }
+
   tabGroceries.onclick = () => showTab("groceries");
   tabDishes.onclick = () => showTab("dishes");
+
+  btnMore.onclick = () => showTab("tools");
+  document.getElementById("btnToolsBack").onclick = () => showTab("groceries");
 
   // =========================
   // Grocery actions
@@ -1448,7 +1616,7 @@
   // Dish actions
   // =========================
   document.getElementById("btnRandom14").onclick = () => {
-    if(state.dishCatalog.length === 0){
+    if(!state.dishCatalog || state.dishCatalog.length === 0){
       alert("Catalog is empty. Scan some dish QR codes first.");
       return;
     }
@@ -1462,6 +1630,8 @@
   document.getElementById("btnClearMenu").onclick = () => {
     if(!confirm("Clear the current menu?")) return;
     state.currentMenu = [];
+    // also clear menu flags
+    state.menuAddFlags = {};
     saveState(state);
     render();
   };
@@ -1542,6 +1712,8 @@
       return s;
     };
 
+    const lower = raw.toLowerCase();
+
     try {
       if (/^[a-z]+:\/\//i.test(raw)) {
         const url = new URL(raw);
@@ -1571,7 +1743,7 @@
 
     const itemMatch = raw.match(/(?:^|[?&\s])item=([^&\n]+)/i);
     if (itemMatch) {
-      const start = raw.toLowerCase().indexOf("item=");
+      const start = lower.indexOf("item=");
       const qs = raw.slice(start);
       const sp = new URLSearchParams(qs);
       const item = sp.get("item");
@@ -1783,9 +1955,7 @@
       const item = e.target.closest(".shopItem");
       if(!item) return;
       const url = item.getAttribute("data-url");
-      if(url){
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
+      if(url) window.open(url, "_blank", "noopener,noreferrer");
       closeMenu();
     });
 
@@ -1793,8 +1963,269 @@
     document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeMenu(); });
   })();
 
-  // Initial render
+  // =========================
+  // TOOLS: Export / Import (MERGE)
+  // =========================
+  const deviceNameInput = document.getElementById("deviceName");
+  const importFileEl = document.getElementById("importFile");
+  const importReportEl = document.getElementById("importReport");
+  const impOverwriteUPC = document.getElementById("impOverwriteUPC");
+
+  function renderTools(){
+    // keep input in sync with state
+    if(deviceNameInput && deviceNameInput.value !== state.deviceName){
+      deviceNameInput.value = state.deviceName || "";
+    }
+  }
+
+  deviceNameInput.addEventListener("change", () => {
+    state.deviceName = normName(deviceNameInput.value) || "My Device";
+    saveState(state);
+    showToast("Device name saved.", 1400);
+  });
+
+  function nowStamp(){
+    const d = new Date();
+    const pad = (n)=> String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+  }
+
+  function downloadJson(obj, filename){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 250);
+  }
+
+  function exportPayload(kind){
+    // Always store catalogs as canonical:
+    const master = (state.masterGroceries || []).map(x => ({ name: normName(x.name), cat: normName(x.cat||"Misc")||"Misc" })).filter(x => x.name);
+    const dishes = (state.dishCatalog || []).map(d => ({
+      name: normName(d.name),
+      ingredients: Array.isArray(d.ingredients) ? d.ingredients.map(i => ({ name: normName(i.name), cat: normName(i.cat||"Misc")||"Misc" })).filter(i=>i.name) : []
+    })).filter(d => d.name);
+
+    const upc = state.upcDB && typeof state.upcDB === "object" ? state.upcDB : {};
+
+    const base = {
+      app: "grocery-app",
+      schema: 1,
+      exportedAt: new Date().toISOString(),
+      deviceName: state.deviceName || "",
+      appVersion: APP_VERSION
+    };
+
+    if(kind === "master") return { ...base, kind, masterGroceries: master };
+    if(kind === "dishes") return { ...base, kind, dishCatalog: dishes };
+    if(kind === "upc") return { ...base, kind, upcDB: upc };
+
+    // all (recommended)
+    return { ...base, kind: "all", masterGroceries: master, dishCatalog: dishes, upcDB: upc };
+  }
+
+  document.getElementById("btnExportAll").onclick = () => {
+    const payload = exportPayload("all");
+    const fn = `grocery-app_ALL_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported ALL.", 1600);
+  };
+  document.getElementById("btnExportMaster").onclick = () => {
+    const payload = exportPayload("master");
+    const fn = `grocery-app_MASTER_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported Master.", 1600);
+  };
+  document.getElementById("btnExportDishes").onclick = () => {
+    const payload = exportPayload("dishes");
+    const fn = `grocery-app_DISHES_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported Dishes.", 1600);
+  };
+  document.getElementById("btnExportUPC").onclick = () => {
+    const payload = exportPayload("upc");
+    const fn = `grocery-app_UPC_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported UPC DB.", 1600);
+  };
+
+  document.getElementById("btnImport").onclick = () => {
+    importFileEl.value = "";
+    importFileEl.click();
+  };
+
+  function mergeMaster(imported){
+    let added = 0, skipped = 0;
+    const arr = Array.isArray(imported) ? imported : [];
+    arr.forEach(x => {
+      const name = normName(x?.name);
+      const cat  = normName(x?.cat || "Misc") || "Misc";
+      if(!name) return;
+      const ok = addToMaster(name, cat);
+      if(ok) added++; else skipped++;
+    });
+    return { added, skipped };
+  }
+
+  function mergeDishes(imported){
+    let dishAdded = 0, dishUpdated = 0;
+    let ingAdded = 0, ingSkipped = 0;
+
+    const arr = Array.isArray(imported) ? imported : [];
+    arr.forEach(d => {
+      const dishName = normName(d?.name);
+      if(!dishName) return;
+
+      let local = getDishObjByName(dishName);
+      if(!local){
+        state.dishCatalog.push({ name: dishName, ingredients: [] });
+        local = getDishObjByName(dishName);
+        dishAdded++;
+      }
+
+      // merge ingredients (union)
+      const incoming = Array.isArray(d?.ingredients) ? d.ingredients : [];
+      const beforeCount = (local.ingredients || []).length;
+
+      if(!Array.isArray(local.ingredients)) local.ingredients = [];
+
+      const seen = new Set(local.ingredients.map(i =>
+        normName(i.name).toLowerCase()+"|"+normName(i.cat||"Misc").toLowerCase()
+      ));
+
+      incoming.forEach(i => {
+        const inName = normName(i?.name);
+        const inCat  = normName(i?.cat || "Misc") || "Misc";
+        if(!inName) return;
+        const key = inName.toLowerCase()+"|"+inCat.toLowerCase();
+        if(seen.has(key)){
+          ingSkipped++;
+          return;
+        }
+        seen.add(key);
+        local.ingredients.push({ name: inName, cat: inCat });
+        ingAdded++;
+      });
+
+      if((local.ingredients || []).length !== beforeCount){
+        dishUpdated++;
+      }
+    });
+
+    return { dishAdded, dishUpdated, ingAdded, ingSkipped };
+  }
+
+  function mergeUPC(imported, overwrite){
+    let added = 0, updated = 0, skipped = 0;
+    if(!state.upcDB || typeof state.upcDB !== "object") state.upcDB = {};
+
+    const obj = imported && typeof imported === "object" ? imported : {};
+    Object.keys(obj).forEach(code => {
+      const clean = String(code||"").replace(/[^\d]/g,"").slice(0,32);
+      if(!clean) return;
+
+      const incoming = obj[code];
+      const name = normName(incoming?.name);
+      const cat  = normName(incoming?.cat || "Misc") || "Misc";
+      if(!name) return;
+
+      const exists = state.upcDB[clean];
+      if(!exists){
+        state.upcDB[clean] = { name, cat };
+        added++;
+      } else {
+        const same = normName(exists.name).toLowerCase()===name.toLowerCase()
+          && normName(exists.cat||"Misc").toLowerCase()===cat.toLowerCase();
+
+        if(same){
+          skipped++;
+        } else {
+          if(overwrite){
+            state.upcDB[clean] = { name, cat };
+            updated++;
+          } else {
+            skipped++;
+          }
+        }
+      }
+    });
+
+    return { added, updated, skipped };
+  }
+
+  importFileEl.addEventListener("change", async () => {
+    const file = importFileEl.files?.[0];
+    if(!file) return;
+
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      const meta = {
+        fromDevice: normName(data?.deviceName || "(unknown)"),
+        exportedAt: data?.exportedAt || "(unknown)",
+        kind: data?.kind || "(unknown)"
+      };
+
+      // Accept "all" or partials (master/dishes/upc)
+      const m = data?.masterGroceries ?? data?.master ?? null;
+      const d = data?.dishCatalog ?? data?.dishes ?? null;
+      const u = data?.upcDB ?? data?.upc ?? null;
+
+      const doUPCOverwrite = !!impOverwriteUPC.checked;
+
+      let report = "";
+      report += `IMPORT FILE: ${file.name}\n`;
+      report += `FROM DEVICE: ${meta.fromDevice}\n`;
+      report += `EXPORTED AT: ${meta.exportedAt}\n`;
+      report += `KIND: ${meta.kind}\n\n`;
+
+      let masterRes = null, dishRes = null, upcRes = null;
+
+      if(m){
+        masterRes = mergeMaster(m);
+        report += `MASTER MERGE:\n  Added: ${masterRes.added}\n  Skipped (already exists): ${masterRes.skipped}\n\n`;
+      } else {
+        report += `MASTER MERGE:\n  (No master data in file)\n\n`;
+      }
+
+      if(d){
+        dishRes = mergeDishes(d);
+        report += `DISH CATALOG MERGE:\n  New dishes: ${dishRes.dishAdded}\n  Dishes updated: ${dishRes.dishUpdated}\n  Ingredients added: ${dishRes.ingAdded}\n  Ingredients skipped: ${dishRes.ingSkipped}\n\n`;
+      } else {
+        report += `DISH CATALOG MERGE:\n  (No dish data in file)\n\n`;
+      }
+
+      if(u){
+        upcRes = mergeUPC(u, doUPCOverwrite);
+        report += `UPC DB MERGE:\n  Added: ${upcRes.added}\n  Updated: ${upcRes.updated}\n  Skipped: ${upcRes.skipped}\n  Policy: ${doUPCOverwrite ? "OVERWRITE conflicts" : "SKIP conflicts"}\n\n`;
+      } else {
+        report += `UPC DB MERGE:\n  (No upc data in file)\n\n`;
+      }
+
+      saveState(state);
+      debouncedRender();
+
+      importReportEl.textContent = report.trim();
+      showToast("Import merge complete.", 1800);
+
+    } catch(err){
+      console.warn("Import failed:", err);
+      importReportEl.textContent = `Import failed.\n\n${String(err)}`;
+      showToast("Import failed. Bad JSON?", 2000);
+    }
+  });
+
+  // =========================
+  // Initial render + default tab
+  // =========================
   render();
+  showTab("groceries");
   </script>
 </body>
 </html>
