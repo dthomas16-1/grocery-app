@@ -380,33 +380,38 @@
       margin-left: 20px;
     }
 
-    .shopMenu{
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      min-width: 200px;
-      padding: 8px;
-      background: #fff;
-      border: 1px solid rgba(0,0,0,.2);
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      z-index: 9999;
-    }
-    .shopSubMenu{
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      min-width: 180px;
-      padding: 8px;
-      background: #fff;
-      border: 1px solid rgba(0,0,0,.2);
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      z-index: 10000;
-    }
-    .shopSubMenu.hidden{ display:none; }
+    /* ===== SHOP menus: mobile-safe ===== */
+.shopMenu,
+.shopSubMenu{
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  max-width: min(92vw, 320px);
+  padding: 8px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  z-index: 10000;
+  overflow: hidden;
+}
 
-    .shopMenu.hidden{ display: none; }
+.shopMenu.hidden,
+.shopSubMenu.hidden{ display:none; }
+
+/* On phones: use FIXED so it can’t fall off-screen */
+@media (max-width: 520px){
+  .shopMenu,
+  .shopSubMenu{
+    position: fixed;
+    top: 110px;           /* below header */
+    right: 12px;          /* pin to right edge */
+    left: 12px;           /* also pin to left edge */
+    max-width: none;
+    width: auto;
+  }
+}
 
     .shopItem{
       width: 100%;
@@ -505,7 +510,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 070)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 070a)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -791,7 +796,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 70;
+  const APP_VERSION = 70a;
 
   // Service worker registration
   if ("serviceWorker" in navigator) {
@@ -894,7 +899,7 @@
   }
 
   // =========================
-  // Smart one-time migration helper (v70 looks back)
+  // Smart one-time migration helper (v70a looks back)
   // =========================
   function smartMigrateLocalStorage({ maxLookback = 40 } = {}) {
     const newKey = `groceryApp_v${APP_VERSION}`;
