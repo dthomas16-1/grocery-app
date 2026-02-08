@@ -19,7 +19,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 067)
+     index.html  (BUILD 068)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -378,7 +378,7 @@
     .ingRow .delBtn{ padding:10px 12px; }
 
     .mini{
-      width:min(520px, 100%);
+      width:min(560px, 100%);
       background:#fff; border-radius:18px; overflow:hidden;
       box-shadow:0 20px 60px rgba(0,0,0,.35);
     }
@@ -423,13 +423,76 @@
       font-weight: 900;
     }
     .toggleRow input[type="checkbox"]{ width: 22px; height: 22px; }
+
+    /* ===== Category Manager ===== */
+    .catMgrList{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding: 6px 0 4px;
+    }
+    .catMgrRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px;
+      border:1px solid rgba(15,23,42,.12);
+      border-radius:14px;
+      background: rgba(17,24,39,.03);
+    }
+    .dragHandle{
+      width:34px;
+      text-align:center;
+      user-select:none;
+      cursor: grab;
+      font-weight: 900;
+      opacity:.75;
+      border:1px solid rgba(15,23,42,.10);
+      border-radius:12px;
+      padding:8px 8px;
+      background:#fff;
+    }
+    .catMgrRow.dragging{
+      opacity:.55;
+      transform: scale(0.995);
+    }
+    .catNameInput{
+      flex:1;
+      padding:12px 12px;
+      border:1px solid #ddd;
+      border-radius:14px;
+      font-size:16px;
+      background:#fff;
+      font-weight:900;
+    }
+    .catBadge{
+      font-size: 12px;
+      font-weight: 900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.12);
+      background:#fff;
+      color:#111827;
+      white-space:nowrap;
+      opacity:.8;
+    }
+    .catBadge.builtIn{
+      background: rgba(37,99,235,.12);
+      border-color: rgba(37,99,235,.18);
+      color:#1d4ed8;
+    }
+    .catBadge.custom{
+      background: rgba(34,197,94,.14);
+      border-color: rgba(34,197,94,.18);
+      color:#065f46;
+    }
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 067)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 068)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -450,6 +513,7 @@
         <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
         <button id="btnAdd" class="secondary">Add Item</button>
         <button id="btnUndo" class="secondary">Undo</button>
+        <button id="btnCats" class="secondary" title="Manage Categories">CATS</button>
 
         <!-- SHOP button + dropdown -->
         <div class="shopWrap">
@@ -553,6 +617,10 @@
           <input id="deviceName" type="text" placeholder="e.g., Dave-iPhone, Kitchen-iPad, Laptop" />
           <div class="smallNote">Tip: Use a unique name per device so you can tell exports apart.</div>
         </div>
+
+        <div class="spacer"></div>
+        <button id="btnCatsTools" class="secondary" type="button">Manage Categories</button>
+        <div class="smallNote">Categories are stored locally per device. You can optionally export/import them via Export ALL.</div>
       </div>
 
       <div class="card">
@@ -576,6 +644,10 @@
 
         <div class="toggleRow">
           <label><input id="impOverwriteUPC" type="checkbox"> Overwrite UPC conflicts (default: skip conflicts)</label>
+        </div>
+
+        <div class="toggleRow">
+          <label><input id="impMergeCats" type="checkbox" checked> Merge categories (from Export ALL only)</label>
         </div>
 
         <div class="spacer"></div>
@@ -639,6 +711,32 @@
     </div>
   </div>
 
+  <!-- Category Manager Modal -->
+  <div class="miniBg" id="catBg" style="display:none;">
+    <div class="mini">
+      <div class="miniHead">
+        <div>Manage Categories</div>
+        <button id="catCloseX" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
+      </div>
+      <div class="miniBody">
+        <div class="muted" style="font-size:14px;">
+          Drag to reorder (walking order). Rename any category. Delete custom categories (items move to Misc).
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <input id="catNewName" type="text" placeholder="New category name…" style="flex:1; min-width:220px; padding:12px; border:1px solid #ddd; border-radius:14px; font-size:16px;">
+          <button id="catAddBtn" class="secondary" type="button" style="min-width:160px;">+ Add Category</button>
+        </div>
+
+        <div class="catMgrList" id="catMgrList"></div>
+      </div>
+      <div class="miniBtns">
+        <button id="catCancel" class="secondary" type="button">Close</button>
+        <button id="catSave" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Dish Ingredients Modal (PHASE 2) -->
   <div class="miniBg" id="dishBg" style="display:none;">
     <div class="mini">
@@ -668,7 +766,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 67;
+  const APP_VERSION = 68;
 
   // =========================
   // Smart one-time migration helper
@@ -711,10 +809,31 @@
   const LS_KEY = `groceryApp_v${APP_VERSION}`;
   const UNITS = ["ea","lb","oz","gal","ct"];
 
-  const CATEGORIES = [
-    "Produce","Deli","Bakery","Seafood","Beef","Pork","Chicken","Dairy","Cheese","Beer/Wine",
-    "Beverages","Snacks","Frozen","Household","Baking","Can Vegies","Can Meat","Condiments",
-    "Bread","Pet","Pharmacy","Misc"
+  // ===== DEFAULT categories shipped with the app =====
+  // Stable IDs + labels. Users can add/rename/reorder locally.
+  const DEFAULT_CATS = [
+    { id:"produce", label:"Produce" },
+    { id:"deli", label:"Deli" },
+    { id:"bakery", label:"Bakery" },
+    { id:"seafood", label:"Seafood" },
+    { id:"beef", label:"Beef" },
+    { id:"pork", label:"Pork" },
+    { id:"chicken", label:"Chicken" },
+    { id:"dairy", label:"Dairy" },
+    { id:"cheese", label:"Cheese" },
+    { id:"beerwine", label:"Beer/Wine" },
+    { id:"beverages", label:"Beverages" },
+    { id:"snacks", label:"Snacks" },
+    { id:"frozen", label:"Frozen" },
+    { id:"household", label:"Household" },
+    { id:"baking", label:"Baking" },
+    { id:"canveggies", label:"Can Vegies" },
+    { id:"canmeat", label:"Can Meat" },
+    { id:"condiments", label:"Condiments" },
+    { id:"bread", label:"Bread" },
+    { id:"pet", label:"Pet" },
+    { id:"pharmacy", label:"Pharmacy" },
+    { id:"misc", label:"Misc" } // IMPORTANT fallback
   ];
 
   // =========================
@@ -744,20 +863,13 @@
 
   function normName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
 
-  function catIndex(cat){
-    const i = CATEGORIES.findIndex(x => x.toLowerCase() === String(cat||"").toLowerCase());
-    return i === -1 ? CATEGORIES.length + 999 : i;
-  }
-
-  function sortByCatThenName(a, b){
-    const ai = catIndex(a.cat);
-    const bi = catIndex(b.cat);
-    if(ai !== bi) return ai - bi;
-    const an = normName(a.name).toLowerCase();
-    const bn = normName(b.name).toLowerCase();
-    if(an < bn) return -1;
-    if(an > bn) return 1;
-    return 0;
+  // stable slug for custom category IDs
+  function slugify(s){
+    s = normName(s).toLowerCase();
+    s = s.replace(/&/g,"and");
+    s = s.replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+    if(!s) s = "cat";
+    return s.slice(0,32);
   }
 
   function showToast(message, duration = 2000) {
@@ -782,14 +894,149 @@
     }, 0);
   }
 
+  // =========================
+  // State
+  // =========================
+  let state = loadState() || {
+    current: newBlankList("Today"),
+    dishCatalog: [],
+    currentMenu: [],
+    masterGroceries: [],
+    upcDB: {},
+    deviceName: "",
+    // categoryPrefs holds user additions + order.
+    categoryPrefs: {
+      custom: {},   // { [id]: { label } }
+      order: []     // array of category IDs (walking order)
+    }
+  };
+
+  // Ensure deviceName exists
+  if(typeof state.deviceName !== "string"){
+    state.deviceName = "";
+  }
+  if(!state.deviceName.trim()){
+    const plat = (navigator.platform || "").replace(/\s+/g," ").trim();
+    state.deviceName = plat ? plat : "My Device";
+    saveState(state);
+  }
+
+  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
+  if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
+    state.menuAddFlags = {};
+    saveState(state);
+  }
+
+  // Ensure categoryPrefs shape
+  if(!state.categoryPrefs || typeof state.categoryPrefs !== "object"){
+    state.categoryPrefs = { custom:{}, order:[] };
+  }
+  if(!state.categoryPrefs.custom || typeof state.categoryPrefs.custom !== "object"){
+    state.categoryPrefs.custom = {};
+  }
+  if(!Array.isArray(state.categoryPrefs.order)){
+    state.categoryPrefs.order = [];
+  }
+
+  // =========================
+  // CATEGORY ENGINE (defaults + user additions + order)
+  // =========================
+  function getAllCats(){
+    // merge built-in + custom
+    const built = DEFAULT_CATS.map(c => ({ id:c.id, label:c.label, builtIn:true }));
+    const custom = Object.keys(state.categoryPrefs.custom || {}).map(id => ({
+      id,
+      label: state.categoryPrefs.custom[id]?.label || id,
+      builtIn:false
+    }));
+
+    // dedupe by id, prefer built-in label if conflict
+    const map = new Map();
+    built.forEach(c => map.set(c.id, c));
+    custom.forEach(c => {
+      if(!map.has(c.id)) map.set(c.id, c);
+    });
+
+    // ensure misc exists
+    if(!map.has("misc")) map.set("misc", { id:"misc", label:"Misc", builtIn:true });
+
+    const all = Array.from(map.values());
+
+    // order: use saved order then append missing
+    const order = Array.isArray(state.categoryPrefs.order) ? [...state.categoryPrefs.order] : [];
+    const inOrder = new Set(order);
+    all.forEach(c => { if(!inOrder.has(c.id)) order.push(c.id); });
+
+    // finally build ordered list
+    const byId = new Map(all.map(c => [c.id, c]));
+    const ordered = order.map(id => byId.get(id)).filter(Boolean);
+
+    return ordered;
+  }
+
+  function catLabelById(id){
+    id = String(id || "misc");
+    const all = getAllCats();
+    const found = all.find(c => c.id === id);
+    return found ? found.label : "Misc";
+  }
+
+  function findCatIdByLabel(label){
+    const want = normName(label).toLowerCase();
+    if(!want) return "misc";
+    const all = getAllCats();
+    const exact = all.find(c => normName(c.label).toLowerCase() === want);
+    return exact ? exact.id : null;
+  }
+
+  function ensureCatForLabel(label){
+    const existing = findCatIdByLabel(label);
+    if(existing) return existing;
+
+    // create custom
+    const base = slugify(label);
+    let id = base;
+    let tries = 0;
+    while (DEFAULT_CATS.some(c => c.id === id) || state.categoryPrefs.custom[id]) {
+      tries++;
+      id = `${base}-${tries}`;
+      if(tries > 50) { id = `${base}-${generateId().slice(0,6)}`; break; }
+    }
+    state.categoryPrefs.custom[id] = { label: normName(label) || "New Category" };
+
+    // append to end of order
+    if(!state.categoryPrefs.order.includes(id)){
+      state.categoryPrefs.order.push(id);
+    }
+
+    saveState(state);
+    return id;
+  }
+
+  function catIndexById(catId){
+    const ordered = getAllCats();
+    const i = ordered.findIndex(c => c.id === String(catId || "misc"));
+    return i === -1 ? ordered.length + 999 : i;
+  }
+
+  function sortByCatThenName(a, b){
+    const ai = catIndexById(a.catId);
+    const bi = catIndexById(b.catId);
+    if(ai !== bi) return ai - bi;
+    const an = normName(a.name).toLowerCase();
+    const bn = normName(b.name).toLowerCase();
+    if(an < bn) return -1;
+    if(an > bn) return 1;
+    return 0;
+  }
+
   function sameItem(a, b){
     const an = normName(a.name).toLowerCase();
     const bn = normName(b.name).toLowerCase();
-    const ac = normName(a.cat||"Misc").toLowerCase();
-    const bc = normName(b.cat||"Misc").toLowerCase();
+    const ac = String(a.catId || "misc");
+    const bc = String(b.catId || "misc");
     return an === bn && ac === bc;
   }
-
   function hasItem(arr, cand){ return arr.some(x => sameItem(x, cand)); }
 
   // Dish helpers
@@ -807,33 +1054,70 @@
   }
 
   // =========================
-  // State
+  // MIGRATION: old "cat" strings -> catId
+  // - Also upgrade masterGroceries entries to include catId
+  // - Any unknown cats become user custom categories
   // =========================
-  let state = loadState() || {
-    current: newBlankList("Today"),
-    dishCatalog: [],
-    currentMenu: [],
-    masterGroceries: [],
-    upcDB: {},
-    deviceName: ""
-  };
+  (function migrateCategories(){
+    let changed = false;
 
-  // Ensure deviceName exists
-  if(typeof state.deviceName !== "string"){
-    state.deviceName = "";
-  }
-  if(!state.deviceName.trim()){
-    // default suggestion (user can edit)
-    const plat = (navigator.platform || "").replace(/\s+/g," ").trim();
-    state.deviceName = plat ? plat : "My Device";
-    saveState(state);
-  }
+    function migrateItem(obj){
+      if(!obj || typeof obj !== "object") return;
+      if(obj.catId) return;
+      const oldCat = normName(obj.cat || "");
+      const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
+      obj.catId = cid;
+      if("cat" in obj) delete obj.cat; // keep clean
+      changed = true;
+    }
 
-  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
-  if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
-    state.menuAddFlags = {};
-    saveState(state);
-  }
+    // current items
+    (state.current?.items || []).forEach(migrateItem);
+
+    // master list
+    (state.masterGroceries || []).forEach(m => {
+      if(!m || typeof m !== "object") return;
+      if(m.catId) return;
+      const oldCat = normName(m.cat || "");
+      const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
+      m.catId = cid;
+      if("cat" in m) delete m.cat;
+      changed = true;
+    });
+
+    // UPC DB
+    if(state.upcDB && typeof state.upcDB === "object"){
+      Object.keys(state.upcDB).forEach(code => {
+        const entry = state.upcDB[code];
+        if(!entry || typeof entry !== "object") return;
+        if(entry.catId) return;
+        const oldCat = normName(entry.cat || "");
+        const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
+        entry.catId = cid;
+        if("cat" in entry) delete entry.cat;
+        changed = true;
+      });
+    }
+
+    // Dish ingredient cats
+    (state.dishCatalog || []).forEach(d => {
+      const ings = Array.isArray(d?.ingredients) ? d.ingredients : [];
+      ings.forEach(i => {
+        if(!i || typeof i !== "object") return;
+        if(i.catId) return;
+        const oldCat = normName(i.cat || "");
+        const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
+        i.catId = cid;
+        if("cat" in i) delete i.cat;
+        changed = true;
+      });
+    });
+
+    if(changed){
+      console.log("[MIGRATE] Categories upgraded to catId + local categoryPrefs");
+      saveState(state);
+    }
+  })();
 
   // =========================
   // PHASE 1: Dish object migration (SAFE / INVISIBLE)
@@ -885,14 +1169,18 @@
   const miniCat = document.getElementById("miniCat");
   let miniResolve = null;
 
-  function buildCatOptions(selected){
-    miniCat.innerHTML = CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("");
+  function buildCatOptions(selectedId){
+    const cats = getAllCats();
+    miniCat.innerHTML = cats.map(c => {
+      const sel = String(selectedId||"misc") === c.id ? "selected" : "";
+      return `<option value="${escapeHtml(c.id)}" ${sel}>${escapeHtml(c.label)}</option>`;
+    }).join("");
   }
 
-  function openItemModal(title, defaults = {name:"", cat:"Misc"}){
+  function openItemModal(title, defaults = {name:"", catId:"misc"}){
     miniTitle.textContent = title;
     miniName.value = defaults.name || "";
-    buildCatOptions(defaults.cat || "Misc");
+    buildCatOptions(defaults.catId || "misc");
     miniBg.style.display = "flex";
     setTimeout(()=> miniName.focus(), 80);
     return new Promise(resolve => { miniResolve = resolve; });
@@ -909,15 +1197,201 @@
   document.getElementById("miniCancel").onclick = () => closeItemModal(null);
   document.getElementById("miniOk").onclick = () => {
     const name = normName(miniName.value);
-    const cat = normName(miniCat.value) || "Misc";
+    const catId = String(miniCat.value || "misc");
     if(!name){
       showToast("Please enter a name", 1600);
       miniName.focus();
       return;
     }
-    closeItemModal({ name, cat });
+    closeItemModal({ name, catId });
   };
   miniBg.onclick = e => { if(e.target === miniBg) closeItemModal(null); };
+
+  // =========================
+  // Category Manager Modal (Add/Rename/Delete/Reorder)
+  // =========================
+  const catBg = document.getElementById("catBg");
+  const catMgrList = document.getElementById("catMgrList");
+  const catNewName = document.getElementById("catNewName");
+  const catAddBtn = document.getElementById("catAddBtn");
+
+  let catMgrSnapshot = null; // for cancel restore
+
+  function openCatManager(){
+    // snapshot so cancel can revert
+    catMgrSnapshot = JSON.stringify(state.categoryPrefs || { custom:{}, order:[] });
+
+    catNewName.value = "";
+    renderCatManagerList();
+    catBg.style.display = "flex";
+    setTimeout(()=> catNewName.focus(), 80);
+  }
+
+  function closeCatManager(save){
+    if(!save){
+      // restore snapshot
+      try{
+        const snap = JSON.parse(catMgrSnapshot || "{}");
+        state.categoryPrefs = snap;
+        if(!state.categoryPrefs.custom) state.categoryPrefs.custom = {};
+        if(!Array.isArray(state.categoryPrefs.order)) state.categoryPrefs.order = [];
+        saveState(state);
+      }catch{}
+    } else {
+      saveState(state);
+    }
+    catMgrSnapshot = null;
+    catBg.style.display = "none";
+    debouncedRender();
+  }
+
+  function renderCatManagerList(){
+    const cats = getAllCats();
+
+    catMgrList.innerHTML = cats.map(c => `
+      <div class="catMgrRow" draggable="true" data-id="${escapeHtml(c.id)}">
+        <div class="dragHandle" title="Drag to reorder">≡</div>
+        <input class="catNameInput" type="text" value="${escapeHtml(c.label)}" />
+        <span class="catBadge ${c.builtIn ? "builtIn":"custom"}">${c.builtIn ? "DEFAULT":"CUSTOM"}</span>
+        <button class="delBtn" title="Delete" ${c.id==="misc" ? "disabled":""}>🗑️</button>
+      </div>
+    `).join("");
+
+    // bind rename + delete
+    catMgrList.querySelectorAll(".catMgrRow").forEach(row => {
+      const id = row.dataset.id;
+      const input = row.querySelector(".catNameInput");
+      const del = row.querySelector(".delBtn");
+
+      // rename
+      input.addEventListener("change", () => {
+        const newLabel = normName(input.value);
+        if(!newLabel){
+          input.value = catLabelById(id);
+          showToast("Name cannot be blank.", 1600);
+          return;
+        }
+
+        // if built-in, store override in custom map? Keep simple:
+        // We'll allow renaming built-in by writing to custom override table
+        // BUT we must not lose built-in id.
+        if(DEFAULT_CATS.some(x => x.id === id)){
+          // store override in custom with same id
+          state.categoryPrefs.custom[id] = { label: newLabel };
+        } else {
+          // regular custom
+          if(!state.categoryPrefs.custom[id]) state.categoryPrefs.custom[id] = { label: newLabel };
+          else state.categoryPrefs.custom[id].label = newLabel;
+        }
+        saveState(state);
+        // do NOT re-render here (avoids cursor jump)
+      });
+
+      // delete
+      del?.addEventListener("click", () => {
+        if(id === "misc") return;
+
+        // built-ins: we don't allow deleting defaults (only rename)
+        const isBuilt = DEFAULT_CATS.some(x => x.id === id);
+        if(isBuilt){
+          showToast("Default categories can't be deleted (rename is OK).", 2200);
+          return;
+        }
+
+        const ok = confirm(`Delete category "${catLabelById(id)}"?\n\nAll items in that category will move to Misc.`);
+        if(!ok) return;
+
+        // remove from custom + order
+        if(state.categoryPrefs.custom && state.categoryPrefs.custom[id]){
+          delete state.categoryPrefs.custom[id];
+        }
+        state.categoryPrefs.order = (state.categoryPrefs.order || []).filter(x => x !== id);
+
+        // reassign items
+        (state.current?.items || []).forEach(it => { if(it.catId === id) it.catId = "misc"; });
+        (state.masterGroceries || []).forEach(m => { if(m.catId === id) m.catId = "misc"; });
+        if(state.upcDB && typeof state.upcDB === "object"){
+          Object.keys(state.upcDB).forEach(code => {
+            if(state.upcDB[code]?.catId === id) state.upcDB[code].catId = "misc";
+          });
+        }
+        (state.dishCatalog || []).forEach(d => {
+          (d.ingredients || []).forEach(i => { if(i.catId === id) i.catId = "misc"; });
+        });
+
+        saveState(state);
+        renderCatManagerList();
+        showToast("Category deleted (moved items to Misc).", 1800);
+      });
+    });
+
+    // drag reorder
+    bindCatDragAndDrop();
+  }
+
+  function bindCatDragAndDrop(){
+    const rows = Array.from(catMgrList.querySelectorAll(".catMgrRow"));
+    let dragEl = null;
+
+    rows.forEach(r => {
+      r.addEventListener("dragstart", (e) => {
+        dragEl = r;
+        r.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", r.dataset.id || "");
+      });
+
+      r.addEventListener("dragend", () => {
+        r.classList.remove("dragging");
+        dragEl = null;
+      });
+
+      r.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        const target = r;
+        if(!dragEl || target === dragEl) return;
+
+        const rect = target.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+
+        if(before){
+          target.parentNode.insertBefore(dragEl, target);
+        } else {
+          target.parentNode.insertBefore(dragEl, target.nextSibling);
+        }
+      });
+
+      r.addEventListener("drop", (e) => {
+        e.preventDefault();
+        // update order based on DOM
+        const orderedIds = Array.from(catMgrList.querySelectorAll(".catMgrRow"))
+          .map(x => x.dataset.id)
+          .filter(Boolean);
+
+        state.categoryPrefs.order = orderedIds;
+        saveState(state);
+      });
+    });
+  }
+
+  catAddBtn.onclick = () => {
+    const label = normName(catNewName.value);
+    if(!label){
+      showToast("Enter a category name.", 1600);
+      catNewName.focus();
+      return;
+    }
+    ensureCatForLabel(label);
+    catNewName.value = "";
+    renderCatManagerList();
+    showToast("Category added.", 1400);
+  };
+
+  document.getElementById("catCloseX").onclick = () => closeCatManager(false);
+  document.getElementById("catCancel").onclick = () => closeCatManager(false);
+  document.getElementById("catSave").onclick = () => closeCatManager(true);
+  catBg.onclick = (e) => { if(e.target === catBg) closeCatManager(false); };
 
   // =========================
   // PHASE 2: Dish Ingredients Modal
@@ -929,24 +1403,30 @@
   let dishEditingName = null;
   let dishEditingSnapshot = null;
 
-  function buildCatSelect(selected){
+  function buildCatSelect(selectedId){
+    const cats = getAllCats();
     return `
       <select class="ingCat">
-        ${CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+        ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${String(selectedId||"misc")===c.id?"selected":""}>${escapeHtml(c.label)}</option>`).join("")}
       </select>
     `;
   }
 
-  function addIngRow({name="", cat="Misc"} = {}){
+  function addIngRow({name="", catId="misc"} = {}){
     const row = document.createElement("div");
     row.className = "ingRow";
     row.innerHTML = `
       <input class="ingName" type="text" placeholder="Ingredient name" value="${escapeHtml(name)}">
-      ${buildCatSelect(cat || "Misc")}
+      ${buildCatSelect(catId || "misc")}
       <button class="delBtn" type="button" title="Remove">🗑️</button>
     `;
     row.querySelector(".delBtn").onclick = () => row.remove();
     dishIngList.appendChild(row);
+  }
+
+  function getDishObjByName(name){
+    const n = normName(name).toLowerCase();
+    return (state.dishCatalog || []).find(d => normName(d.name).toLowerCase() === n) || null;
   }
 
   function openDishIngredientsModal(dishName){
@@ -964,7 +1444,7 @@
 
     const ings = Array.isArray(dish.ingredients) ? dish.ingredients : [];
     if(ings.length){
-      ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
+      ings.forEach(x => addIngRow({ name: x.name, catId: x.catId || "misc" }));
     }
 
     dishBg.style.display = "flex";
@@ -997,15 +1477,15 @@
     const out = [];
     dishIngList.querySelectorAll(".ingRow").forEach(r => {
       const n = normName(r.querySelector(".ingName")?.value || "");
-      const c = normName(r.querySelector(".ingCat")?.value || "Misc") || "Misc";
+      const cId = String(r.querySelector(".ingCat")?.value || "misc");
       if(!n) return;
-      out.push({ name: n, cat: c });
+      out.push({ name: n, catId: cId });
     });
 
-    // de-dupe within dish by name+cat
+    // de-dupe within dish by name+catId
     const seen = new Set();
     dish.ingredients = out.filter(x => {
-      const k = normName(x.name).toLowerCase() + "|" + normName(x.cat).toLowerCase();
+      const k = normName(x.name).toLowerCase() + "|" + String(x.catId||"misc");
       if(seen.has(k)) return false;
       seen.add(k);
       return true;
@@ -1021,7 +1501,7 @@
     showToast("Ingredients saved.", 1400);
   }
 
-  document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", cat:"Misc"});
+  document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", catId:"misc"});
   document.getElementById("dishClose").onclick = () => closeDishModal(false);
   document.getElementById("dishCancel").onclick = () => closeDishModal(false);
   document.getElementById("dishSave").onclick = () => closeDishModal(true);
@@ -1030,12 +1510,12 @@
   // =========================
   // Groceries: Shopping list
   // =========================
-  function addItemToCurrent(name, cat="Misc"){
+  function addItemToCurrent(name, catId="misc"){
     name = normName(name);
-    cat = normName(cat) || "Misc";
+    catId = String(catId || "misc");
     if(!name) return false;
 
-    const item = { id: generateId(), name, cat, done:false, qty:"1", unit:"ea", price:"" };
+    const item = { id: generateId(), name, catId, done:false, qty:"1", unit:"ea", price:"" };
     if(hasItem(state.current.items, item)) return false;
 
     state.current.items.push(item);
@@ -1065,12 +1545,12 @@
   // =========================
   // Groceries: Master list
   // =========================
-  function addToMaster(name, cat="Misc"){
+  function addToMaster(name, catId="misc"){
     name = normName(name);
-    cat = normName(cat) || "Misc";
+    catId = String(catId || "misc");
     if(!name) return false;
 
-    const entry = { name, cat };
+    const entry = { name, catId };
     if(hasItem(state.masterGroceries, entry)) return false;
 
     state.masterGroceries.push(entry);
@@ -1079,11 +1559,11 @@
     return true;
   }
 
-  function removeFromMaster(name, cat){
+  function removeFromMaster(name, catId){
     const n = normName(name).toLowerCase();
-    const c = normName(cat||"Misc").toLowerCase();
+    const c = String(catId || "misc");
     state.masterGroceries = state.masterGroceries.filter(x =>
-      !(normName(x.name).toLowerCase()===n && normName(x.cat||"Misc").toLowerCase()===c)
+      !(normName(x.name).toLowerCase()===n && String(x.catId||"misc")===c)
     );
     saveState(state);
     debouncedRender();
@@ -1092,11 +1572,6 @@
   // =========================
   // Dishes
   // =========================
-  function getDishObjByName(name){
-    const n = normName(name).toLowerCase();
-    return (state.dishCatalog || []).find(d => normName(d.name).toLowerCase() === n) || null;
-  }
-
   function hasDishObjByName(name){
     const n = normName(name).toLowerCase();
     return (state.dishCatalog || []).some(d => normName(d.name).toLowerCase() === n);
@@ -1108,19 +1583,16 @@
 
     let addedCatalog = false, addedMenu = false;
 
-    // ensure catalog stores objects
     if(!hasDishObjByName(name)){
       state.dishCatalog.push({ name, ingredients: [] });
       addedCatalog = true;
     }
 
-    // menu stays as strings (dish names)
     if(!hasDish(state.currentMenu, name)){
       state.currentMenu.push(name);
       addedMenu = true;
     }
 
-    // default unchecked
     if(!state.menuAddFlags) state.menuAddFlags = {};
     state.menuAddFlags[name] = false;
 
@@ -1151,10 +1623,8 @@
       const j = Math.floor(Math.random()*(i+1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    // ✅ menu is strings
     state.currentMenu = pool.slice(0, 14).map(d => d.name);
 
-    // reset menu checkboxes for the new menu (default UNCHECKED)
     state.menuAddFlags = {};
     state.currentMenu.forEach(n => state.menuAddFlags[n] = false);
 
@@ -1179,7 +1649,6 @@
 
     const menuRows = Array.from(document.querySelectorAll("#menuCard .dishRow"));
 
-    // dishName -> checked?
     const checkedMap = {};
     menuRows.forEach(row => {
       const key = row.dataset.key || "";
@@ -1206,18 +1675,16 @@
 
       ings.forEach(ing => {
         const n = normName(ing.name);
-        const c = normName(ing.cat || "Misc") || "Misc";
+        const cId = String(ing.catId || "misc");
         if(!n) return;
 
-        // Always add to Master
-        addToMaster(n, c);
+        addToMaster(n, cId);
 
-        // Add to current shopping list (qty=1, unit=ea)
-        const ok = addItemToCurrent(n, c);
+        const ok = addItemToCurrent(n, cId);
         if(ok){
           const it = state.current.items.find(x =>
             normName(x.name).toLowerCase()===n.toLowerCase()
-            && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase()
+            && String(x.catId||"misc")===cId
           );
           if(it){
             it.qty = "1";
@@ -1230,7 +1697,6 @@
       });
     });
 
-    // ✅ Auto-uncheck the menu dishes after adding ingredients (your request)
     menuRows.forEach(row => {
       const chk = row.querySelector(".ingCheck");
       if(chk && chk.checked){
@@ -1276,7 +1742,7 @@
         <div class="item ${it.done ? "done":""}" data-id="${it.id}">
           <input class="check" type="checkbox" ${it.done ? "checked":""}>
           <div class="name">${escapeHtml(it.name)}</div>
-          <span class="catPill">${escapeHtml(it.cat||"Misc")}</span>
+          <span class="catPill">${escapeHtml(catLabelById(it.catId))}</span>
           <input class="qty" type="number" step="0.5" min="0" value="${escapeHtml(it.qty)}">
           <select class="unit">
             ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${escapeHtml(u)}</option>`).join("")}
@@ -1309,16 +1775,16 @@
         row.querySelector(".delBtn").onclick = () => deleteItemById(id);
 
         row.querySelector(".name").onclick = async () => {
-          const res = await openItemModal("Edit Item", { name: item.name, cat: item.cat || "Misc" });
+          const res = await openItemModal("Edit Item", { name: item.name, catId: item.catId || "misc" });
           if(!res) return;
 
-          const cand = { name: res.name, cat: res.cat };
+          const cand = { name: res.name, catId: res.catId };
           const others = state.current.items.filter(x => x.id !== id);
           if(hasItem(others, cand)){
             showToast("That item already exists in the Shopping List.", 1900);
             return;
           }
-          updateItem(id, { name: res.name, cat: res.cat });
+          updateItem(id, { name: res.name, catId: res.catId });
         };
       });
     }
@@ -1338,7 +1804,7 @@
         <div class="masterRow" data-idx="${idx}">
           <input class="mCheck" type="checkbox">
           <div class="mName">${escapeHtml(m.name)}</div>
-          <span class="catPill">${escapeHtml(m.cat||"Misc")}</span>
+          <span class="catPill">${escapeHtml(catLabelById(m.catId))}</span>
           <button class="delBtn" title="Delete from Master">🗑️</button>
         </div>
       `).join("");
@@ -1350,17 +1816,17 @@
         if(!m) return;
 
         row.querySelector(".mName").onclick = async () => {
-          const res = await openItemModal("Edit Master Item", { name: m.name, cat: m.cat || "Misc" });
+          const res = await openItemModal("Edit Master Item", { name: m.name, catId: m.catId || "misc" });
           if(!res) return;
-          removeFromMaster(m.name, m.cat);
-          addToMaster(res.name, res.cat);
+          removeFromMaster(m.name, m.catId);
+          addToMaster(res.name, res.catId);
           showToast("Master item updated.", 1500);
         };
 
         row.querySelector(".delBtn").onclick = () => {
-          const ok = confirm(`Delete from Master?\n\n${m.name} (${m.cat||"Misc"})`);
+          const ok = confirm(`Delete from Master?\n\n${m.name} (${catLabelById(m.catId)})`);
           if(!ok) return;
-          removeFromMaster(m.name, m.cat);
+          removeFromMaster(m.name, m.catId);
         };
       });
     }
@@ -1423,7 +1889,6 @@
         const name = undishKey(row.dataset.key || "");
         const where = row.dataset.where;
 
-        // Checkbox handler
         const chk = row.querySelector(".ingCheck");
         if(chk){
           chk.checked = !!state.menuAddFlags?.[name];
@@ -1444,7 +1909,6 @@
             return;
           }
 
-          // where === "menu"
           const allowed = !!row.querySelector(".ingCheck")?.checked;
 
           if(allowed){
@@ -1452,7 +1916,6 @@
             return;
           }
 
-          // Rename behavior when NOT checked
           const newName = prompt("Rename dish (updates Catalog + Menu):", name);
           if(!newName) return;
           const nn = normName(newName);
@@ -1518,10 +1981,7 @@
     tabGroceries.classList.toggle("active", isG);
     tabDishes.classList.toggle("active", isD);
 
-    // Top-right action: only for groceries
     document.getElementById("btnClearDone").style.display = isG ? "" : "none";
-
-    // ⋯ button only on groceries (as requested)
     btnMore.style.display = isG ? "" : "none";
   }
 
@@ -1544,14 +2004,14 @@
   };
 
   document.getElementById("btnAdd").onclick = async () => {
-    const res = await openItemModal("Add Item", { name:"", cat:"Misc" });
+    const res = await openItemModal("Add Item", { name:"", catId:"misc" });
     if(!res) return;
 
-    addToMaster(res.name, res.cat);
+    addToMaster(res.name, res.catId);
 
-    const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${res.cat})`);
+    const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${catLabelById(res.catId)})`);
     if(also){
-      const ok = addItemToCurrent(res.name, res.cat);
+      const ok = addItemToCurrent(res.name, res.catId);
       showToast(ok ? `Added: ${res.name}` : `Already in Shopping List: ${res.name}`, 1800);
     } else {
       showToast(`Added to Master only: ${res.name}`, 1800);
@@ -1584,9 +2044,11 @@
       if(!cb || !cb.checked) return;
 
       const name = r.querySelector(".mName")?.textContent || "";
-      const cat = r.querySelector(".catPill")?.textContent || "Misc";
+      // read cat label pill -> map to catId (safe fallback)
+      const catLabel = r.querySelector(".catPill")?.textContent || "Misc";
+      const catId = findCatIdByLabel(catLabel) || ensureCatForLabel(catLabel);
 
-      const ok = addItemToCurrent(name, cat);
+      const ok = addItemToCurrent(name, catId);
       if(ok) added++; else already++;
 
       cb.checked = false;
@@ -1612,6 +2074,10 @@
     render();
   };
 
+  // ===== Open Category Manager =====
+  document.getElementById("btnCats").onclick = openCatManager;
+  document.getElementById("btnCatsTools").onclick = openCatManager;
+
   // =========================
   // Dish actions
   // =========================
@@ -1630,7 +2096,6 @@
   document.getElementById("btnClearMenu").onclick = () => {
     if(!confirm("Clear the current menu?")) return;
     state.currentMenu = [];
-    // also clear menu flags
     state.menuAddFlags = {};
     saveState(state);
     render();
@@ -1873,41 +2338,42 @@
       showTab("dishes");
     }
     else if(pending.kind === "item"){
-      const cat = normName(pending.cat) || "Misc";
-      addToMaster(pending.name, cat);
-      const ok = addItemToCurrent(pending.name, cat);
-      setScanMsg(ok ? `✅ Added item: ${pending.name} (${cat})` : `ℹ️ Already in list: ${pending.name} (${cat})`, "ok");
+      // map cat label -> catId (creates custom if needed)
+      const catId = pending.cat ? ensureCatForLabel(pending.cat) : "misc";
+      addToMaster(pending.name, catId);
+      const ok = addItemToCurrent(pending.name, catId);
+      setScanMsg(ok ? `✅ Added item: ${pending.name} (${catLabelById(catId)})` : `ℹ️ Already in list: ${pending.name} (${catLabelById(catId)})`, "ok");
       showTab("groceries");
     }
     else if(pending.kind === "upc"){
       const code = pending.code;
 
       const known = state.upcDB && state.upcDB[code];
-      let entry = known ? { name: known.name, cat: known.cat || "Misc" } : null;
+      let entry = known ? { name: known.name, catId: known.catId || "misc" } : null;
 
       if(!entry){
-        const res = await openItemModal("New UPC Item", { name:"", cat:"Misc" });
+        const res = await openItemModal("New UPC Item", { name:"", catId:"misc" });
         if(!res){
           setScanMsg("UPC captured, but canceled.", "warn");
           document.getElementById("btnCapture").disabled = true;
           setTimeout(resetTarget, 450);
           return;
         }
-        entry = { name: res.name, cat: res.cat || "Misc" };
+        entry = { name: res.name, catId: res.catId || "misc" };
 
         if(!state.upcDB) state.upcDB = {};
-        state.upcDB[code] = { name: entry.name, cat: entry.cat };
+        state.upcDB[code] = { name: entry.name, catId: entry.catId };
         saveState(state);
       }
 
-      addToMaster(entry.name, entry.cat);
+      addToMaster(entry.name, entry.catId);
 
-      const also = confirm(`UPC: ${code}\n\nItem: ${entry.name} (${entry.cat})\n\nAdd to Current Shopping List too?`);
+      const also = confirm(`UPC: ${code}\n\nItem: ${entry.name} (${catLabelById(entry.catId)})\n\nAdd to Current Shopping List too?`);
       if(also){
-        const ok = addItemToCurrent(entry.name, entry.cat);
-        setScanMsg(ok ? `✅ Added: ${entry.name} (${entry.cat})` : `ℹ️ Already in list: ${entry.name} (${entry.cat})`, "ok");
+        const ok = addItemToCurrent(entry.name, entry.catId);
+        setScanMsg(ok ? `✅ Added: ${entry.name} (${catLabelById(entry.catId)})` : `ℹ️ Already in list: ${entry.name} (${catLabelById(entry.catId)})`, "ok");
       } else {
-        setScanMsg(`✅ Added to Master only: ${entry.name} (${entry.cat})`, "ok");
+        setScanMsg(`✅ Added to Master only: ${entry.name} (${catLabelById(entry.catId)})`, "ok");
       }
 
       showTab("groceries");
@@ -1915,9 +2381,9 @@
     else {
       const raw = normName(pending.raw);
       if(raw){
-        addToMaster(raw, "Misc");
+        addToMaster(raw, "misc");
         const also = confirm(`Detected unknown code:\n\n"${raw}"\n\nAdd to Current Shopping List too?`);
-        if(also) addItemToCurrent(raw, "Misc");
+        if(also) addItemToCurrent(raw, "misc");
         setScanMsg(`✅ Saved: ${raw}`, "ok");
         showTab("groceries");
       } else {
@@ -1970,9 +2436,9 @@
   const importFileEl = document.getElementById("importFile");
   const importReportEl = document.getElementById("importReport");
   const impOverwriteUPC = document.getElementById("impOverwriteUPC");
+  const impMergeCats = document.getElementById("impMergeCats");
 
   function renderTools(){
-    // keep input in sync with state
     if(deviceNameInput && deviceNameInput.value !== state.deviceName){
       deviceNameInput.value = state.deviceName || "";
     }
@@ -2004,18 +2470,23 @@
   }
 
   function exportPayload(kind){
-    // Always store catalogs as canonical:
-    const master = (state.masterGroceries || []).map(x => ({ name: normName(x.name), cat: normName(x.cat||"Misc")||"Misc" })).filter(x => x.name);
+    const master = (state.masterGroceries || []).map(x => ({
+      name: normName(x.name),
+      catId: String(x.catId || "misc")
+    })).filter(x => x.name);
+
     const dishes = (state.dishCatalog || []).map(d => ({
       name: normName(d.name),
-      ingredients: Array.isArray(d.ingredients) ? d.ingredients.map(i => ({ name: normName(i.name), cat: normName(i.cat||"Misc")||"Misc" })).filter(i=>i.name) : []
+      ingredients: Array.isArray(d.ingredients)
+        ? d.ingredients.map(i => ({ name: normName(i.name), catId: String(i.catId || "misc") })).filter(i=>i.name)
+        : []
     })).filter(d => d.name);
 
     const upc = state.upcDB && typeof state.upcDB === "object" ? state.upcDB : {};
 
     const base = {
       app: "grocery-app",
-      schema: 1,
+      schema: 2,
       exportedAt: new Date().toISOString(),
       deviceName: state.deviceName || "",
       appVersion: APP_VERSION
@@ -2025,8 +2496,15 @@
     if(kind === "dishes") return { ...base, kind, dishCatalog: dishes };
     if(kind === "upc") return { ...base, kind, upcDB: upc };
 
-    // all (recommended)
-    return { ...base, kind: "all", masterGroceries: master, dishCatalog: dishes, upcDB: upc };
+    // all (recommended) — includes categories
+    return {
+      ...base,
+      kind: "all",
+      masterGroceries: master,
+      dishCatalog: dishes,
+      upcDB: upc,
+      categoryPrefs: state.categoryPrefs || { custom:{}, order:[] }
+    };
   }
 
   document.getElementById("btnExportAll").onclick = () => {
@@ -2059,14 +2537,54 @@
     importFileEl.click();
   };
 
+  function mergeCategoryPrefs(incoming){
+    if(!incoming || typeof incoming !== "object") return { merged:false };
+
+    const incCustom = incoming.custom && typeof incoming.custom === "object" ? incoming.custom : {};
+    const incOrder = Array.isArray(incoming.order) ? incoming.order : [];
+
+    let changed = false;
+
+    // merge custom labels (don't overwrite local unless new id)
+    Object.keys(incCustom).forEach(id => {
+      const lbl = normName(incCustom[id]?.label || "");
+      if(!lbl) return;
+
+      if(!state.categoryPrefs.custom[id]){
+        state.categoryPrefs.custom[id] = { label: lbl };
+        changed = true;
+      }
+    });
+
+    // merge order: keep local order, append unknown ids from imported order
+    const local = Array.isArray(state.categoryPrefs.order) ? [...state.categoryPrefs.order] : [];
+    const set = new Set(local);
+    incOrder.forEach(id => {
+      if(!set.has(id)){
+        local.push(id);
+        set.add(id);
+        changed = true;
+      }
+    });
+    state.categoryPrefs.order = local;
+
+    if(changed) saveState(state);
+    return { merged: changed };
+  }
+
   function mergeMaster(imported){
     let added = 0, skipped = 0;
     const arr = Array.isArray(imported) ? imported : [];
     arr.forEach(x => {
       const name = normName(x?.name);
-      const cat  = normName(x?.cat || "Misc") || "Misc";
+      let catId = String(x?.catId || "misc");
+
+      // If older export had cat string, map it
+      if(!x?.catId && x?.cat){
+        catId = ensureCatForLabel(x.cat);
+      }
       if(!name) return;
-      const ok = addToMaster(name, cat);
+      const ok = addToMaster(name, catId);
       if(ok) added++; else skipped++;
     });
     return { added, skipped };
@@ -2088,27 +2606,29 @@
         dishAdded++;
       }
 
-      // merge ingredients (union)
       const incoming = Array.isArray(d?.ingredients) ? d.ingredients : [];
       const beforeCount = (local.ingredients || []).length;
 
       if(!Array.isArray(local.ingredients)) local.ingredients = [];
 
       const seen = new Set(local.ingredients.map(i =>
-        normName(i.name).toLowerCase()+"|"+normName(i.cat||"Misc").toLowerCase()
+        normName(i.name).toLowerCase()+"|"+String(i.catId||"misc")
       ));
 
       incoming.forEach(i => {
         const inName = normName(i?.name);
-        const inCat  = normName(i?.cat || "Misc") || "Misc";
+        let inCatId = String(i?.catId || "misc");
+        if(!i?.catId && i?.cat){
+          inCatId = ensureCatForLabel(i.cat);
+        }
         if(!inName) return;
-        const key = inName.toLowerCase()+"|"+inCat.toLowerCase();
+        const key = inName.toLowerCase()+"|"+inCatId;
         if(seen.has(key)){
           ingSkipped++;
           return;
         }
         seen.add(key);
-        local.ingredients.push({ name: inName, cat: inCat });
+        local.ingredients.push({ name: inName, catId: inCatId });
         ingAdded++;
       });
 
@@ -2117,6 +2637,7 @@
       }
     });
 
+    saveState(state);
     return { dishAdded, dishUpdated, ingAdded, ingSkipped };
   }
 
@@ -2131,22 +2652,25 @@
 
       const incoming = obj[code];
       const name = normName(incoming?.name);
-      const cat  = normName(incoming?.cat || "Misc") || "Misc";
+      let catId = String(incoming?.catId || "misc");
+      if(!incoming?.catId && incoming?.cat){
+        catId = ensureCatForLabel(incoming.cat);
+      }
       if(!name) return;
 
       const exists = state.upcDB[clean];
       if(!exists){
-        state.upcDB[clean] = { name, cat };
+        state.upcDB[clean] = { name, catId };
         added++;
       } else {
         const same = normName(exists.name).toLowerCase()===name.toLowerCase()
-          && normName(exists.cat||"Misc").toLowerCase()===cat.toLowerCase();
+          && String(exists.catId||"misc")===catId;
 
         if(same){
           skipped++;
         } else {
           if(overwrite){
-            state.upcDB[clean] = { name, cat };
+            state.upcDB[clean] = { name, catId };
             updated++;
           } else {
             skipped++;
@@ -2155,6 +2679,7 @@
       }
     });
 
+    saveState(state);
     return { added, updated, skipped };
   }
 
@@ -2185,6 +2710,14 @@
       report += `EXPORTED AT: ${meta.exportedAt}\n`;
       report += `KIND: ${meta.kind}\n\n`;
 
+      // categories
+      if(impMergeCats.checked && data?.categoryPrefs){
+        const r = mergeCategoryPrefs(data.categoryPrefs);
+        report += `CATEGORIES MERGE:\n  Merged: ${r.merged ? "YES" : "No changes"}\n\n`;
+      } else {
+        report += `CATEGORIES MERGE:\n  (Skipped)\n\n`;
+      }
+
       let masterRes = null, dishRes = null, upcRes = null;
 
       if(m){
@@ -2208,7 +2741,6 @@
         report += `UPC DB MERGE:\n  (No upc data in file)\n\n`;
       }
 
-      saveState(state);
       debouncedRender();
 
       importReportEl.textContent = report.trim();
