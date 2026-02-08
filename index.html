@@ -423,49 +423,6 @@
       font-weight: 900;
     }
     .toggleRow input[type="checkbox"]{ width: 22px; height: 22px; }
-
-    /* ===== Category Manager ===== */
-    .catRow{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 8px;
-      border:1px solid rgba(15,23,42,.10);
-      border-radius:14px;
-      background: rgba(17,24,39,.03);
-      margin-bottom:10px;
-    }
-    .catRow.dragging{ opacity:.6; }
-    .catHandle{
-      width:38px; text-align:center;
-      border-radius:12px;
-      background: rgba(17,24,39,.08);
-      border:1px solid rgba(17,24,39,.10);
-      padding:10px 0;
-      cursor: grab;
-      user-select:none;
-      font-weight: 900;
-    }
-    .catLabel{
-      flex:1; font-weight: 900;
-      padding:10px 12px;
-      border-radius: 12px;
-      border:1px solid rgba(15,23,42,.10);
-      background:#fff;
-    }
-    .catTinyBtn{
-      padding:10px 12px;
-      border-radius: 14px;
-      font-weight: 900;
-      background: rgba(37,99,235,.12);
-      color:#1d4ed8;
-      border:1px solid rgba(37,99,235,.18);
-      box-shadow:none;
-    }
-    .catTinyBtn:hover{ filter: brightness(1.02); }
-    .catTinyBtn.dangerTiny{
-      background: rgba(239,68,68,.10);
-      color:#7f1d1d;
-      border:1px solid rgba(239,68,68,.18);
-    }
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
@@ -598,19 +555,6 @@
         </div>
       </div>
 
-      <!-- NEW: Category Manager entry -->
-      <div class="card">
-        <b>Categories</b>
-        <div class="spacer"></div>
-        <div class="toolRow">
-          <button id="btnManageCats" class="secondary">Manage Categories (add / rename / reorder / delete)</button>
-        </div>
-        <div class="spacer"></div>
-        <div class="smallNote">
-          Categories are stored locally on this device. Default categories come from the code; your additions/ordering are saved in localStorage.
-        </div>
-      </div>
-
       <div class="card">
         <b>Export</b>
         <div class="spacer"></div>
@@ -720,38 +664,6 @@
     </div>
   </div>
 
-  <!-- Category Manager Modal -->
-  <div class="miniBg" id="catBg" style="display:none;">
-    <div class="mini" style="width:min(760px, 100%);">
-      <div class="miniHead">
-        <div id="catTitle">Manage Categories</div>
-        <button id="catClose" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
-      </div>
-
-      <div class="miniBody" style="gap:12px;">
-        <div class="muted" style="font-size:14px;">
-          Drag categories to reorder walking order. You can add/rename/delete categories here.
-          Deleting a category moves any items using it to <b>Misc</b>.
-        </div>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <input id="catNewName" type="text" placeholder="New category name (e.g., Paper Goods)" style="flex:1; min-width:220px;">
-          <button id="catAddBtn" class="secondary" type="button">+ Add</button>
-        </div>
-
-        <div id="catList"></div>
-
-        <div class="smallNote">
-          Tip: Categories are stored locally per device. If you want to sync categories between devices, export ALL and import on the other device.
-        </div>
-      </div>
-
-      <div class="miniBtns">
-        <button id="catDone" class="secondary" type="button">Done</button>
-      </div>
-    </div>
-  </div>
-
   <script>
   // =========================
   // Consistency: Build / Version
@@ -799,35 +711,10 @@
   const LS_KEY = `groceryApp_v${APP_VERSION}`;
   const UNITS = ["ea","lb","oz","gal","ct"];
 
-  // =========================
-  // DEFAULT CATEGORIES (code-shipped)
-  //   - Users can add/rename/reorder locally
-  //   - Deleting a category reassigns items to DEFAULT_MISC_ID
-  // =========================
-  const DEFAULT_MISC_ID = "misc";
-  const DEFAULT_CATEGORIES = [
-    { id:"produce", label:"Produce" },
-    { id:"deli", label:"Deli" },
-    { id:"bakery", label:"Bakery" },
-    { id:"seafood", label:"Seafood" },
-    { id:"beef", label:"Beef" },
-    { id:"pork", label:"Pork" },
-    { id:"chicken", label:"Chicken" },
-    { id:"dairy", label:"Dairy" },
-    { id:"cheese", label:"Cheese" },
-    { id:"beer-wine", label:"Beer/Wine" },
-    { id:"beverages", label:"Beverages" },
-    { id:"snacks", label:"Snacks" },
-    { id:"frozen", label:"Frozen" },
-    { id:"household", label:"Household" },
-    { id:"baking", label:"Baking" },
-    { id:"can-vegies", label:"Can Vegies" },
-    { id:"can-meat", label:"Can Meat" },
-    { id:"condiments", label:"Condiments" },
-    { id:"bread", label:"Bread" },
-    { id:"pet", label:"Pet" },
-    { id:"pharmacy", label:"Pharmacy" },
-    { id:DEFAULT_MISC_ID, label:"Misc" }
+  const CATEGORIES = [
+    "Produce","Deli","Bakery","Seafood","Beef","Pork","Chicken","Dairy","Cheese","Beer/Wine",
+    "Beverages","Snacks","Frozen","Household","Baking","Can Vegies","Can Meat","Condiments",
+    "Bread","Pet","Pharmacy","Misc"
   ];
 
   // =========================
@@ -857,246 +744,14 @@
 
   function normName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
 
-  function slugifyLabel(label){
-    const s = normName(label).toLowerCase()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    return s || ("cat-" + generateId().slice(0,8));
-  }
-
-  // =========================
-  // State
-  // =========================
-  let state = loadState() || {
-    current: newBlankList("Today"),
-    dishCatalog: [],
-    currentMenu: [],
-    masterGroceries: [],
-    upcDB: {},
-    deviceName: "",
-    // NEW (v67): user category store
-    categoriesUser: [],      // [{id,label}]
-    categoryOrder: []        // [id,id,id...] (walking order)
-  };
-
-  // Ensure deviceName exists
-  if(typeof state.deviceName !== "string"){
-    state.deviceName = "";
-  }
-  if(!state.deviceName.trim()){
-    const plat = (navigator.platform || "").replace(/\s+/g," ").trim();
-    state.deviceName = plat ? plat : "My Device";
-    saveState(state);
-  }
-
-  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
-  if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
-    state.menuAddFlags = {};
-    saveState(state);
-  }
-
-  // =========================
-  // CATEGORY SYSTEM (v67)
-  // =========================
-  function ensureCategorySystem(){
-    // Ensure containers
-    if(!Array.isArray(state.categoriesUser)) state.categoriesUser = [];
-    if(!Array.isArray(state.categoryOrder)) state.categoryOrder = [];
-
-    // Ensure Misc exists in defaults (and order)
-    const defIds = DEFAULT_CATEGORIES.map(c => c.id);
-
-    // If order is empty, initialize to defaults
-    if(state.categoryOrder.length === 0){
-      state.categoryOrder = [...defIds];
-      saveState(state);
-      return;
-    }
-
-    // Ensure all default ids exist in order (append missing)
-    let changed = false;
-    defIds.forEach(id => {
-      if(!state.categoryOrder.includes(id)){
-        state.categoryOrder.push(id);
-        changed = true;
-      }
-    });
-
-    // Ensure all user cats exist in order (append missing)
-    state.categoriesUser.forEach(c => {
-      if(c && c.id && !state.categoryOrder.includes(c.id)){
-        state.categoryOrder.push(c.id);
-        changed = true;
-      }
-    });
-
-    // Remove any unknown ids from order
-    const knownSet = new Set([...defIds, ...state.categoriesUser.map(c=>c.id)]);
-    const beforeLen = state.categoryOrder.length;
-    state.categoryOrder = state.categoryOrder.filter(id => knownSet.has(id));
-    if(state.categoryOrder.length !== beforeLen) changed = true;
-
-    // Ensure Misc is last-ish if it exists but got removed accidentally
-    if(!state.categoryOrder.includes(DEFAULT_MISC_ID)){
-      state.categoryOrder.push(DEFAULT_MISC_ID);
-      changed = true;
-    }
-
-    if(changed) saveState(state);
-  }
-
-  function allCategoriesMap(){
-    const m = new Map();
-    DEFAULT_CATEGORIES.forEach(c => m.set(c.id, { ...c, source:"default" }));
-    (state.categoriesUser||[]).forEach(c => {
-      if(!c || !c.id) return;
-      const label = normName(c.label);
-      if(!label) return;
-      m.set(c.id, { id:c.id, label, source:"user" });
-    });
-    // Safety: ensure misc exists
-    if(!m.has(DEFAULT_MISC_ID)){
-      m.set(DEFAULT_MISC_ID, { id:DEFAULT_MISC_ID, label:"Misc", source:"default" });
-    }
-    return m;
-  }
-
-  function getOrderedCategories(){
-    ensureCategorySystem();
-    const m = allCategoriesMap();
-    const out = [];
-    (state.categoryOrder||[]).forEach(id => {
-      const c = m.get(id);
-      if(c) out.push(c);
-    });
-
-    // Add any cats missing from order at end (shouldn’t happen, but safe)
-    m.forEach(c => {
-      if(!out.some(x => x.id === c.id)) out.push(c);
-    });
-
-    return out;
-  }
-
-  function catLabelById(id){
-    const m = allCategoriesMap();
-    const c = m.get(id);
-    if(c) return c.label;
-    return "Misc";
-  }
-
-  // Convert old "cat":"Dairy" string to catId where possible
-  function catIdFromLegacyLabel(label){
-    const t = normName(label || "").toLowerCase();
-    if(!t) return DEFAULT_MISC_ID;
-
-    // Try defaults first
-    for(const c of DEFAULT_CATEGORIES){
-      if(normName(c.label).toLowerCase() === t) return c.id;
-    }
-
-    // Then user cats
-    for(const c of (state.categoriesUser||[])){
-      if(normName(c.label).toLowerCase() === t) return c.id;
-    }
-
-    // If unknown, create a NEW user category to preserve data
-    // (This prevents losing someone’s old category name)
-    const newLabel = normName(label);
-    if(newLabel){
-      const idBase = slugifyLabel(newLabel);
-      let id = idBase;
-      const m = allCategoriesMap();
-      if(m.has(id)){
-        id = idBase + "-" + generateId().slice(0,4);
-      }
-      state.categoriesUser.push({ id, label:newLabel });
-      if(!state.categoryOrder.includes(id)) state.categoryOrder.push(id);
-      saveState(state);
-      return id;
-    }
-
-    return DEFAULT_MISC_ID;
-  }
-
-  function normalizeItemCategoryFields(){
-    // Shopping list items: support both old (cat) and new (catId)
-    (state.current?.items || []).forEach(it => {
-      if(!it) return;
-
-      // If new field exists, keep it
-      if(it.catId && typeof it.catId === "string"){
-        // keep legacy label in it.cat for older UI (optional)
-        it.cat = catLabelById(it.catId);
-        return;
-      }
-
-      // Legacy cat string -> catId
-      const legacy = it.cat || "Misc";
-      it.catId = catIdFromLegacyLabel(legacy);
-      it.cat = catLabelById(it.catId);
-    });
-
-    // Master groceries
-    (state.masterGroceries || []).forEach(m => {
-      if(!m) return;
-
-      if(m.catId && typeof m.catId === "string"){
-        m.cat = catLabelById(m.catId);
-        return;
-      }
-      const legacy = m.cat || "Misc";
-      m.catId = catIdFromLegacyLabel(legacy);
-      m.cat = catLabelById(m.catId);
-    });
-
-    // Dish ingredients
-    (state.dishCatalog || []).forEach(d => {
-      const ings = Array.isArray(d?.ingredients) ? d.ingredients : [];
-      ings.forEach(i => {
-        if(!i) return;
-
-        if(i.catId && typeof i.catId === "string"){
-          i.cat = catLabelById(i.catId);
-          return;
-        }
-
-        const legacy = i.cat || "Misc";
-        i.catId = catIdFromLegacyLabel(legacy);
-        i.cat = catLabelById(i.catId);
-      });
-    });
-
-    // UPC DB
-    if(state.upcDB && typeof state.upcDB === "object"){
-      Object.keys(state.upcDB).forEach(code => {
-        const entry = state.upcDB[code];
-        if(!entry || typeof entry !== "object") return;
-
-        if(entry.catId && typeof entry.catId === "string"){
-          entry.cat = catLabelById(entry.catId);
-          return;
-        }
-
-        const legacy = entry.cat || "Misc";
-        entry.catId = catIdFromLegacyLabel(legacy);
-        entry.cat = catLabelById(entry.catId);
-      });
-    }
-
-    saveState(state);
-  }
-
-  function categoryIndexById(catId){
-    ensureCategorySystem();
-    const i = (state.categoryOrder || []).indexOf(catId || DEFAULT_MISC_ID);
-    return i === -1 ? (state.categoryOrder.length + 999) : i;
+  function catIndex(cat){
+    const i = CATEGORIES.findIndex(x => x.toLowerCase() === String(cat||"").toLowerCase());
+    return i === -1 ? CATEGORIES.length + 999 : i;
   }
 
   function sortByCatThenName(a, b){
-    const ai = categoryIndexById(a.catId || DEFAULT_MISC_ID);
-    const bi = categoryIndexById(b.catId || DEFAULT_MISC_ID);
+    const ai = catIndex(a.cat);
+    const bi = catIndex(b.cat);
     if(ai !== bi) return ai - bi;
     const an = normName(a.name).toLowerCase();
     const bn = normName(b.name).toLowerCase();
@@ -1130,10 +785,8 @@
   function sameItem(a, b){
     const an = normName(a.name).toLowerCase();
     const bn = normName(b.name).toLowerCase();
-
-    const ac = (a.catId || catIdFromLegacyLabel(a.cat || "Misc"));
-    const bc = (b.catId || catIdFromLegacyLabel(b.cat || "Misc"));
-
+    const ac = normName(a.cat||"Misc").toLowerCase();
+    const bc = normName(b.cat||"Misc").toLowerCase();
     return an === bn && ac === bc;
   }
 
@@ -1151,6 +804,35 @@
   function dishKey(name){ return encodeURIComponent(String(name ?? "")); }
   function undishKey(k){
     try { return decodeURIComponent(String(k ?? "")); } catch { return String(k ?? ""); }
+  }
+
+  // =========================
+  // State
+  // =========================
+  let state = loadState() || {
+    current: newBlankList("Today"),
+    dishCatalog: [],
+    currentMenu: [],
+    masterGroceries: [],
+    upcDB: {},
+    deviceName: ""
+  };
+
+  // Ensure deviceName exists
+  if(typeof state.deviceName !== "string"){
+    state.deviceName = "";
+  }
+  if(!state.deviceName.trim()){
+    // default suggestion (user can edit)
+    const plat = (navigator.platform || "").replace(/\s+/g," ").trim();
+    state.deviceName = plat ? plat : "My Device";
+    saveState(state);
+  }
+
+  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
+  if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
+    state.menuAddFlags = {};
+    saveState(state);
   }
 
   // =========================
@@ -1191,10 +873,6 @@
     }
   })();
 
-  // Initialize category system + migrate old cat strings to catId fields
-  ensureCategorySystem();
-  normalizeItemCategoryFields();
-
   let lastAddedId = null;
   let renderTimeout = null;
 
@@ -1207,18 +885,14 @@
   const miniCat = document.getElementById("miniCat");
   let miniResolve = null;
 
-  function buildCatOptions(selectedCatId){
-    const cats = getOrderedCategories();
-    const sel = selectedCatId || DEFAULT_MISC_ID;
-    miniCat.innerHTML = cats.map(c => `
-      <option value="${escapeHtml(c.id)}" ${c.id===sel?"selected":""}>${escapeHtml(c.label)}</option>
-    `).join("");
+  function buildCatOptions(selected){
+    miniCat.innerHTML = CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("");
   }
 
-  function openItemModal(title, defaults = {name:"", catId:DEFAULT_MISC_ID}){
+  function openItemModal(title, defaults = {name:"", cat:"Misc"}){
     miniTitle.textContent = title;
     miniName.value = defaults.name || "";
-    buildCatOptions(defaults.catId || DEFAULT_MISC_ID);
+    buildCatOptions(defaults.cat || "Misc");
     miniBg.style.display = "flex";
     setTimeout(()=> miniName.focus(), 80);
     return new Promise(resolve => { miniResolve = resolve; });
@@ -1235,13 +909,13 @@
   document.getElementById("miniCancel").onclick = () => closeItemModal(null);
   document.getElementById("miniOk").onclick = () => {
     const name = normName(miniName.value);
-    const catId = normName(miniCat.value) || DEFAULT_MISC_ID;
+    const cat = normName(miniCat.value) || "Misc";
     if(!name){
       showToast("Please enter a name", 1600);
       miniName.focus();
       return;
     }
-    closeItemModal({ name, catId });
+    closeItemModal({ name, cat });
   };
   miniBg.onclick = e => { if(e.target === miniBg) closeItemModal(null); };
 
@@ -1255,22 +929,20 @@
   let dishEditingName = null;
   let dishEditingSnapshot = null;
 
-  function buildCatSelect(selectedCatId){
-    const cats = getOrderedCategories();
-    const sel = selectedCatId || DEFAULT_MISC_ID;
+  function buildCatSelect(selected){
     return `
       <select class="ingCat">
-        ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id===sel?"selected":""}>${escapeHtml(c.label)}</option>`).join("")}
+        ${CATEGORIES.map(c => `<option ${String(selected||"").toLowerCase()===c.toLowerCase()?"selected":""}>${escapeHtml(c)}</option>`).join("")}
       </select>
     `;
   }
 
-  function addIngRow({name="", catId=DEFAULT_MISC_ID} = {}){
+  function addIngRow({name="", cat="Misc"} = {}){
     const row = document.createElement("div");
     row.className = "ingRow";
     row.innerHTML = `
       <input class="ingName" type="text" placeholder="Ingredient name" value="${escapeHtml(name)}">
-      ${buildCatSelect(catId || DEFAULT_MISC_ID)}
+      ${buildCatSelect(cat || "Misc")}
       <button class="delBtn" type="button" title="Remove">🗑️</button>
     `;
     row.querySelector(".delBtn").onclick = () => row.remove();
@@ -1292,7 +964,7 @@
 
     const ings = Array.isArray(dish.ingredients) ? dish.ingredients : [];
     if(ings.length){
-      ings.forEach(x => addIngRow({ name: x.name, catId: x.catId || catIdFromLegacyLabel(x.cat||"Misc") }));
+      ings.forEach(x => addIngRow({ name: x.name, cat: x.cat || "Misc" }));
     }
 
     dishBg.style.display = "flex";
@@ -1325,15 +997,15 @@
     const out = [];
     dishIngList.querySelectorAll(".ingRow").forEach(r => {
       const n = normName(r.querySelector(".ingName")?.value || "");
-      const cId = normName(r.querySelector(".ingCat")?.value || DEFAULT_MISC_ID) || DEFAULT_MISC_ID;
+      const c = normName(r.querySelector(".ingCat")?.value || "Misc") || "Misc";
       if(!n) return;
-      out.push({ name: n, catId: cId, cat: catLabelById(cId) });
+      out.push({ name: n, cat: c });
     });
 
-    // de-dupe within dish by name+catId
+    // de-dupe within dish by name+cat
     const seen = new Set();
     dish.ingredients = out.filter(x => {
-      const k = normName(x.name).toLowerCase() + "|" + (x.catId||DEFAULT_MISC_ID);
+      const k = normName(x.name).toLowerCase() + "|" + normName(x.cat).toLowerCase();
       if(seen.has(k)) return false;
       seen.add(k);
       return true;
@@ -1349,7 +1021,7 @@
     showToast("Ingredients saved.", 1400);
   }
 
-  document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", catId:DEFAULT_MISC_ID});
+  document.getElementById("dishAddIng").onclick = () => addIngRow({name:"", cat:"Misc"});
   document.getElementById("dishClose").onclick = () => closeDishModal(false);
   document.getElementById("dishCancel").onclick = () => closeDishModal(false);
   document.getElementById("dishSave").onclick = () => closeDishModal(true);
@@ -1358,12 +1030,12 @@
   // =========================
   // Groceries: Shopping list
   // =========================
-  function addItemToCurrent(name, catId=DEFAULT_MISC_ID){
+  function addItemToCurrent(name, cat="Misc"){
     name = normName(name);
-    catId = normName(catId) || DEFAULT_MISC_ID;
+    cat = normName(cat) || "Misc";
     if(!name) return false;
 
-    const item = { id: generateId(), name, catId, cat: catLabelById(catId), done:false, qty:"1", unit:"ea", price:"" };
+    const item = { id: generateId(), name, cat, done:false, qty:"1", unit:"ea", price:"" };
     if(hasItem(state.current.items, item)) return false;
 
     state.current.items.push(item);
@@ -1385,14 +1057,6 @@
   function updateItem(id, changes) {
     const item = state.current.items.find(x => x.id === id);
     if (!item) return;
-
-    // If category changes, keep both catId and cat label in sync
-    if(Object.prototype.hasOwnProperty.call(changes, "catId")){
-      const newId = normName(changes.catId) || DEFAULT_MISC_ID;
-      changes.catId = newId;
-      changes.cat = catLabelById(newId);
-    }
-
     Object.assign(item, changes);
     saveState(state);
     debouncedRender();
@@ -1401,12 +1065,12 @@
   // =========================
   // Groceries: Master list
   // =========================
-  function addToMaster(name, catId=DEFAULT_MISC_ID){
+  function addToMaster(name, cat="Misc"){
     name = normName(name);
-    catId = normName(catId) || DEFAULT_MISC_ID;
+    cat = normName(cat) || "Misc";
     if(!name) return false;
 
-    const entry = { name, catId, cat: catLabelById(catId) };
+    const entry = { name, cat };
     if(hasItem(state.masterGroceries, entry)) return false;
 
     state.masterGroceries.push(entry);
@@ -1415,11 +1079,11 @@
     return true;
   }
 
-  function removeFromMaster(name, catId){
+  function removeFromMaster(name, cat){
     const n = normName(name).toLowerCase();
-    const c = normName(catId||DEFAULT_MISC_ID);
+    const c = normName(cat||"Misc").toLowerCase();
     state.masterGroceries = state.masterGroceries.filter(x =>
-      !(normName(x.name).toLowerCase()===n && normName(x.catId||DEFAULT_MISC_ID)===c)
+      !(normName(x.name).toLowerCase()===n && normName(x.cat||"Misc").toLowerCase()===c)
     );
     saveState(state);
     debouncedRender();
@@ -1542,18 +1206,18 @@
 
       ings.forEach(ing => {
         const n = normName(ing.name);
-        const cId = normName(ing.catId || catIdFromLegacyLabel(ing.cat||"Misc")) || DEFAULT_MISC_ID;
+        const c = normName(ing.cat || "Misc") || "Misc";
         if(!n) return;
 
         // Always add to Master
-        addToMaster(n, cId);
+        addToMaster(n, c);
 
         // Add to current shopping list (qty=1, unit=ea)
-        const ok = addItemToCurrent(n, cId);
+        const ok = addItemToCurrent(n, c);
         if(ok){
           const it = state.current.items.find(x =>
             normName(x.name).toLowerCase()===n.toLowerCase()
-            && normName(x.catId||DEFAULT_MISC_ID)===cId
+            && normName(x.cat||"Misc").toLowerCase()===c.toLowerCase()
           );
           if(it){
             it.qty = "1";
@@ -1612,7 +1276,7 @@
         <div class="item ${it.done ? "done":""}" data-id="${it.id}">
           <input class="check" type="checkbox" ${it.done ? "checked":""}>
           <div class="name">${escapeHtml(it.name)}</div>
-          <span class="catPill">${escapeHtml(catLabelById(it.catId || DEFAULT_MISC_ID))}</span>
+          <span class="catPill">${escapeHtml(it.cat||"Misc")}</span>
           <input class="qty" type="number" step="0.5" min="0" value="${escapeHtml(it.qty)}">
           <select class="unit">
             ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${escapeHtml(u)}</option>`).join("")}
@@ -1645,7 +1309,16 @@
         row.querySelector(".delBtn").onclick = () => deleteItemById(id);
 
         row.querySelector(".name").onclick = async () => {
-          const res = await openItemModal("Edit Item", { name: item.name, catId: item.catId || DEFAULT_MISC_ID writeNo??? });
+          const res = await openItemModal("Edit Item", { name: item.name, cat: item.cat || "Misc" });
+          if(!res) return;
+
+          const cand = { name: res.name, cat: res.cat };
+          const others = state.current.items.filter(x => x.id !== id);
+          if(hasItem(others, cand)){
+            showToast("That item already exists in the Shopping List.", 1900);
+            return;
+          }
+          updateItem(id, { name: res.name, cat: res.cat });
         };
       });
     }
@@ -1665,7 +1338,7 @@
         <div class="masterRow" data-idx="${idx}">
           <input class="mCheck" type="checkbox">
           <div class="mName">${escapeHtml(m.name)}</div>
-          <span class="catPill">${escapeHtml(catLabelById(m.catId || DEFAULT_MISC_ID))}</span>
+          <span class="catPill">${escapeHtml(m.cat||"Misc")}</span>
           <button class="delBtn" title="Delete from Master">🗑️</button>
         </div>
       `).join("");
@@ -1677,46 +1350,20 @@
         if(!m) return;
 
         row.querySelector(".mName").onclick = async () => {
-          const res = await openItemModal("Edit Master Item", { name: m.name, catId: m.catId || DEFAULT_MISC_ID });
+          const res = await openItemModal("Edit Master Item", { name: m.name, cat: m.cat || "Misc" });
           if(!res) return;
-          removeFromMaster(m.name, m.catId || DEFAULT_MISC_ID);
-          addToMaster(res.name, res.catId);
+          removeFromMaster(m.name, m.cat);
+          addToMaster(res.name, res.cat);
           showToast("Master item updated.", 1500);
         };
 
         row.querySelector(".delBtn").onclick = () => {
-          const ok = confirm(`Delete from Master?\n\n${m.name} (${catLabelById(m.catId||DEFAULT_MISC_ID)})`);
+          const ok = confirm(`Delete from Master?\n\n${m.name} (${m.cat||"Misc"})`);
           if(!ok) return;
-          removeFromMaster(m.name, m.catId || DEFAULT_MISC_ID);
+          removeFromMaster(m.name, m.cat);
         };
       });
     }
-  }
-
-  // FIX: Resume missing code continuation from grocery row onclick edit (the earlier placeholder)
-  function bindGroceryEditHandlers(){
-    const card = document.getElementById("listCard");
-    card.querySelectorAll(".item").forEach(row => {
-      const id = row.dataset.id;
-      const item = state.current.items.find(x => x.id === id);
-      if(!item) return;
-
-      const nameEl = row.querySelector(".name");
-      if(!nameEl) return;
-
-      nameEl.onclick = async () => {
-        const res = await openItemModal("Edit Item", { name: item.name, catId: item.catId || DEFAULT_MISC_ID });
-        if(!res) return;
-
-        const cand = { name: res.name, catId: res.catId };
-        const others = state.current.items.filter(x => x.id !== id);
-        if(hasItem(others, cand)){
-          showToast("That item already exists in the Shopping List.", 1900);
-          return;
-        }
-        updateItem(id, { name: res.name, catId: res.catId });
-      };
-    });
   }
 
   function dishRowHtml(name, where){
@@ -1845,7 +1492,6 @@
 
   function render(){
     renderGroceries();
-    bindGroceryEditHandlers(); // v67: keeps edit hook clean after render rebuild
     renderDishes();
     renderTools();
   }
@@ -1898,14 +1544,14 @@
   };
 
   document.getElementById("btnAdd").onclick = async () => {
-    const res = await openItemModal("Add Item", { name:"", catId:DEFAULT_MISC_ID });
+    const res = await openItemModal("Add Item", { name:"", cat:"Misc" });
     if(!res) return;
 
-    addToMaster(res.name, res.catId);
+    addToMaster(res.name, res.cat);
 
-    const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${catLabelById(res.catId)})`);
+    const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${res.cat})`);
     if(also){
-      const ok = addItemToCurrent(res.name, res.catId);
+      const ok = addItemToCurrent(res.name, res.cat);
       showToast(ok ? `Added: ${res.name}` : `Already in Shopping List: ${res.name}`, 1800);
     } else {
       showToast(`Added to Master only: ${res.name}`, 1800);
@@ -1938,11 +1584,9 @@
       if(!cb || !cb.checked) return;
 
       const name = r.querySelector(".mName")?.textContent || "";
-      // cat id is not stored in DOM; use pill label -> id lookup (safe)
-      const catLabel = r.querySelector(".catPill")?.textContent || "Misc";
-      const catId = catIdFromLegacyLabel(catLabel);
+      const cat = r.querySelector(".catPill")?.textContent || "Misc";
 
-      const ok = addItemToCurrent(name, catId);
+      const ok = addItemToCurrent(name, cat);
       if(ok) added++; else already++;
 
       cb.checked = false;
@@ -2082,7 +1726,6 @@
         if (item) return {
           kind:"item",
           name: maybeDecode(item).trim().slice(0,120),
-          // cat can be either label or id; we’ll treat it as label for now
           cat:  maybeDecode(cat||"").trim().slice(0,80),
           raw
         };
@@ -2102,4 +1745,487 @@
     if (itemMatch) {
       const start = lower.indexOf("item=");
       const qs = raw.slice(start);
-      const sp = new URLSearchParams(q
+      const sp = new URLSearchParams(qs);
+      const item = sp.get("item");
+      const cat  = sp.get("cat");
+      if (item) {
+        return {
+          kind:"item",
+          name: maybeDecode(item).trim().slice(0,120),
+          cat:  maybeDecode(cat||"").trim().slice(0,80),
+          raw
+        };
+      }
+    }
+
+    return { kind:"unknown", raw: raw.slice(0,140) };
+  }
+
+  function parseUPC(decodedText){
+    let raw = String(decodedText ?? "").trim();
+    raw = raw.replace(/[^\d]/g, "");
+    raw = raw.slice(0, 32);
+    if(!raw) return { kind:"unknown", raw:"" };
+    return { kind:"upc", code: raw, raw };
+  }
+
+  async function openScanner(mode){
+    scanMode = mode;
+    modalBg.style.display = "flex";
+    resetTarget();
+    document.getElementById("reader").innerHTML = "";
+
+    scanTitleEl.textContent = (mode === "upc") ? "Scan UPC" : "Scan QR";
+    scanHintEl.textContent  = (mode === "upc")
+      ? "Tip: Center the barcode inside the rectangle and hold steady."
+      : "Tip: Fill the square with the QR and hold steady.";
+
+    const formats = (mode === "upc")
+      ? [
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128
+        ]
+      : [Html5QrcodeSupportedFormats.QR_CODE];
+
+    qr = new Html5Qrcode("reader", {
+      verbose: false,
+      formatsToSupport: formats,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+    });
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras?.length) throw new Error("No cameras found");
+
+      const rear = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length-1];
+
+      const qrboxFunction = () => {
+        if(mode === "upc") return { width: 260, height: 110 };
+        return { width: 70, height: 70 };
+      };
+
+      await qr.start(
+        rear.id,
+        {
+          fps: 12,
+          qrbox: qrboxFunction,
+          disableFlip: false,
+          rememberLastUsedCamera: true,
+          aspectRatio: 1.777
+        },
+        onScanSuccess
+      );
+    } catch (err) {
+      setScanMsg("Camera error – check permissions / try again.", "warn");
+      console.warn("Scanner start failed:", err);
+      setTimeout(closeScanner, 2200);
+    }
+  }
+
+  async function closeScanner() {
+    modalBg.style.display = "none";
+    resetTarget();
+
+    if (!qr) return;
+    try {
+      await qr.stop();
+      qr.clear();
+    } catch (err) {
+      console.warn("Scanner cleanup issue:", err);
+    } finally {
+      qr = null;
+      document.getElementById("reader").innerHTML = "";
+    }
+  }
+
+  function onScanSuccess(decodedText) {
+    if (targetLocked) return;
+    targetLocked = true;
+
+    pending = (scanMode === "upc") ? parseUPC(decodedText) : parseQR(decodedText);
+
+    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    beep();
+
+    document.getElementById("btnCapture").disabled = false;
+
+    if(pending.kind === "dish"){
+      setScanMsg(`Detected DISH: ${pending.name} → tap Capture`, "ok");
+    } else if(pending.kind === "item"){
+      const cat = pending.cat ? ` (${pending.cat})` : "";
+      setScanMsg(`Detected ITEM: ${pending.name}${cat} → tap Capture`, "ok");
+    } else if(pending.kind === "upc"){
+      setScanMsg(`Detected UPC: ${pending.code} → tap Capture`, "ok");
+    } else {
+      setScanMsg(`Detected: ${pending.raw} → tap Capture`, "warn");
+    }
+  }
+
+  document.getElementById("btnCapture").onclick = async () => {
+    if (!pending) return;
+
+    if(pending.kind === "dish"){
+      const r = addDishToCatalogAndMenu(pending.name);
+      setScanMsg((r.addedCatalog || r.addedMenu) ? `✅ Dish added: ${pending.name}` : `ℹ️ Dish already exists: ${pending.name}`, "ok");
+      showTab("dishes");
+    }
+    else if(pending.kind === "item"){
+      const cat = normName(pending.cat) || "Misc";
+      addToMaster(pending.name, cat);
+      const ok = addItemToCurrent(pending.name, cat);
+      setScanMsg(ok ? `✅ Added item: ${pending.name} (${cat})` : `ℹ️ Already in list: ${pending.name} (${cat})`, "ok");
+      showTab("groceries");
+    }
+    else if(pending.kind === "upc"){
+      const code = pending.code;
+
+      const known = state.upcDB && state.upcDB[code];
+      let entry = known ? { name: known.name, cat: known.cat || "Misc" } : null;
+
+      if(!entry){
+        const res = await openItemModal("New UPC Item", { name:"", cat:"Misc" });
+        if(!res){
+          setScanMsg("UPC captured, but canceled.", "warn");
+          document.getElementById("btnCapture").disabled = true;
+          setTimeout(resetTarget, 450);
+          return;
+        }
+        entry = { name: res.name, cat: res.cat || "Misc" };
+
+        if(!state.upcDB) state.upcDB = {};
+        state.upcDB[code] = { name: entry.name, cat: entry.cat };
+        saveState(state);
+      }
+
+      addToMaster(entry.name, entry.cat);
+
+      const also = confirm(`UPC: ${code}\n\nItem: ${entry.name} (${entry.cat})\n\nAdd to Current Shopping List too?`);
+      if(also){
+        const ok = addItemToCurrent(entry.name, entry.cat);
+        setScanMsg(ok ? `✅ Added: ${entry.name} (${entry.cat})` : `ℹ️ Already in list: ${entry.name} (${entry.cat})`, "ok");
+      } else {
+        setScanMsg(`✅ Added to Master only: ${entry.name} (${entry.cat})`, "ok");
+      }
+
+      showTab("groceries");
+    }
+    else {
+      const raw = normName(pending.raw);
+      if(raw){
+        addToMaster(raw, "Misc");
+        const also = confirm(`Detected unknown code:\n\n"${raw}"\n\nAdd to Current Shopping List too?`);
+        if(also) addItemToCurrent(raw, "Misc");
+        setScanMsg(`✅ Saved: ${raw}`, "ok");
+        showTab("groceries");
+      } else {
+        setScanMsg("Nothing detected.", "warn");
+      }
+    }
+
+    document.getElementById("btnCapture").disabled = true;
+    setTimeout(resetTarget, 650);
+  };
+
+  document.getElementById("btnScan").onclick = () => openScanner("qr");
+  document.getElementById("btnScanUPC").onclick = () => openScanner("upc");
+  document.getElementById("btnScanDish").onclick = () => openScanner("qr");
+
+  document.getElementById("btnCloseTop").onclick = closeScanner;
+  document.getElementById("btnDone").onclick = closeScanner;
+  modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
+
+  // ===== SHOP dropdown behavior =====
+  (function initShopMenu(){
+    const btnShop  = document.getElementById("btnShop");
+    const shopMenu = document.getElementById("shopMenu");
+    if(!btnShop || !shopMenu) return;
+
+    function closeMenu(){ shopMenu.classList.add("hidden"); }
+    function toggleMenu(){ shopMenu.classList.toggle("hidden"); }
+
+    btnShop.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    shopMenu.addEventListener("click", (e) => {
+      const item = e.target.closest(".shopItem");
+      if(!item) return;
+      const url = item.getAttribute("data-url");
+      if(url) window.open(url, "_blank", "noopener,noreferrer");
+      closeMenu();
+    });
+
+    document.addEventListener("click", () => closeMenu());
+    document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeMenu(); });
+  })();
+
+  // =========================
+  // TOOLS: Export / Import (MERGE)
+  // =========================
+  const deviceNameInput = document.getElementById("deviceName");
+  const importFileEl = document.getElementById("importFile");
+  const importReportEl = document.getElementById("importReport");
+  const impOverwriteUPC = document.getElementById("impOverwriteUPC");
+
+  function renderTools(){
+    // keep input in sync with state
+    if(deviceNameInput && deviceNameInput.value !== state.deviceName){
+      deviceNameInput.value = state.deviceName || "";
+    }
+  }
+
+  deviceNameInput.addEventListener("change", () => {
+    state.deviceName = normName(deviceNameInput.value) || "My Device";
+    saveState(state);
+    showToast("Device name saved.", 1400);
+  });
+
+  function nowStamp(){
+    const d = new Date();
+    const pad = (n)=> String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+  }
+
+  function downloadJson(obj, filename){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 250);
+  }
+
+  function exportPayload(kind){
+    // Always store catalogs as canonical:
+    const master = (state.masterGroceries || []).map(x => ({ name: normName(x.name), cat: normName(x.cat||"Misc")||"Misc" })).filter(x => x.name);
+    const dishes = (state.dishCatalog || []).map(d => ({
+      name: normName(d.name),
+      ingredients: Array.isArray(d.ingredients) ? d.ingredients.map(i => ({ name: normName(i.name), cat: normName(i.cat||"Misc")||"Misc" })).filter(i=>i.name) : []
+    })).filter(d => d.name);
+
+    const upc = state.upcDB && typeof state.upcDB === "object" ? state.upcDB : {};
+
+    const base = {
+      app: "grocery-app",
+      schema: 1,
+      exportedAt: new Date().toISOString(),
+      deviceName: state.deviceName || "",
+      appVersion: APP_VERSION
+    };
+
+    if(kind === "master") return { ...base, kind, masterGroceries: master };
+    if(kind === "dishes") return { ...base, kind, dishCatalog: dishes };
+    if(kind === "upc") return { ...base, kind, upcDB: upc };
+
+    // all (recommended)
+    return { ...base, kind: "all", masterGroceries: master, dishCatalog: dishes, upcDB: upc };
+  }
+
+  document.getElementById("btnExportAll").onclick = () => {
+    const payload = exportPayload("all");
+    const fn = `grocery-app_ALL_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported ALL.", 1600);
+  };
+  document.getElementById("btnExportMaster").onclick = () => {
+    const payload = exportPayload("master");
+    const fn = `grocery-app_MASTER_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported Master.", 1600);
+  };
+  document.getElementById("btnExportDishes").onclick = () => {
+    const payload = exportPayload("dishes");
+    const fn = `grocery-app_DISHES_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported Dishes.", 1600);
+  };
+  document.getElementById("btnExportUPC").onclick = () => {
+    const payload = exportPayload("upc");
+    const fn = `grocery-app_UPC_${normName(state.deviceName).replace(/\s+/g,"-")}_${nowStamp()}.json`;
+    downloadJson(payload, fn);
+    showToast("Exported UPC DB.", 1600);
+  };
+
+  document.getElementById("btnImport").onclick = () => {
+    importFileEl.value = "";
+    importFileEl.click();
+  };
+
+  function mergeMaster(imported){
+    let added = 0, skipped = 0;
+    const arr = Array.isArray(imported) ? imported : [];
+    arr.forEach(x => {
+      const name = normName(x?.name);
+      const cat  = normName(x?.cat || "Misc") || "Misc";
+      if(!name) return;
+      const ok = addToMaster(name, cat);
+      if(ok) added++; else skipped++;
+    });
+    return { added, skipped };
+  }
+
+  function mergeDishes(imported){
+    let dishAdded = 0, dishUpdated = 0;
+    let ingAdded = 0, ingSkipped = 0;
+
+    const arr = Array.isArray(imported) ? imported : [];
+    arr.forEach(d => {
+      const dishName = normName(d?.name);
+      if(!dishName) return;
+
+      let local = getDishObjByName(dishName);
+      if(!local){
+        state.dishCatalog.push({ name: dishName, ingredients: [] });
+        local = getDishObjByName(dishName);
+        dishAdded++;
+      }
+
+      // merge ingredients (union)
+      const incoming = Array.isArray(d?.ingredients) ? d.ingredients : [];
+      const beforeCount = (local.ingredients || []).length;
+
+      if(!Array.isArray(local.ingredients)) local.ingredients = [];
+
+      const seen = new Set(local.ingredients.map(i =>
+        normName(i.name).toLowerCase()+"|"+normName(i.cat||"Misc").toLowerCase()
+      ));
+
+      incoming.forEach(i => {
+        const inName = normName(i?.name);
+        const inCat  = normName(i?.cat || "Misc") || "Misc";
+        if(!inName) return;
+        const key = inName.toLowerCase()+"|"+inCat.toLowerCase();
+        if(seen.has(key)){
+          ingSkipped++;
+          return;
+        }
+        seen.add(key);
+        local.ingredients.push({ name: inName, cat: inCat });
+        ingAdded++;
+      });
+
+      if((local.ingredients || []).length !== beforeCount){
+        dishUpdated++;
+      }
+    });
+
+    return { dishAdded, dishUpdated, ingAdded, ingSkipped };
+  }
+
+  function mergeUPC(imported, overwrite){
+    let added = 0, updated = 0, skipped = 0;
+    if(!state.upcDB || typeof state.upcDB !== "object") state.upcDB = {};
+
+    const obj = imported && typeof imported === "object" ? imported : {};
+    Object.keys(obj).forEach(code => {
+      const clean = String(code||"").replace(/[^\d]/g,"").slice(0,32);
+      if(!clean) return;
+
+      const incoming = obj[code];
+      const name = normName(incoming?.name);
+      const cat  = normName(incoming?.cat || "Misc") || "Misc";
+      if(!name) return;
+
+      const exists = state.upcDB[clean];
+      if(!exists){
+        state.upcDB[clean] = { name, cat };
+        added++;
+      } else {
+        const same = normName(exists.name).toLowerCase()===name.toLowerCase()
+          && normName(exists.cat||"Misc").toLowerCase()===cat.toLowerCase();
+
+        if(same){
+          skipped++;
+        } else {
+          if(overwrite){
+            state.upcDB[clean] = { name, cat };
+            updated++;
+          } else {
+            skipped++;
+          }
+        }
+      }
+    });
+
+    return { added, updated, skipped };
+  }
+
+  importFileEl.addEventListener("change", async () => {
+    const file = importFileEl.files?.[0];
+    if(!file) return;
+
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      const meta = {
+        fromDevice: normName(data?.deviceName || "(unknown)"),
+        exportedAt: data?.exportedAt || "(unknown)",
+        kind: data?.kind || "(unknown)"
+      };
+
+      // Accept "all" or partials (master/dishes/upc)
+      const m = data?.masterGroceries ?? data?.master ?? null;
+      const d = data?.dishCatalog ?? data?.dishes ?? null;
+      const u = data?.upcDB ?? data?.upc ?? null;
+
+      const doUPCOverwrite = !!impOverwriteUPC.checked;
+
+      let report = "";
+      report += `IMPORT FILE: ${file.name}\n`;
+      report += `FROM DEVICE: ${meta.fromDevice}\n`;
+      report += `EXPORTED AT: ${meta.exportedAt}\n`;
+      report += `KIND: ${meta.kind}\n\n`;
+
+      let masterRes = null, dishRes = null, upcRes = null;
+
+      if(m){
+        masterRes = mergeMaster(m);
+        report += `MASTER MERGE:\n  Added: ${masterRes.added}\n  Skipped (already exists): ${masterRes.skipped}\n\n`;
+      } else {
+        report += `MASTER MERGE:\n  (No master data in file)\n\n`;
+      }
+
+      if(d){
+        dishRes = mergeDishes(d);
+        report += `DISH CATALOG MERGE:\n  New dishes: ${dishRes.dishAdded}\n  Dishes updated: ${dishRes.dishUpdated}\n  Ingredients added: ${dishRes.ingAdded}\n  Ingredients skipped: ${dishRes.ingSkipped}\n\n`;
+      } else {
+        report += `DISH CATALOG MERGE:\n  (No dish data in file)\n\n`;
+      }
+
+      if(u){
+        upcRes = mergeUPC(u, doUPCOverwrite);
+        report += `UPC DB MERGE:\n  Added: ${upcRes.added}\n  Updated: ${upcRes.updated}\n  Skipped: ${upcRes.skipped}\n  Policy: ${doUPCOverwrite ? "OVERWRITE conflicts" : "SKIP conflicts"}\n\n`;
+      } else {
+        report += `UPC DB MERGE:\n  (No upc data in file)\n\n`;
+      }
+
+      saveState(state);
+      debouncedRender();
+
+      importReportEl.textContent = report.trim();
+      showToast("Import merge complete.", 1800);
+
+    } catch(err){
+      console.warn("Import failed:", err);
+      importReportEl.textContent = `Import failed.\n\n${String(err)}`;
+      showToast("Import failed. Bad JSON?", 2000);
+    }
+  });
+
+  // =========================
+  // Initial render + default tab
+  // =========================
+  render();
+  showTab("groceries");
+  </script>
+</body>
+</html>
