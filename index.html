@@ -392,6 +392,19 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
       z-index: 9999;
     }
+    .shopSubMenu{
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 180px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.2);
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      z-index: 10000;
+    }
+    .shopSubMenu.hidden{ display:none; }
 
     .shopMenu.hidden{ display: none; }
 
@@ -523,6 +536,11 @@
           <div id="shopMenu" class="shopMenu hidden" role="menu" aria-label="Shop">
             <!-- built by JS -->
           </div>
+            <div id="shopSubMenu" class="shopSubMenu hidden" role="menu" aria-label="Store actions">
+              <button class="shopItem subAction" data-action="sort" role="menuitem">Sort</button>
+                <button class="shopItem subAction" data-action="site" role="menuitem">Site</button>
+              <button class="shopItem subAction" data-action="edit" role="menuitem">Edit Order</button>
+            </div>
 
           <!-- Submenu: Sort / Edit Order / Site -->
           <div id="shopSubMenu" class="shopMenu hidden" role="menu" aria-label="Shop store options">
@@ -2426,6 +2444,7 @@
   });
 
   shopMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
     const item = e.target.closest(".shopItem");
     if(!item) return;
     const sid = item.getAttribute("data-store") || "__default__";
@@ -2433,6 +2452,7 @@
   });
 
   shopSubMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
     const item = e.target.closest(".shopItem");
     if(!item) return;
     const act = item.getAttribute("data-act");
