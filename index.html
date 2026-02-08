@@ -3,23 +3,16 @@
   ------------------------------------------------------------
   When making ANY functional change:
 
-  1) Update APP_VERSION below
-     - Controls localStorage key (groceryApp_v##)
-     - Prevents data/version confusion
+  1) Update APP_VERSION below (controls localStorage key)
+  2) Update the visible build label in the header
+  3) Update CACHE in sw.js
+  4) Update start_url in manifest.webmanifest
+  5) Commit ALL related files together
 
-  2) Update the visible build label in the header (optional but recommended)
-     - Helps humans confirm the correct build is loaded
-
-  3) Update VERSION in sw.js
-     - Forces Service Worker + cache refresh
-
-  4) Commit ALL related files together
-
-  If you forget step #3, the browser may keep serving old code.
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 069)
+     index.html  (BUILD 070)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -34,10 +27,8 @@
     * { box-sizing: border-box; }
 
     :root{
-      /* Core palette (warmer + friendlier) */
       --navy:#0b1220;
 
-      /* “App language” colors */
       --primary:#2563eb;
       --primary2:#1d4ed8;
       --success:#16a34a;
@@ -47,7 +38,6 @@
       --danger:#ef4444;
       --danger2:#dc2626;
 
-      /* Softer neutrals */
       --card:#ffffff;
       --ink:#0f172a;
       --muted:#64748b;
@@ -81,7 +71,6 @@
 
     .wrap { padding:16px 14px 90px; max-width:820px; margin:0 auto; }
 
-    /* Tabs row */
     .tabs{
       display:flex;
       gap:12px;
@@ -108,7 +97,6 @@
       box-shadow: 0 12px 22px rgba(2,6,23,.18);
     }
 
-    /* Push right-side buttons to the edge */
     #btnClearDone{ margin-left:auto; }
     #btnMore{
       padding: 10px 14px;
@@ -118,15 +106,13 @@
       min-width: 48px;
     }
 
-    /* Base row */
     .row { display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* ACTION row (Groceries main buttons) should fill width */
     .actionRow{
       justify-content: space-between;
     }
     .actionRow button{
-      flex: 1 1 150px;  /* grows to fill, wraps nicely */
+      flex: 1 1 150px;
       min-width: 140px;
     }
 
@@ -145,40 +131,6 @@
       letter-spacing: .2px;
     }
 
-    /* ===== SHOP dropdown (add BELOW button{}) ===== */
-    .shopWrap{
-      position: relative;
-      display: inline-block;
-      margin-left: 20px;   /* space between UNDO and SHOP */
-    }
-
-    .shopMenu{
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      min-width: 180px;
-      padding: 8px;
-      background: #fff;
-      border: 1px solid rgba(0,0,0,.2);
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      z-index: 9999;
-    }
-
-    .shopMenu.hidden{ display: none; }
-
-    .shopItem{
-      width: 100%;
-      padding: 10px 12px;
-      text-align: left;
-      border: 0;
-      background: transparent;
-      cursor: pointer;
-      color: #000;           /* ✅ FIX: always visible text */
-    }
-
-    .shopItem:hover{ background: rgba(0,0,0,.08); }
-
     button:active{ transform: translateY(1px); }
     button:hover{ filter: brightness(1.03); box-shadow: var(--shadow2); }
     button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; filter:none; }
@@ -196,7 +148,6 @@
       box-shadow: 0 12px 22px rgba(239,68,68,.16);
     }
 
-    /* Intent colors */
     button.scanQR{
       background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     }
@@ -241,7 +192,6 @@
     .spacer { height:10px; }
     .total { font-weight:900; font-size:18px; letter-spacing:.2px; }
 
-    /* Rows / pills */
     .pill,
     .catPill{
       font-size:12px; font-weight:900;
@@ -253,7 +203,6 @@
     .pill.ok{ background:rgba(34,197,94,.18); color:#065f46; }
     .pill.warn{ background:rgba(245,158,11,.18); color:#92400e; }
 
-    /* Grocery list rows */
     .item {
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -266,7 +215,6 @@
     select { padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
     .price { width:96px; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:16px; }
 
-    /* Master list rows */
     .masterRow{
       display:flex; align-items:center; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -275,7 +223,6 @@
     .mName{ flex:1; font-size:16px; cursor:pointer; font-weight:800; }
     .mCheck{ width:26px; height:26px; }
 
-    /* Dish rows */
     .dishRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:10px 6px; border-bottom:1px solid #eee;
@@ -283,7 +230,6 @@
     .dishRow:last-child{ border-bottom:0; }
     .dishName{ font-size:16px; font-weight:800; cursor:pointer; }
 
-    /* Row delete buttons: soft danger */
     .delBtn{
       background: rgba(239,68,68,.10);
       color:#7f1d1d;
@@ -295,7 +241,6 @@
     }
     .delBtn:hover{ filter: brightness(1.02); }
 
-    /* Scanner modal */
     .modalBg {
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
@@ -347,34 +292,12 @@
     .capBtn { background:#16a34a; }
     .doneBtn { background:#e5e7eb; color:#111827; }
 
-    /* Add/Edit modal */
     .miniBg{
       position:fixed; inset:0; background:rgba(0,0,0,.55);
       display:none; align-items:center; justify-content:center; padding:16px;
       z-index: 9998;
     }
-/* ===== CATS modal: allow scrolling inside the modal ===== */
-#catBg .mini{
-  max-height: calc(100dvh - 32px);   /* fits on screen */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;                 /* keep rounded corners clean */
-}
 
-/* Make the content area the scroll container */
-#catBg .miniBody{
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iPhone smooth scrolling */
-  flex: 1 1 auto;
-  min-height: 0;                     /* IMPORTANT for flex scrolling */
-}
-
-/* Optional: keep buttons visible */
-#catBg .miniBtns{
-  flex: 0 0 auto;
-}
-
-    /* PHASE 2: Ingredient rows inside Dish modal */
     .ingRow{
       display:flex;
       gap:10px;
@@ -398,25 +321,31 @@
     .ingRow .delBtn{ padding:10px 12px; }
 
     .mini{
-      width:min(560px, 100%);
+      width:min(520px, 100%);
       background:#fff; border-radius:18px; overflow:hidden;
       box-shadow:0 20px 60px rgba(0,0,0,.35);
+      max-height: calc(100dvh - 32px);
+      display:flex; flex-direction:column;
     }
     .miniHead{
       padding:12px 14px; background:#111827; color:#fff;
       display:flex; justify-content:space-between; align-items:center;
       font-weight:900;
+      flex: 0 0 auto;
     }
-    .miniBody{ padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
-    .miniRow{ display:flex; flex-direction:column; gap:6px; }
-    .miniRow label{ font-weight:900; color:#111827; }
-    .miniRow input, .miniRow select{
-      width:100%; padding:12px 12px; border:1px solid #ddd;
-      border-radius:14px; font-size:16px;
+    .miniBody{
+      padding:12px 14px; display:flex; flex-direction:column; gap:10px;
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1 1 auto;
+      min-height: 0;
     }
-    .miniBtns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; padding:0 14px 14px; }
+    .miniBtns{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+      padding:0 14px 14px;
+      flex: 0 0 auto;
+    }
 
-    /* Tools screen */
     .toolRow{
       display:flex; gap:10px; flex-wrap:wrap; align-items:center;
     }
@@ -444,89 +373,133 @@
     }
     .toggleRow input[type="checkbox"]{ width: 22px; height: 22px; }
 
-    /* ===== Category Manager ===== */
+    /* ===== SHOP menu (two-stage) ===== */
+    .shopWrap{
+      position: relative;
+      display: inline-block;
+      margin-left: 20px;
+    }
+
+    .shopMenu{
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 200px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.2);
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      z-index: 9999;
+    }
+
+    .shopMenu.hidden{ display: none; }
+
+    .shopItem{
+      width: 100%;
+      padding: 10px 12px;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: #000;
+      font-weight: 900;
+      border-radius: 8px;
+    }
+    .shopItem:hover{ background: rgba(0,0,0,.08); }
+
+    .shopItem.active{
+      outline: 2px solid rgba(37,99,235,.25);
+      background: rgba(37,99,235,.10);
+    }
+
+    .shopSubHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 6px 6px 10px 6px;
+      border-bottom: 1px solid rgba(0,0,0,.10);
+      margin-bottom: 8px;
+      font-weight: 900;
+      color:#111827;
+    }
+
+    .shopBackBtn{
+      padding:8px 10px;
+      border-radius:10px;
+      background: rgba(17,24,39,.06);
+      color:#111827;
+      border: 1px solid rgba(0,0,0,.12);
+      box-shadow:none;
+      cursor:pointer;
+      font-weight: 900;
+    }
+
+    /* ===== Category manager rows ===== */
     .catMgrList{
       display:flex;
       flex-direction:column;
       gap:10px;
-      padding: 6px 0 4px;
+      margin-top: 6px;
+      padding-bottom: 8px;
     }
     .catMgrRow{
       display:flex;
       align-items:center;
       gap:10px;
-      padding:10px;
-      border:1px solid rgba(15,23,42,.12);
-      border-radius:14px;
-      background: rgba(17,24,39,.03);
+      padding:10px 10px;
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,.85);
     }
     .dragHandle{
-      width:34px;
+      font-size: 20px;
+      width: 28px;
       text-align:center;
-      user-select:none;
       cursor: grab;
-      font-weight: 900;
+      user-select:none;
       opacity:.75;
-      border:1px solid rgba(15,23,42,.10);
-      border-radius:12px;
-      padding:8px 8px;
-      background:#fff;
-    }
-    .catMgrRow.dragging{
-      opacity:.55;
-      transform: scale(0.995);
     }
     .catNameInput{
       flex:1;
-      padding:12px 12px;
+      padding:10px 10px;
       border:1px solid #ddd;
-      border-radius:14px;
-      font-size:16px;
-      background:#fff;
-      font-weight:900;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 900;
     }
     .catBadge{
       font-size: 12px;
       font-weight: 900;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(15,23,42,.12);
-      background:#fff;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(17,24,39,.05);
       color:#111827;
       white-space:nowrap;
-      opacity:.8;
     }
-    .catBadge.builtIn{
-      background: rgba(37,99,235,.12);
-      border-color: rgba(37,99,235,.18);
-      color:#1d4ed8;
-    }
-    .catBadge.custom{
-      background: rgba(34,197,94,.14);
-      border-color: rgba(34,197,94,.18);
-      color:#065f46;
-    }
+    .catBadge.builtIn{ background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.22); color:#065f46; }
+
+    /* ===== iOS Safari fallback for dvh ===== */
     @supports not (height: 100dvh){
-    #catBg .mini{
-      max-height: calc(100vh - 32px);
+      .mini{ max-height: calc(100vh - 32px); }
+      .modal{ max-height: calc(100vh - 32px); }
     }
-  }
   </style>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 069)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 070)</span></header>
 
   <div class="wrap">
     <div class="tabs">
       <button id="tabGroceries" class="tabBtn active">Groceries</button>
       <button id="tabDishes" class="tabBtn">Dishes</button>
 
-      <!-- ⋯ More button (Groceries -> Tools) -->
       <button id="btnMore" class="secondary" title="More / Import / Export">⋯</button>
-
       <button id="btnClearDone" class="secondary">Clear Purchased</button>
     </div>
 
@@ -538,16 +511,22 @@
         <button id="btnScanUPC" class="scanUPC">SCAN UPC</button>
         <button id="btnAdd" class="secondary">Add Item</button>
         <button id="btnUndo" class="secondary">Undo</button>
-        <button id="btnCats" class="secondary" title="Manage Categories">CATS</button>
+
+        <!-- CATS -->
+        <button id="btnCats" class="secondary">CATS</button>
 
         <!-- SHOP button + dropdown -->
         <div class="shopWrap">
           <button id="btnShop" class="secondary">SHOP</button>
-          <div id="shopMenu" class="shopMenu hidden" role="menu" aria-label="Shop links">
-            <button class="shopItem" data-url="https://www.walmart.com/" role="menuitem">Walmart</button>
-            <button class="shopItem" data-url="https://www.publix.com/" role="menuitem">Publix</button>
-            <button class="shopItem" data-url="https://www.kroger.com/" role="menuitem">Kroger</button>
-            <button class="shopItem" data-url="https://www.ingles-markets.com/" role="menuitem">Ingles</button>
+
+          <!-- Main store list -->
+          <div id="shopMenu" class="shopMenu hidden" role="menu" aria-label="Shop">
+            <!-- built by JS -->
+          </div>
+
+          <!-- Submenu: Sort / Edit Order / Site -->
+          <div id="shopSubMenu" class="shopMenu hidden" role="menu" aria-label="Shop store options">
+            <!-- built by JS -->
           </div>
         </div>
       </div>
@@ -557,16 +536,23 @@
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div>
             <b>Shopping List:</b> <span id="listName">Today</span><br>
-            <span class="muted">Sorted by category walking order + name.</span>
+            <span class="muted">Sorted by store walking order + name.</span>
           </div>
           <div class="total">Total: $<span id="total">0.00</span></div>
         </div>
+
+        <div class="spacer"></div>
+
+        <!-- Active sort indicator -->
+        <div id="sortIndicator" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="pill ok" id="sortIndicatorText">Sorted for: Default</span>
+          <button id="btnClearStoreSort" class="secondary" style="padding:10px 12px; border-radius:12px;">×</button>
+          <span class="muted" style="font-size:13px;">Tap × to return to Default order.</span>
+        </div>
       </div>
 
-      <!-- Shopping list card FIRST (above Master) -->
       <div class="card" id="listCard"></div>
 
-      <!-- Master list AFTER shopping list -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div>
@@ -607,7 +593,6 @@
       </div>
       <div class="card" id="menuCard"></div>
 
-      <!-- Dish Catalog card with Clear Catalog inside it -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
@@ -642,10 +627,6 @@
           <input id="deviceName" type="text" placeholder="e.g., Dave-iPhone, Kitchen-iPad, Laptop" />
           <div class="smallNote">Tip: Use a unique name per device so you can tell exports apart.</div>
         </div>
-
-        <div class="spacer"></div>
-        <button id="btnCatsTools" class="secondary" type="button">Manage Categories</button>
-        <div class="smallNote">Categories are stored locally per device. You can optionally export/import them via Export ALL.</div>
       </div>
 
       <div class="card">
@@ -669,10 +650,6 @@
 
         <div class="toggleRow">
           <label><input id="impOverwriteUPC" type="checkbox"> Overwrite UPC conflicts (default: skip conflicts)</label>
-        </div>
-
-        <div class="toggleRow">
-          <label><input id="impMergeCats" type="checkbox" checked> Merge categories (from Export ALL only)</label>
         </div>
 
         <div class="spacer"></div>
@@ -736,32 +713,6 @@
     </div>
   </div>
 
-  <!-- Category Manager Modal -->
-  <div class="miniBg" id="catBg" style="display:none;">
-    <div class="mini">
-      <div class="miniHead">
-        <div>Manage Categories</div>
-        <button id="catCloseX" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
-      </div>
-      <div class="miniBody">
-        <div class="muted" style="font-size:14px;">
-          Drag to reorder (walking order). Rename any category. Delete custom categories (items move to Misc).
-        </div>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <input id="catNewName" type="text" placeholder="New category name…" style="flex:1; min-width:220px; padding:12px; border:1px solid #ddd; border-radius:14px; font-size:16px;">
-          <button id="catAddBtn" class="secondary" type="button" style="min-width:160px;">+ Add Category</button>
-        </div>
-
-        <div class="catMgrList" id="catMgrList"></div>
-      </div>
-      <div class="miniBtns">
-        <button id="catCancel" class="secondary" type="button">Close</button>
-        <button id="catSave" type="button">Save</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Dish Ingredients Modal (PHASE 2) -->
   <div class="miniBg" id="dishBg" style="display:none;">
     <div class="mini">
@@ -787,16 +738,147 @@
     </div>
   </div>
 
+  <!-- Categories Manager (CATS) -->
+  <div class="miniBg" id="catBg">
+    <div class="mini">
+      <div class="miniHead">
+        <div id="catTitle">Manage Categories</div>
+        <button id="catCloseX" class="secondary" style="padding:10px 12px; border-radius:12px;">X</button>
+      </div>
+      <div class="miniBody">
+        <div class="muted" style="font-size:14px;">
+          Drag to reorder (walking order) for the selected store context. Rename any category. Delete custom categories (items move to Misc).
+        </div>
+
+        <div class="muted" id="catContextLine" style="font-size:13px; font-weight:900;">
+          Editing order for: Default (All Stores)
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <input id="catNewName" type="text" placeholder="New category name…" style="flex:1; min-width:220px; padding:12px; border:1px solid #ddd; border-radius:14px; font-size:16px;">
+          <button id="catAddBtn" class="secondary" type="button" style="min-width:160px;">+ Add Category</button>
+          <button id="catCopyDefaultBtn" class="secondary" type="button" style="min-width:180px; display:none;">Copy Default → This Store</button>
+        </div>
+
+        <div class="catMgrList" id="catMgrList"></div>
+      </div>
+      <div class="miniBtns">
+        <button id="catCancel" class="secondary" type="button">Close</button>
+        <button id="catSave" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 69;
+  const APP_VERSION = 70;
+
+  // Service worker registration
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(console.warn);
+  }
 
   // =========================
-  // Smart one-time migration helper
+  // Helpers
   // =========================
-  function smartMigrateLocalStorage({ maxLookback = 25 } = {}) {
+  function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
+
+  function generateId() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[m]));
+  }
+
+  function normName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
+
+  function showToast(message, duration = 2000) {
+    const div = document.createElement('div');
+    div.textContent = message;
+    div.style.cssText = `
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: #111827; color: white; padding: 12px 24px;
+      border-radius: 12px; z-index: 10000; font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25); pointer-events: none;
+      max-width: calc(100vw - 24px); text-align:center;
+    `;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), duration);
+  }
+
+  function loadState(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || null; }
+    catch { return null; }
+  }
+  function saveState(key, s) { localStorage.setItem(key, JSON.stringify(s)); }
+
+  function newBlankList(name) { return { name, items: [], created: Date.now() }; }
+
+  // =========================
+  // Build constants
+  // =========================
+  const LS_KEY = `groceryApp_v${APP_VERSION}`;
+  const UNITS = ["ea","lb","oz","gal","ct"];
+
+  // ===== Stores =====
+  // NOTE: store list is fixed by code, but per-store ORDER is stored in state.
+  const STORES = [
+    { id:"__default__", name:"Default (All Stores)", url:"" },
+    { id:"walmart", name:"Walmart", url:"https://www.walmart.com/" },
+    { id:"publix",  name:"Publix",  url:"https://www.publix.com/" },
+    { id:"kroger",  name:"Kroger",  url:"https://www.kroger.com/" },
+    { id:"ingles",  name:"Ingles",  url:"https://www.ingles-markets.com/" }
+  ];
+
+  function storeById(id){ return STORES.find(s => s.id === id) || STORES[0]; }
+
+  // ===== Categories (catalog) =====
+  // Items store BOTH catId + catName (hybrid, your choice #3=C)
+  const DEFAULT_CATS = [
+    { id:"produce",    name:"Produce",    builtIn:true },
+    { id:"deli",       name:"Deli",       builtIn:true },
+    { id:"bakery",     name:"Bakery",     builtIn:true },
+    { id:"seafood",    name:"Seafood",    builtIn:true },
+    { id:"beef",       name:"Beef",       builtIn:true },
+    { id:"pork",       name:"Pork",       builtIn:true },
+    { id:"chicken",    name:"Chicken",    builtIn:true },
+    { id:"dairy",      name:"Dairy",      builtIn:true },
+    { id:"cheese",     name:"Cheese",     builtIn:true },
+    { id:"beerwine",   name:"Beer/Wine",  builtIn:true },
+    { id:"beverages",  name:"Beverages",  builtIn:true },
+    { id:"snacks",     name:"Snacks",     builtIn:true },
+    { id:"frozen",     name:"Frozen",     builtIn:true },
+    { id:"household",  name:"Household",  builtIn:true },
+    { id:"baking",     name:"Baking",     builtIn:true },
+    { id:"canveggies", name:"Can Vegies", builtIn:true },
+    { id:"canmeat",    name:"Can Meat",   builtIn:true },
+    { id:"condiments", name:"Condiments", builtIn:true },
+    { id:"bread",      name:"Bread",      builtIn:true },
+    { id:"pet",        name:"Pet",        builtIn:true },
+    { id:"pharmacy",   name:"Pharmacy",   builtIn:true },
+    { id:"misc",       name:"Misc",       builtIn:true }
+  ];
+
+  function slugIdFromName(name){
+    name = normName(name).toLowerCase();
+    name = name.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g,"");
+    if(!name) name = "cat";
+    return name.slice(0, 32);
+  }
+
+  // =========================
+  // Smart one-time migration helper (v70 looks back)
+  // =========================
+  function smartMigrateLocalStorage({ maxLookback = 40 } = {}) {
     const newKey = `groceryApp_v${APP_VERSION}`;
     const flagKey = `groceryApp_migrated_to_${newKey}`;
 
@@ -820,239 +902,314 @@
     }
     return false;
   }
-
   smartMigrateLocalStorage();
-
-  // Service worker registration
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(console.warn);
-  }
-
-  // =========================
-  // Build constants
-  // =========================
-  const LS_KEY = `groceryApp_v${APP_VERSION}`;
-  const UNITS = ["ea","lb","oz","gal","ct"];
-
-  // ===== DEFAULT categories shipped with the app =====
-  // Stable IDs + labels. Users can add/rename/reorder locally.
-  const DEFAULT_CATS = [
-    { id:"produce", label:"Produce" },
-    { id:"deli", label:"Deli" },
-    { id:"bakery", label:"Bakery" },
-    { id:"seafood", label:"Seafood" },
-    { id:"beef", label:"Beef" },
-    { id:"pork", label:"Pork" },
-    { id:"chicken", label:"Chicken" },
-    { id:"dairy", label:"Dairy" },
-    { id:"cheese", label:"Cheese" },
-    { id:"beerwine", label:"Beer/Wine" },
-    { id:"beverages", label:"Beverages" },
-    { id:"snacks", label:"Snacks" },
-    { id:"frozen", label:"Frozen" },
-    { id:"household", label:"Household" },
-    { id:"baking", label:"Baking" },
-    { id:"canveggies", label:"Can Vegies" },
-    { id:"canmeat", label:"Can Meat" },
-    { id:"condiments", label:"Condiments" },
-    { id:"bread", label:"Bread" },
-    { id:"pet", label:"Pet" },
-    { id:"pharmacy", label:"Pharmacy" },
-    { id:"misc", label:"Misc" } // IMPORTANT fallback
-  ];
-
-  // =========================
-  // Helpers
-  // =========================
-  function loadState() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
-    catch { return null; }
-  }
-  function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-  function newBlankList(name) { return { name, items: [], created: Date.now() }; }
-  function money(n) { return (Math.round((n||0)*100)/100).toFixed(2); }
-
-  function generateId() {
-    if (crypto.randomUUID) return crypto.randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-  }
-
-  function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-    }[m]));
-  }
-
-  function normName(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
-
-  // stable slug for custom category IDs
-  function slugify(s){
-    s = normName(s).toLowerCase();
-    s = s.replace(/&/g,"and");
-    s = s.replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
-    if(!s) s = "cat";
-    return s.slice(0,32);
-  }
-
-  function showToast(message, duration = 2000) {
-    const div = document.createElement('div');
-    div.textContent = message;
-    div.style.cssText = `
-      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-      background: #111827; color: white; padding: 12px 24px;
-      border-radius: 12px; z-index: 10000; font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25); pointer-events: none;
-      max-width: calc(100vw - 24px); text-align:center;
-    `;
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), duration);
-  }
-
-  function computeTotal() {
-    return state.current.items.reduce((sum, it) => {
-      const p = parseFloat(it.price) || 0;
-      const q = parseFloat(it.qty) || 1;
-      return sum + p * q;
-    }, 0);
-  }
 
   // =========================
   // State
   // =========================
-  let state = loadState() || {
+  let state = loadState(LS_KEY) || {
     current: newBlankList("Today"),
     dishCatalog: [],
     currentMenu: [],
     masterGroceries: [],
     upcDB: {},
     deviceName: "",
-    // categoryPrefs holds user additions + order.
-    categoryPrefs: {
-      custom: {},   // { [id]: { label } }
-      order: []     // array of category IDs (walking order)
-    }
+    menuAddFlags: {},
+
+    // v70 additions
+    categories: [],
+    defaultOrder: [],
+    storeOrders: {},          // { [storeId]: [catId,...] }
+    activeStoreId: "__default__"
   };
 
   // Ensure deviceName exists
-  if(typeof state.deviceName !== "string"){
-    state.deviceName = "";
-  }
+  if(typeof state.deviceName !== "string") state.deviceName = "";
   if(!state.deviceName.trim()){
     const plat = (navigator.platform || "").replace(/\s+/g," ").trim();
     state.deviceName = plat ? plat : "My Device";
-    saveState(state);
-  }
-
-  // PHASE 2: per-menu "Add Ingredients" checkboxes (default UNCHECKED)
-  if(!state.menuAddFlags || typeof state.menuAddFlags !== "object"){
-    state.menuAddFlags = {};
-    saveState(state);
-  }
-
-  // Ensure categoryPrefs shape
-  if(!state.categoryPrefs || typeof state.categoryPrefs !== "object"){
-    state.categoryPrefs = { custom:{}, order:[] };
-  }
-  if(!state.categoryPrefs.custom || typeof state.categoryPrefs.custom !== "object"){
-    state.categoryPrefs.custom = {};
-  }
-  if(!Array.isArray(state.categoryPrefs.order)){
-    state.categoryPrefs.order = [];
   }
 
   // =========================
-  // CATEGORY ENGINE (defaults + user additions + order)
+  // v70: Category / Store Order Migration + Normalization
   // =========================
-  function getAllCats(){
-    // merge built-in + custom
-    const built = DEFAULT_CATS.map(c => ({ id:c.id, label:c.label, builtIn:true }));
-    const custom = Object.keys(state.categoryPrefs.custom || {}).map(id => ({
-      id,
-      label: state.categoryPrefs.custom[id]?.label || id,
-      builtIn:false
-    }));
+  function ensureV70CategoryModel(){
+    let changed = false;
 
-    // dedupe by id, prefer built-in label if conflict
-    const map = new Map();
-    built.forEach(c => map.set(c.id, c));
-    custom.forEach(c => {
-      if(!map.has(c.id)) map.set(c.id, c);
+    // categories catalog
+    if(!Array.isArray(state.categories) || state.categories.length === 0){
+      state.categories = DEFAULT_CATS.map(x => ({...x}));
+      changed = true;
+    } else {
+      // ensure required fields
+      state.categories = state.categories
+        .map(c => ({
+          id: String(c?.id || "").trim(),
+          name: normName(c?.name || ""),
+          builtIn: !!c?.builtIn
+        }))
+        .filter(c => c.id && c.name);
+    }
+
+    // Ensure misc exists and is builtIn
+    if(!state.categories.some(c => c.id === "misc")){
+      state.categories.push({ id:"misc", name:"Misc", builtIn:true });
+      changed = true;
+    }
+
+    // defaultOrder
+    if(!Array.isArray(state.defaultOrder) || state.defaultOrder.length === 0){
+      state.defaultOrder = DEFAULT_CATS.map(c => c.id);
+      changed = true;
+    }
+
+    // storeOrders map
+    if(!state.storeOrders || typeof state.storeOrders !== "object"){
+      state.storeOrders = {};
+      changed = true;
+    }
+
+    // active store
+    if(typeof state.activeStoreId !== "string" || !state.activeStoreId){
+      state.activeStoreId = "__default__";
+      changed = true;
+    }
+    if(!storeById(state.activeStoreId)) state.activeStoreId = "__default__";
+
+    // Build fast lookup for name->id
+    const nameToId = {};
+    state.categories.forEach(c => { nameToId[c.name.toLowerCase()] = c.id; });
+
+    // Migrate old items that used item.cat (string) to catId + catName
+    const fixItemCat = (it) => {
+      if(!it) return it;
+
+      // If already hybrid
+      if(it.catId && it.catName){
+        it.catId = String(it.catId);
+        it.catName = normName(it.catName) || "Misc";
+        return it;
+      }
+
+      // Old format: it.cat (string)
+      const oldName = normName(it.cat || it.catName || "Misc") || "Misc";
+      const id = nameToId[oldName.toLowerCase()] || (oldName.toLowerCase()==="misc" ? "misc" : null);
+
+      if(id){
+        it.catId = id;
+        it.catName = oldName;
+        delete it.cat; // optional cleanup
+        changed = true;
+        return it;
+      }
+
+      // Unknown category name from old data -> create custom category
+      // (keeps your data safe)
+      const newIdBase = slugIdFromName(oldName);
+      let newId = newIdBase;
+      let n = 2;
+      while(state.categories.some(c => c.id === newId)) { newId = `${newIdBase}-${n++}`; }
+
+      state.categories.push({ id:newId, name: oldName, builtIn:false });
+      it.catId = newId;
+      it.catName = oldName;
+      delete it.cat;
+      changed = true;
+      return it;
+    };
+
+    // current list items
+    if(state.current && Array.isArray(state.current.items)){
+      state.current.items = state.current.items.map(fixItemCat);
+    }
+
+    // masterGroceries entries (old had {name,cat})
+    if(Array.isArray(state.masterGroceries)){
+      state.masterGroceries = state.masterGroceries.map(m => {
+        if(!m) return m;
+
+        // already hybrid entry
+        if(m.catId && m.catName){
+          m.catId = String(m.catId);
+          m.catName = normName(m.catName) || "Misc";
+          return m;
+        }
+
+        const oldName = normName(m.cat || m.catName || "Misc") || "Misc";
+        let id = nameToId[oldName.toLowerCase()] || (oldName.toLowerCase()==="misc" ? "misc" : null);
+        if(!id){
+          const base = slugIdFromName(oldName);
+          let nid = base, k=2;
+          while(state.categories.some(c => c.id === nid)) nid = `${base}-${k++}`;
+          state.categories.push({ id:nid, name: oldName, builtIn:false });
+          id = nid;
+          changed = true;
+        }
+        return { name: normName(m.name), catId: id, catName: oldName };
+      }).filter(x => x && normName(x.name));
+      changed = true;
+    }
+
+    // dish catalog migration (string -> object) + ingredients cat model
+    (function migrateDishData(){
+      let dishChanged = false;
+
+      state.dishCatalog = (state.dishCatalog || []).map(d => {
+        if (typeof d === "string") {
+          dishChanged = true;
+          return { name: d, ingredients: [] };
+        }
+        if (!d || typeof d !== "object") {
+          dishChanged = true;
+          return { name: String(d ?? ""), ingredients: [] };
+        }
+        if (!("name" in d)) {
+          dishChanged = true;
+          d.name = String(d.name ?? "");
+        }
+        if (!Array.isArray(d.ingredients)) {
+          dishChanged = true;
+          d.ingredients = [];
+        }
+
+        // migrate ingredients {name,cat} -> {name,catId,catName}
+        d.ingredients = (d.ingredients || []).map(ing => {
+          if(!ing) return ing;
+          if(ing.catId && ing.catName){
+            return { name: normName(ing.name), catId: String(ing.catId), catName: normName(ing.catName)||"Misc" };
+          }
+          const oldName = normName(ing.cat || ing.catName || "Misc") || "Misc";
+          let id = nameToId[oldName.toLowerCase()] || "misc";
+          return { name: normName(ing.name), catId: id, catName: oldName };
+        }).filter(x => x && normName(x.name));
+
+        return d;
+      }).filter(d => normName(d.name));
+
+      state.currentMenu = (state.currentMenu || [])
+        .map(d => typeof d === "string" ? d : d?.name)
+        .filter(Boolean);
+
+      if (dishChanged) {
+        console.log("[v70] Dish data migrated");
+        changed = true;
+      }
+    })();
+
+    // Normalize orders: ensure every order includes all category ids (append missing before misc)
+    function normalizeOrder(order){
+      const ids = state.categories.map(c => c.id);
+      const seen = new Set();
+      const out = [];
+
+      // Keep known ids in existing order
+      (order || []).forEach(id => {
+        id = String(id||"");
+        if(!id) return;
+        if(!ids.includes(id)) return; // skip removed cats
+        if(seen.has(id)) return;
+        seen.add(id);
+        out.push(id);
+      });
+
+      // Ensure "misc" exists; we want missing cats to go BEFORE misc when possible.
+      const hasMisc = out.includes("misc");
+
+      // Append missing ids (except misc) before misc
+      const missing = ids.filter(id => id !== "misc" && !seen.has(id));
+      if(missing.length){
+        if(hasMisc){
+          const iMisc = out.indexOf("misc");
+          out.splice(iMisc, 0, ...missing);
+        } else {
+          out.push(...missing);
+        }
+      }
+
+      // Ensure misc last
+      if(!out.includes("misc")) out.push("misc");
+      else {
+        // move misc to end
+        out.splice(out.indexOf("misc"), 1);
+        out.push("misc");
+      }
+
+      return out;
+    }
+
+    state.defaultOrder = normalizeOrder(state.defaultOrder);
+
+    // For each store (non-default), keep an independent order when created
+    Object.keys(state.storeOrders).forEach(sid => {
+      state.storeOrders[sid] = normalizeOrder(state.storeOrders[sid]);
     });
 
-    // ensure misc exists
-    if(!map.has("misc")) map.set("misc", { id:"misc", label:"Misc", builtIn:true });
-
-    const all = Array.from(map.values());
-
-    // order: use saved order then append missing
-    const order = Array.isArray(state.categoryPrefs.order) ? [...state.categoryPrefs.order] : [];
-    const inOrder = new Set(order);
-    all.forEach(c => { if(!inOrder.has(c.id)) order.push(c.id); });
-
-    // finally build ordered list
-    const byId = new Map(all.map(c => [c.id, c]));
-    const ordered = order.map(id => byId.get(id)).filter(Boolean);
-
-    return ordered;
-  }
-
-  function catLabelById(id){
-    id = String(id || "misc");
-    const all = getAllCats();
-    const found = all.find(c => c.id === id);
-    return found ? found.label : "Misc";
-  }
-
-  function findCatIdByLabel(label){
-    const want = normName(label).toLowerCase();
-    if(!want) return "misc";
-    const all = getAllCats();
-    const exact = all.find(c => normName(c.label).toLowerCase() === want);
-    return exact ? exact.id : null;
-  }
-
-  function ensureCatForLabel(label){
-    const existing = findCatIdByLabel(label);
-    if(existing) return existing;
-
-    // create custom
-    const base = slugify(label);
-    let id = base;
-    let tries = 0;
-    while (DEFAULT_CATS.some(c => c.id === id) || state.categoryPrefs.custom[id]) {
-      tries++;
-      id = `${base}-${tries}`;
-      if(tries > 50) { id = `${base}-${generateId().slice(0,6)}`; break; }
+    if(changed){
+      saveState(LS_KEY, state);
     }
-    state.categoryPrefs.custom[id] = { label: normName(label) || "New Category" };
+  }
 
-    // append to end of order
-    if(!state.categoryPrefs.order.includes(id)){
-      state.categoryPrefs.order.push(id);
+  ensureV70CategoryModel();
+
+  // =========================
+  // Category + Store Order Helpers
+  // =========================
+  function getOrderForStore(storeId){
+    if(storeId === "__default__") return state.defaultOrder;
+    if(state.storeOrders && Array.isArray(state.storeOrders[storeId])) return state.storeOrders[storeId];
+    return null;
+  }
+
+  function ensureStoreOrderExists(storeId){
+    if(storeId === "__default__") return;
+    if(!state.storeOrders) state.storeOrders = {};
+    if(!Array.isArray(state.storeOrders[storeId])){
+      // First time: copy default into store order (then independent)
+      state.storeOrders[storeId] = [...state.defaultOrder];
+      saveState(LS_KEY, state);
     }
-
-    saveState(state);
-    return id;
   }
 
-  function catIndexById(catId){
-    const ordered = getAllCats();
-    const i = ordered.findIndex(c => c.id === String(catId || "misc"));
-    return i === -1 ? ordered.length + 999 : i;
+  function catById(id){
+    return state.categories.find(c => c.id === id) || state.categories.find(c => c.id === "misc");
   }
 
-  function sortByCatThenName(a, b){
-    const ai = catIndexById(a.catId);
-    const bi = catIndexById(b.catId);
+  function catNameFromId(id){
+    return catById(id)?.name || "Misc";
+  }
+
+  function getActiveOrder(){
+    const sid = state.activeStoreId || "__default__";
+    return getOrderForStore(sid) || state.defaultOrder;
+  }
+
+  function catIndexInActiveOrder(catId){
+    const order = getActiveOrder();
+    const i = order.indexOf(catId);
+    return i === -1 ? order.length + 999 : i;
+  }
+
+  function sortByStoreOrderThenName(a, b){
+    const ai = catIndexInActiveOrder(a.catId || "misc");
+    const bi = catIndexInActiveOrder(b.catId || "misc");
     if(ai !== bi) return ai - bi;
+
     const an = normName(a.name).toLowerCase();
     const bn = normName(b.name).toLowerCase();
     if(an < bn) return -1;
     if(an > bn) return 1;
     return 0;
+  }
+
+  // =========================
+  // State helpers
+  // =========================
+  function computeTotal() {
+    return state.current.items.reduce((sum, it) => {
+      const p = parseFloat(it.price) || 0;
+      const q = parseFloat(it.qty) || 1;
+      return sum + p * q;
+    }, 0);
   }
 
   function sameItem(a, b){
@@ -1064,7 +1221,6 @@
   }
   function hasItem(arr, cand){ return arr.some(x => sameItem(x, cand)); }
 
-  // Dish helpers
   function sameDishName(a, b){
     return normName(a).toLowerCase() === normName(b).toLowerCase();
   }
@@ -1072,118 +1228,10 @@
     return (arr||[]).some(x => sameDishName(x, name));
   }
 
-  // Safe key encoding for dataset attributes
   function dishKey(name){ return encodeURIComponent(String(name ?? "")); }
   function undishKey(k){
     try { return decodeURIComponent(String(k ?? "")); } catch { return String(k ?? ""); }
   }
-
-  // =========================
-  // MIGRATION: old "cat" strings -> catId
-  // - Also upgrade masterGroceries entries to include catId
-  // - Any unknown cats become user custom categories
-  // =========================
-  (function migrateCategories(){
-    let changed = false;
-
-    function migrateItem(obj){
-      if(!obj || typeof obj !== "object") return;
-      if(obj.catId) return;
-      const oldCat = normName(obj.cat || "");
-      const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
-      obj.catId = cid;
-      if("cat" in obj) delete obj.cat; // keep clean
-      changed = true;
-    }
-
-    // current items
-    (state.current?.items || []).forEach(migrateItem);
-
-    // master list
-    (state.masterGroceries || []).forEach(m => {
-      if(!m || typeof m !== "object") return;
-      if(m.catId) return;
-      const oldCat = normName(m.cat || "");
-      const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
-      m.catId = cid;
-      if("cat" in m) delete m.cat;
-      changed = true;
-    });
-
-    // UPC DB
-    if(state.upcDB && typeof state.upcDB === "object"){
-      Object.keys(state.upcDB).forEach(code => {
-        const entry = state.upcDB[code];
-        if(!entry || typeof entry !== "object") return;
-        if(entry.catId) return;
-        const oldCat = normName(entry.cat || "");
-        const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
-        entry.catId = cid;
-        if("cat" in entry) delete entry.cat;
-        changed = true;
-      });
-    }
-
-    // Dish ingredient cats
-    (state.dishCatalog || []).forEach(d => {
-      const ings = Array.isArray(d?.ingredients) ? d.ingredients : [];
-      ings.forEach(i => {
-        if(!i || typeof i !== "object") return;
-        if(i.catId) return;
-        const oldCat = normName(i.cat || "");
-        const cid = oldCat ? ensureCatForLabel(oldCat) : "misc";
-        i.catId = cid;
-        if("cat" in i) delete i.cat;
-        changed = true;
-      });
-    });
-
-    if(changed){
-      console.log("[MIGRATE] Categories upgraded to catId + local categoryPrefs");
-      saveState(state);
-    }
-  })();
-
-  // =========================
-  // PHASE 1: Dish object migration (SAFE / INVISIBLE)
-  // =========================
-  (function migrateDishData(){
-    let changed = false;
-
-    // Ensure dishCatalog entries are objects with ingredients[]
-    state.dishCatalog = (state.dishCatalog || []).map(d => {
-      if (typeof d === "string") {
-        changed = true;
-        return { name: d, ingredients: [] };
-      }
-      if (!d || typeof d !== "object") {
-        changed = true;
-        return { name: String(d ?? ""), ingredients: [] };
-      }
-      if (!("name" in d)) {
-        changed = true;
-        d.name = String(d.name ?? "");
-      }
-      if (!Array.isArray(d.ingredients)) {
-        changed = true;
-        d.ingredients = [];
-      }
-      return d;
-    }).filter(d => normName(d.name));
-
-    // Ensure currentMenu is array of dish names (strings)
-    state.currentMenu = (state.currentMenu || [])
-      .map(d => typeof d === "string" ? d : d?.name)
-      .filter(Boolean);
-
-    if (changed) {
-      console.log("[PHASE 1] Dish data migrated");
-      saveState(state);
-    }
-  })();
-
-  let lastAddedId = null;
-  let renderTimeout = null;
 
   // =========================
   // Add/Edit Item Modal
@@ -1194,12 +1242,17 @@
   const miniCat = document.getElementById("miniCat");
   let miniResolve = null;
 
-  function buildCatOptions(selectedId){
-    const cats = getAllCats();
-    miniCat.innerHTML = cats.map(c => {
-      const sel = String(selectedId||"misc") === c.id ? "selected" : "";
-      return `<option value="${escapeHtml(c.id)}" ${sel}>${escapeHtml(c.label)}</option>`;
-    }).join("");
+  function buildCatOptions(selectedCatId){
+    const sel = String(selectedCatId || "misc");
+    // Use ACTIVE order list for display (nice UX)
+    const order = getActiveOrder();
+    const orderedCats = order
+      .map(id => catById(id))
+      .filter(Boolean);
+
+    miniCat.innerHTML = orderedCats.map(c =>
+      `<option value="${escapeHtml(c.id)}" ${c.id===sel ? "selected":""}>${escapeHtml(c.name)}</option>`
+    ).join("");
   }
 
   function openItemModal(title, defaults = {name:"", catId:"misc"}){
@@ -1233,192 +1286,6 @@
   miniBg.onclick = e => { if(e.target === miniBg) closeItemModal(null); };
 
   // =========================
-  // Category Manager Modal (Add/Rename/Delete/Reorder)
-  // =========================
-  const catBg = document.getElementById("catBg");
-  const catMgrList = document.getElementById("catMgrList");
-  const catNewName = document.getElementById("catNewName");
-  const catAddBtn = document.getElementById("catAddBtn");
-
-  let catMgrSnapshot = null; // for cancel restore
-
-  function openCatManager(){
-    // snapshot so cancel can revert
-    catMgrSnapshot = JSON.stringify(state.categoryPrefs || { custom:{}, order:[] });
-
-    catNewName.value = "";
-    renderCatManagerList();
-    catBg.style.display = "flex";
-    setTimeout(()=> catNewName.focus(), 80);
-  }
-
-  function closeCatManager(save){
-    if(!save){
-      // restore snapshot
-      try{
-        const snap = JSON.parse(catMgrSnapshot || "{}");
-        state.categoryPrefs = snap;
-        if(!state.categoryPrefs.custom) state.categoryPrefs.custom = {};
-        if(!Array.isArray(state.categoryPrefs.order)) state.categoryPrefs.order = [];
-        saveState(state);
-      }catch{}
-    } else {
-      saveState(state);
-    }
-    catMgrSnapshot = null;
-    catBg.style.display = "none";
-    debouncedRender();
-  }
-
-  function renderCatManagerList(){
-    const cats = getAllCats();
-
-    catMgrList.innerHTML = cats.map(c => `
-      <div class="catMgrRow" draggable="true" data-id="${escapeHtml(c.id)}">
-        <div class="dragHandle" title="Drag to reorder">≡</div>
-        <input class="catNameInput" type="text" value="${escapeHtml(c.label)}" />
-        <span class="catBadge ${c.builtIn ? "builtIn":"custom"}">${c.builtIn ? "DEFAULT":"CUSTOM"}</span>
-        <button class="delBtn" title="Delete" ${c.id==="misc" ? "disabled":""}>🗑️</button>
-      </div>
-    `).join("");
-
-    // bind rename + delete
-    catMgrList.querySelectorAll(".catMgrRow").forEach(row => {
-      const id = row.dataset.id;
-      const input = row.querySelector(".catNameInput");
-      const del = row.querySelector(".delBtn");
-
-      // rename
-      input.addEventListener("change", () => {
-        const newLabel = normName(input.value);
-        if(!newLabel){
-          input.value = catLabelById(id);
-          showToast("Name cannot be blank.", 1600);
-          return;
-        }
-
-        // if built-in, store override in custom map? Keep simple:
-        // We'll allow renaming built-in by writing to custom override table
-        // BUT we must not lose built-in id.
-        if(DEFAULT_CATS.some(x => x.id === id)){
-          // store override in custom with same id
-          state.categoryPrefs.custom[id] = { label: newLabel };
-        } else {
-          // regular custom
-          if(!state.categoryPrefs.custom[id]) state.categoryPrefs.custom[id] = { label: newLabel };
-          else state.categoryPrefs.custom[id].label = newLabel;
-        }
-        saveState(state);
-        // do NOT re-render here (avoids cursor jump)
-      });
-
-      // delete
-      del?.addEventListener("click", () => {
-        if(id === "misc") return;
-
-        // built-ins: we don't allow deleting defaults (only rename)
-        const isBuilt = DEFAULT_CATS.some(x => x.id === id);
-        if(isBuilt){
-          showToast("Default categories can't be deleted (rename is OK).", 2200);
-          return;
-        }
-
-        const ok = confirm(`Delete category "${catLabelById(id)}"?\n\nAll items in that category will move to Misc.`);
-        if(!ok) return;
-
-        // remove from custom + order
-        if(state.categoryPrefs.custom && state.categoryPrefs.custom[id]){
-          delete state.categoryPrefs.custom[id];
-        }
-        state.categoryPrefs.order = (state.categoryPrefs.order || []).filter(x => x !== id);
-
-        // reassign items
-        (state.current?.items || []).forEach(it => { if(it.catId === id) it.catId = "misc"; });
-        (state.masterGroceries || []).forEach(m => { if(m.catId === id) m.catId = "misc"; });
-        if(state.upcDB && typeof state.upcDB === "object"){
-          Object.keys(state.upcDB).forEach(code => {
-            if(state.upcDB[code]?.catId === id) state.upcDB[code].catId = "misc";
-          });
-        }
-        (state.dishCatalog || []).forEach(d => {
-          (d.ingredients || []).forEach(i => { if(i.catId === id) i.catId = "misc"; });
-        });
-
-        saveState(state);
-        renderCatManagerList();
-        showToast("Category deleted (moved items to Misc).", 1800);
-      });
-    });
-
-    // drag reorder
-    bindCatDragAndDrop();
-  }
-
-  function bindCatDragAndDrop(){
-    const rows = Array.from(catMgrList.querySelectorAll(".catMgrRow"));
-    let dragEl = null;
-
-    rows.forEach(r => {
-      r.addEventListener("dragstart", (e) => {
-        dragEl = r;
-        r.classList.add("dragging");
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", r.dataset.id || "");
-      });
-
-      r.addEventListener("dragend", () => {
-        r.classList.remove("dragging");
-        dragEl = null;
-      });
-
-      r.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        const target = r;
-        if(!dragEl || target === dragEl) return;
-
-        const rect = target.getBoundingClientRect();
-        const before = (e.clientY - rect.top) < rect.height / 2;
-
-        if(before){
-          target.parentNode.insertBefore(dragEl, target);
-        } else {
-          target.parentNode.insertBefore(dragEl, target.nextSibling);
-        }
-      });
-
-      r.addEventListener("drop", (e) => {
-        e.preventDefault();
-        // update order based on DOM
-        const orderedIds = Array.from(catMgrList.querySelectorAll(".catMgrRow"))
-          .map(x => x.dataset.id)
-          .filter(Boolean);
-
-        state.categoryPrefs.order = orderedIds;
-        saveState(state);
-      });
-    });
-  }
-
-  catAddBtn.onclick = () => {
-    const label = normName(catNewName.value);
-    if(!label){
-      showToast("Enter a category name.", 1600);
-      catNewName.focus();
-      return;
-    }
-    ensureCatForLabel(label);
-    catNewName.value = "";
-    renderCatManagerList();
-    showToast("Category added.", 1400);
-  };
-
-  document.getElementById("catCloseX").onclick = () => closeCatManager(false);
-  document.getElementById("catCancel").onclick = () => closeCatManager(false);
-  document.getElementById("catSave").onclick = () => closeCatManager(true);
-  catBg.onclick = (e) => { if(e.target === catBg) closeCatManager(false); };
-
-  // =========================
   // PHASE 2: Dish Ingredients Modal
   // =========================
   const dishBg = document.getElementById("dishBg");
@@ -1428,11 +1295,14 @@
   let dishEditingName = null;
   let dishEditingSnapshot = null;
 
-  function buildCatSelect(selectedId){
-    const cats = getAllCats();
+  function buildCatSelect(selectedCatId){
+    const sel = String(selectedCatId || "misc");
+    const order = state.defaultOrder; // ingredient categories should be stable; default is fine
+    const orderedCats = order.map(id => catById(id)).filter(Boolean);
+
     return `
       <select class="ingCat">
-        ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${String(selectedId||"misc")===c.id?"selected":""}>${escapeHtml(c.label)}</option>`).join("")}
+        ${orderedCats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id===sel?"selected":""}>${escapeHtml(c.name)}</option>`).join("")}
       </select>
     `;
   }
@@ -1452,6 +1322,10 @@
   function getDishObjByName(name){
     const n = normName(name).toLowerCase();
     return (state.dishCatalog || []).find(d => normName(d.name).toLowerCase() === n) || null;
+  }
+  function hasDishObjByName(name){
+    const n = normName(name).toLowerCase();
+    return (state.dishCatalog || []).some(d => normName(d.name).toLowerCase() === n);
   }
 
   function openDishIngredientsModal(dishName){
@@ -1489,7 +1363,6 @@
     }
 
     if(!save){
-      // restore snapshot
       try { dish.ingredients = JSON.parse(dishEditingSnapshot || "[]"); }
       catch { dish.ingredients = dish.ingredients || []; }
       dishBg.style.display = "none";
@@ -1498,16 +1371,14 @@
       return;
     }
 
-    // collect rows
     const out = [];
     dishIngList.querySelectorAll(".ingRow").forEach(r => {
       const n = normName(r.querySelector(".ingName")?.value || "");
-      const cId = String(r.querySelector(".ingCat")?.value || "misc");
+      const cid = String(r.querySelector(".ingCat")?.value || "misc");
       if(!n) return;
-      out.push({ name: n, catId: cId });
+      out.push({ name: n, catId: cid, catName: catNameFromId(cid) });
     });
 
-    // de-dupe within dish by name+catId
     const seen = new Set();
     dish.ingredients = out.filter(x => {
       const k = normName(x.name).toLowerCase() + "|" + String(x.catId||"misc");
@@ -1516,7 +1387,7 @@
       return true;
     });
 
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
 
     dishBg.style.display = "none";
@@ -1533,19 +1404,22 @@
   dishBg.onclick = (e) => { if(e.target === dishBg) closeDishModal(false); };
 
   // =========================
-  // Groceries: Shopping list
+  // Groceries: list + master
   // =========================
+  let lastAddedId = null;
+  let renderTimeout = null;
+
   function addItemToCurrent(name, catId="misc"){
     name = normName(name);
     catId = String(catId || "misc");
     if(!name) return false;
 
-    const item = { id: generateId(), name, catId, done:false, qty:"1", unit:"ea", price:"" };
+    const item = { id: generateId(), name, catId, catName: catNameFromId(catId), done:false, qty:"1", unit:"ea", price:"" };
     if(hasItem(state.current.items, item)) return false;
 
     state.current.items.push(item);
     lastAddedId = item.id;
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
     return true;
   }
@@ -1555,7 +1429,7 @@
     if (idx === -1) return;
     state.current.items.splice(idx, 1);
     if (lastAddedId === id) lastAddedId = null;
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
   }
 
@@ -1563,45 +1437,44 @@
     const item = state.current.items.find(x => x.id === id);
     if (!item) return;
     Object.assign(item, changes);
-    saveState(state);
+
+    // keep hybrid fields consistent if catId changes
+    if("catId" in changes){
+      item.catId = String(item.catId || "misc");
+      item.catName = catNameFromId(item.catId);
+    }
+
+    saveState(LS_KEY, state);
     debouncedRender();
   }
 
-  // =========================
-  // Groceries: Master list
-  // =========================
   function addToMaster(name, catId="misc"){
     name = normName(name);
     catId = String(catId || "misc");
     if(!name) return false;
 
-    const entry = { name, catId };
+    const entry = { name, catId, catName: catNameFromId(catId) };
     if(hasItem(state.masterGroceries, entry)) return false;
 
     state.masterGroceries.push(entry);
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
     return true;
   }
 
   function removeFromMaster(name, catId){
     const n = normName(name).toLowerCase();
-    const c = String(catId || "misc");
+    const cid = String(catId || "misc");
     state.masterGroceries = state.masterGroceries.filter(x =>
-      !(normName(x.name).toLowerCase()===n && String(x.catId||"misc")===c)
+      !(normName(x.name).toLowerCase()===n && String(x.catId||"misc")===cid)
     );
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
   }
 
   // =========================
   // Dishes
   // =========================
-  function hasDishObjByName(name){
-    const n = normName(name).toLowerCase();
-    return (state.dishCatalog || []).some(d => normName(d.name).toLowerCase() === n);
-  }
-
   function addDishToCatalogAndMenu(name){
     name = normName(name);
     if(!name) return {addedCatalog:false, addedMenu:false};
@@ -1621,7 +1494,7 @@
     if(!state.menuAddFlags) state.menuAddFlags = {};
     state.menuAddFlags[name] = false;
 
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
     return {addedCatalog, addedMenu};
   }
@@ -1629,7 +1502,7 @@
   function removeDishFromMenu(name){
     const n = normName(name).toLowerCase();
     state.currentMenu = (state.currentMenu || []).filter(x => normName(x).toLowerCase() !== n);
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
   }
 
@@ -1638,7 +1511,7 @@
     state.dishCatalog = (state.dishCatalog || []).filter(d => normName(d.name).toLowerCase() !== n);
     state.currentMenu = (state.currentMenu || []).filter(x => normName(x).toLowerCase() !== n);
     if(state.menuAddFlags) delete state.menuAddFlags[name];
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
   }
 
@@ -1653,7 +1526,7 @@
     state.menuAddFlags = {};
     state.currentMenu.forEach(n => state.menuAddFlags[n] = false);
 
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
   }
 
@@ -1664,7 +1537,6 @@
 
   // =========================
   // Add Ingredients from checked menu dishes
-  // (also auto-UNcheck after adding)  ✅ v65 behavior
   // =========================
   function addIngredientsForCheckedMenu(){
     let dishesChecked = 0;
@@ -1700,16 +1572,16 @@
 
       ings.forEach(ing => {
         const n = normName(ing.name);
-        const cId = String(ing.catId || "misc");
+        const cid = String(ing.catId || "misc");
         if(!n) return;
 
-        addToMaster(n, cId);
+        addToMaster(n, cid);
 
-        const ok = addItemToCurrent(n, cId);
+        const ok = addItemToCurrent(n, cid);
         if(ok){
           const it = state.current.items.find(x =>
             normName(x.name).toLowerCase()===n.toLowerCase()
-            && String(x.catId||"misc")===cId
+            && String(x.catId||"misc")===cid
           );
           if(it){
             it.qty = "1";
@@ -1731,7 +1603,7 @@
       if(state.menuAddFlags && name) state.menuAddFlags[name] = false;
     });
 
-    saveState(state);
+    saveState(LS_KEY, state);
     debouncedRender();
 
     if(dishesChecked === 0){
@@ -1748,13 +1620,41 @@
   }
 
   // =========================
+  // Store sort indicator
+  // =========================
+  const sortIndicator = document.getElementById("sortIndicator");
+  const sortIndicatorText = document.getElementById("sortIndicatorText");
+  const btnClearStoreSort = document.getElementById("btnClearStoreSort");
+
+  function updateSortIndicator(){
+    const sid = state.activeStoreId || "__default__";
+    const st = storeById(sid);
+
+    if(sid === "__default__"){
+      sortIndicator.style.display = "none";
+      return;
+    }
+
+    sortIndicator.style.display = "flex";
+    sortIndicatorText.textContent = `Sorted for: ${st.name}`;
+  }
+
+  btnClearStoreSort.onclick = () => {
+    state.activeStoreId = "__default__";
+    saveState(LS_KEY, state);
+    debouncedRender();
+    showToast("Sorting returned to Default.", 1400);
+  };
+
+  // =========================
   // Render
   // =========================
   function renderGroceries() {
     document.getElementById("listName").textContent = state.current.name;
     document.getElementById("total").textContent = money(computeTotal());
+    updateSortIndicator();
 
-    const sortedCurrent = [...state.current.items].sort((a,b) => sortByCatThenName(a,b));
+    const sortedCurrent = [...state.current.items].sort(sortByStoreOrderThenName);
     const card = document.getElementById("listCard");
 
     if (sortedCurrent.length === 0) {
@@ -1767,7 +1667,7 @@
         <div class="item ${it.done ? "done":""}" data-id="${it.id}">
           <input class="check" type="checkbox" ${it.done ? "checked":""}>
           <div class="name">${escapeHtml(it.name)}</div>
-          <span class="catPill">${escapeHtml(catLabelById(it.catId))}</span>
+          <span class="catPill">${escapeHtml(catNameFromId(it.catId||"misc"))}</span>
           <input class="qty" type="number" step="0.5" min="0" value="${escapeHtml(it.qty)}">
           <select class="unit">
             ${UNITS.map(u => `<option ${u===it.unit?"selected":""}>${escapeHtml(u)}</option>`).join("")}
@@ -1815,7 +1715,7 @@
     }
 
     // Master list
-    const sortedMaster = [...state.masterGroceries].sort((a,b)=>sortByCatThenName(a,b));
+    const sortedMaster = [...state.masterGroceries].sort(sortByStoreOrderThenName);
     document.getElementById("masterCount").textContent = sortedMaster.length;
 
     const masterCard = document.getElementById("masterCard");
@@ -1829,7 +1729,7 @@
         <div class="masterRow" data-idx="${idx}">
           <input class="mCheck" type="checkbox">
           <div class="mName">${escapeHtml(m.name)}</div>
-          <span class="catPill">${escapeHtml(catLabelById(m.catId))}</span>
+          <span class="catPill">${escapeHtml(catNameFromId(m.catId||"misc"))}</span>
           <button class="delBtn" title="Delete from Master">🗑️</button>
         </div>
       `).join("");
@@ -1843,15 +1743,15 @@
         row.querySelector(".mName").onclick = async () => {
           const res = await openItemModal("Edit Master Item", { name: m.name, catId: m.catId || "misc" });
           if(!res) return;
-          removeFromMaster(m.name, m.catId);
+          removeFromMaster(m.name, m.catId || "misc");
           addToMaster(res.name, res.catId);
           showToast("Master item updated.", 1500);
         };
 
         row.querySelector(".delBtn").onclick = () => {
-          const ok = confirm(`Delete from Master?\n\n${m.name} (${catLabelById(m.catId)})`);
+          const ok = confirm(`Delete from Master?\n\n${m.name} (${catNameFromId(m.catId||"misc")})`);
           if(!ok) return;
-          removeFromMaster(m.name, m.catId);
+          removeFromMaster(m.name, m.catId || "misc");
         };
       });
     }
@@ -1922,7 +1822,7 @@
             e.stopPropagation();
             if(!state.menuAddFlags) state.menuAddFlags = {};
             state.menuAddFlags[name] = !!chk.checked;
-            saveState(state);
+            saveState(LS_KEY, state);
           };
 
           chk.onclick = (e) => e.stopPropagation();
@@ -1952,7 +1852,7 @@
           if(state.menuAddFlags){
             delete state.menuAddFlags[name];
             state.menuAddFlags[nn] = false;
-            saveState(state);
+            saveState(LS_KEY, state);
           }
         };
 
@@ -1978,10 +1878,18 @@
     bindDishRows(catalogCard);
   }
 
+  function renderTools(){
+    const deviceNameInput = document.getElementById("deviceName");
+    if(deviceNameInput && deviceNameInput.value !== state.deviceName){
+      deviceNameInput.value = state.deviceName || "";
+    }
+  }
+
   function render(){
     renderGroceries();
     renderDishes();
     renderTools();
+    renderShopMenu(); // keep highlight in sync
   }
 
   // =========================
@@ -2024,7 +1932,7 @@
     if (!name?.trim()) return;
     state.current = newBlankList(name.trim());
     lastAddedId = null;
-    saveState(state);
+    saveState(LS_KEY, state);
     render();
   };
 
@@ -2034,7 +1942,7 @@
 
     addToMaster(res.name, res.catId);
 
-    const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${catLabelById(res.catId)})`);
+    const also = confirm(`Add to Current Shopping List too?\n\n${res.name} (${catNameFromId(res.catId)})`);
     if(also){
       const ok = addItemToCurrent(res.name, res.catId);
       showToast(ok ? `Added: ${res.name}` : `Already in Shopping List: ${res.name}`, 1800);
@@ -2051,7 +1959,7 @@
     const before = state.current.items.length;
     state.current.items = state.current.items.filter(x => !x.done);
     if (state.current.items.length !== before) {
-      saveState(state);
+      saveState(LS_KEY, state);
       render();
     }
   };
@@ -2069,11 +1977,12 @@
       if(!cb || !cb.checked) return;
 
       const name = r.querySelector(".mName")?.textContent || "";
-      // read cat label pill -> map to catId (safe fallback)
-      const catLabel = r.querySelector(".catPill")?.textContent || "Misc";
-      const catId = findCatIdByLabel(catLabel) || ensureCatForLabel(catLabel);
+      const catPill = r.querySelector(".catPill")?.textContent || "Misc";
 
-      const ok = addItemToCurrent(name, catId);
+      // Map pill name -> catId
+      const cid = (state.categories.find(c => c.name.toLowerCase() === catPill.toLowerCase())?.id) || "misc";
+
+      const ok = addItemToCurrent(name, cid);
       if(ok) added++; else already++;
 
       cb.checked = false;
@@ -2095,13 +2004,9 @@
   document.getElementById("btnMasterClear").onclick = () => {
     if(!confirm("Clear the entire Master Grocery List?")) return;
     state.masterGroceries = [];
-    saveState(state);
+    saveState(LS_KEY, state);
     render();
   };
-
-  // ===== Open Category Manager =====
-  document.getElementById("btnCats").onclick = openCatManager;
-  document.getElementById("btnCatsTools").onclick = openCatManager;
 
   // =========================
   // Dish actions
@@ -2122,7 +2027,7 @@
     if(!confirm("Clear the current menu?")) return;
     state.currentMenu = [];
     state.menuAddFlags = {};
-    saveState(state);
+    saveState(LS_KEY, state);
     render();
   };
 
@@ -2131,7 +2036,7 @@
     state.dishCatalog = [];
     state.currentMenu = [];
     state.menuAddFlags = {};
-    saveState(state);
+    saveState(LS_KEY, state);
     render();
   };
 
@@ -2363,11 +2268,29 @@
       showTab("dishes");
     }
     else if(pending.kind === "item"){
-      // map cat label -> catId (creates custom if needed)
-      const catId = pending.cat ? ensureCatForLabel(pending.cat) : "misc";
+      // pending.cat is a NAME; map it to catId if possible, else create custom
+      const catName = normName(pending.cat) || "Misc";
+      let catId = (state.categories.find(c => c.name.toLowerCase() === catName.toLowerCase())?.id) || null;
+
+      if(!catId){
+        const base = slugIdFromName(catName);
+        let nid = base, k=2;
+        while(state.categories.some(c => c.id === nid)) nid = `${base}-${k++}`;
+        state.categories.push({ id:nid, name: catName, builtIn:false });
+
+        // add new cat to all orders (before misc)
+        state.defaultOrder = insertBeforeMisc(state.defaultOrder, nid);
+        Object.keys(state.storeOrders||{}).forEach(sid => {
+          state.storeOrders[sid] = insertBeforeMisc(state.storeOrders[sid], nid);
+        });
+
+        catId = nid;
+        saveState(LS_KEY, state);
+      }
+
       addToMaster(pending.name, catId);
       const ok = addItemToCurrent(pending.name, catId);
-      setScanMsg(ok ? `✅ Added item: ${pending.name} (${catLabelById(catId)})` : `ℹ️ Already in list: ${pending.name} (${catLabelById(catId)})`, "ok");
+      setScanMsg(ok ? `✅ Added item: ${pending.name} (${catNameFromId(catId)})` : `ℹ️ Already in list: ${pending.name} (${catNameFromId(catId)})`, "ok");
       showTab("groceries");
     }
     else if(pending.kind === "upc"){
@@ -2387,18 +2310,18 @@
         entry = { name: res.name, catId: res.catId || "misc" };
 
         if(!state.upcDB) state.upcDB = {};
-        state.upcDB[code] = { name: entry.name, catId: entry.catId };
-        saveState(state);
+        state.upcDB[code] = { name: entry.name, catId: entry.catId, catName: catNameFromId(entry.catId) };
+        saveState(LS_KEY, state);
       }
 
       addToMaster(entry.name, entry.catId);
 
-      const also = confirm(`UPC: ${code}\n\nItem: ${entry.name} (${catLabelById(entry.catId)})\n\nAdd to Current Shopping List too?`);
+      const also = confirm(`UPC: ${code}\n\nItem: ${entry.name} (${catNameFromId(entry.catId)})\n\nAdd to Current Shopping List too?`);
       if(also){
         const ok = addItemToCurrent(entry.name, entry.catId);
-        setScanMsg(ok ? `✅ Added: ${entry.name} (${catLabelById(entry.catId)})` : `ℹ️ Already in list: ${entry.name} (${catLabelById(entry.catId)})`, "ok");
+        setScanMsg(ok ? `✅ Added: ${entry.name} (${catNameFromId(entry.catId)})` : `ℹ️ Already in list: ${entry.name} (${catNameFromId(entry.catId)})`, "ok");
       } else {
-        setScanMsg(`✅ Added to Master only: ${entry.name} (${catLabelById(entry.catId)})`, "ok");
+        setScanMsg(`✅ Added to Master only: ${entry.name} (${catNameFromId(entry.catId)})`, "ok");
       }
 
       showTab("groceries");
@@ -2428,50 +2351,455 @@
   document.getElementById("btnDone").onclick = closeScanner;
   modalBg.onclick = e => { if (e.target === modalBg) closeScanner(); };
 
-  // ===== SHOP dropdown behavior =====
-  (function initShopMenu(){
-    const btnShop  = document.getElementById("btnShop");
-    const shopMenu = document.getElementById("shopMenu");
-    if(!btnShop || !shopMenu) return;
+  // =========================
+  // SHOP: two-stage store menu
+  // =========================
+  const btnShop  = document.getElementById("btnShop");
+  const shopMenu = document.getElementById("shopMenu");
+  const shopSubMenu = document.getElementById("shopSubMenu");
 
-    function closeMenu(){ shopMenu.classList.add("hidden"); }
-    function toggleMenu(){ shopMenu.classList.toggle("hidden"); }
+  let shopSelectedStoreId = "__default__";
 
-    btnShop.addEventListener("click", (e) => {
+  function closeMenus(){
+    shopMenu.classList.add("hidden");
+    shopSubMenu.classList.add("hidden");
+  }
+
+  function openMainMenu(){
+    shopSubMenu.classList.add("hidden");
+    shopMenu.classList.remove("hidden");
+  }
+
+  function openSubMenu(storeId){
+    shopSelectedStoreId = storeId;
+    shopMenu.classList.add("hidden");
+    shopSubMenu.classList.remove("hidden");
+    renderShopSubMenu(storeId);
+  }
+
+  function renderShopMenu(){
+    const active = state.activeStoreId || "__default__";
+
+    shopMenu.innerHTML = STORES.map(s => {
+      const cls = ["shopItem"];
+      if(s.id === active && s.id !== "__default__") cls.push("active");
+      if(s.id === "__default__" && active === "__default__") cls.push("active");
+      return `<button class="${cls.join(" ")}" data-store="${escapeHtml(s.id)}" role="menuitem">${escapeHtml(s.name)}</button>`;
+    }).join("");
+  }
+
+  function renderShopSubMenu(storeId){
+    const st = storeById(storeId);
+
+    const head = `
+      <div class="shopSubHead">
+        <button class="shopBackBtn" type="button" id="shopBack">←</button>
+        <div style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          ${escapeHtml(st.name)}
+        </div>
+      </div>
+    `;
+
+    const canSite = !!st.url && storeId !== "__default__";
+
+    shopSubMenu.innerHTML = head + `
+      <button class="shopItem" data-act="sort" role="menuitem">Sort</button>
+      <button class="shopItem" data-act="edit" role="menuitem">Edit Order</button>
+      ${canSite ? `<button class="shopItem" data-act="site" role="menuitem">Site</button>` : ``}
+    `;
+
+    document.getElementById("shopBack").onclick = (e) => {
       e.stopPropagation();
-      toggleMenu();
-    });
+      openMainMenu();
+    };
+  }
 
-    shopMenu.addEventListener("click", (e) => {
-      const item = e.target.closest(".shopItem");
-      if(!item) return;
-      const url = item.getAttribute("data-url");
-      if(url) window.open(url, "_blank", "noopener,noreferrer");
-      closeMenu();
-    });
+  btnShop.addEventListener("click", (e) => {
+    e.stopPropagation();
+    // toggle main menu
+    const isOpen = !shopMenu.classList.contains("hidden") || !shopSubMenu.classList.contains("hidden");
+    if(isOpen) closeMenus();
+    else {
+      renderShopMenu();
+      openMainMenu();
+    }
+  });
 
-    document.addEventListener("click", () => closeMenu());
-    document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeMenu(); });
-  })();
+  shopMenu.addEventListener("click", (e) => {
+    const item = e.target.closest(".shopItem");
+    if(!item) return;
+    const sid = item.getAttribute("data-store") || "__default__";
+    openSubMenu(sid);
+  });
+
+  shopSubMenu.addEventListener("click", (e) => {
+    const item = e.target.closest(".shopItem");
+    if(!item) return;
+    const act = item.getAttribute("data-act");
+    const sid = shopSelectedStoreId || "__default__";
+    const st = storeById(sid);
+
+    if(act === "sort"){
+      if(sid !== "__default__"){
+        ensureStoreOrderExists(sid);
+      }
+      state.activeStoreId = sid; // remember active store (your choice B)
+      saveState(LS_KEY, state);
+      closeMenus();
+      debouncedRender();
+      showToast(`Sorted for: ${st.name}`, 1600);
+      return;
+    }
+
+    if(act === "edit"){
+      if(sid !== "__default__") ensureStoreOrderExists(sid);
+      closeMenus();
+      openCatsModalForStore(sid);
+      return;
+    }
+
+    if(act === "site"){
+      if(st.url) window.open(st.url, "_blank", "noopener,noreferrer");
+      closeMenus();
+      return;
+    }
+  });
+
+  document.addEventListener("click", () => closeMenus());
+  document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeMenus(); });
 
   // =========================
-  // TOOLS: Export / Import (MERGE)
+  // CATS: Store-scoped Order Editor
+  // =========================
+  const catBg = document.getElementById("catBg");
+  const catMgrList = document.getElementById("catMgrList");
+  const catNewName = document.getElementById("catNewName");
+  const catAddBtn = document.getElementById("catAddBtn");
+  const catSave = document.getElementById("catSave");
+  const catCancel = document.getElementById("catCancel");
+  const catCloseX = document.getElementById("catCloseX");
+  const catContextLine = document.getElementById("catContextLine");
+  const catCopyDefaultBtn = document.getElementById("catCopyDefaultBtn");
+
+  let catsEditingStoreId = "__default__"; // "__default__" or storeId
+  let catsDraftOrder = []; // catId[]
+  let catsSnapshot = null;
+
+  function insertBeforeMisc(order, catId){
+    order = Array.isArray(order) ? [...order] : [];
+    if(order.includes(catId)) return order;
+    const iMisc = order.indexOf("misc");
+    if(iMisc === -1) return [...order, catId, "misc"];
+    order.splice(iMisc, 0, catId);
+    return order;
+  }
+
+  function openCatsModalForStore(storeId){
+    catsEditingStoreId = storeId || "__default__";
+
+    const st = storeById(catsEditingStoreId);
+    catContextLine.textContent =
+      (catsEditingStoreId === "__default__")
+        ? "Editing order for: Default (All Stores)"
+        : `Editing order for: ${st.name}`;
+
+    // Copy Default button shown only when editing a specific store
+    catCopyDefaultBtn.style.display = (catsEditingStoreId !== "__default__") ? "" : "none";
+
+    const order = (catsEditingStoreId === "__default__")
+      ? state.defaultOrder
+      : (getOrderForStore(catsEditingStoreId) || state.defaultOrder);
+
+    catsDraftOrder = [...order];
+    catsSnapshot = JSON.stringify({
+      categories: state.categories,
+      defaultOrder: state.defaultOrder,
+      storeOrders: state.storeOrders
+    });
+
+    renderCatsList();
+    catBg.style.display = "flex";
+    setTimeout(()=> catNewName.focus(), 120);
+  }
+
+  function closeCatsModal(save){
+    if(!save){
+      // restore snapshot
+      try{
+        const snap = JSON.parse(catsSnapshot || "{}");
+        if(Array.isArray(snap.categories)) state.categories = snap.categories;
+        if(Array.isArray(snap.defaultOrder)) state.defaultOrder = snap.defaultOrder;
+        if(snap.storeOrders && typeof snap.storeOrders === "object") state.storeOrders = snap.storeOrders;
+      } catch {}
+      catBg.style.display = "none";
+      catsEditingStoreId = "__default__";
+      catsDraftOrder = [];
+      catsSnapshot = null;
+      debouncedRender();
+      return;
+    }
+
+    // Save draft order into correct target
+    if(catsEditingStoreId === "__default__"){
+      state.defaultOrder = normalizeOrder(catsDraftOrder);
+    } else {
+      ensureStoreOrderExists(catsEditingStoreId);
+      state.storeOrders[catsEditingStoreId] = normalizeOrder(catsDraftOrder);
+    }
+
+    // Ensure all orders include all cats
+    state.defaultOrder = normalizeOrder(state.defaultOrder);
+    Object.keys(state.storeOrders||{}).forEach(sid => {
+      state.storeOrders[sid] = normalizeOrder(state.storeOrders[sid]);
+    });
+
+    saveState(LS_KEY, state);
+    catBg.style.display = "none";
+    catsEditingStoreId = "__default__";
+    catsDraftOrder = [];
+    catsSnapshot = null;
+    debouncedRender();
+    showToast("Category order saved.", 1400);
+  }
+
+  function normalizeOrder(order){
+    const ids = state.categories.map(c => c.id);
+    const seen = new Set();
+    const out = [];
+
+    (order || []).forEach(id => {
+      id = String(id||"");
+      if(!id) return;
+      if(!ids.includes(id)) return;
+      if(seen.has(id)) return;
+      seen.add(id);
+      out.push(id);
+    });
+
+    const hasMisc = out.includes("misc");
+    const missing = ids.filter(id => id !== "misc" && !seen.has(id));
+    if(missing.length){
+      if(hasMisc){
+        const iMisc = out.indexOf("misc");
+        out.splice(iMisc, 0, ...missing);
+      } else {
+        out.push(...missing);
+      }
+    }
+
+    if(!out.includes("misc")) out.push("misc");
+    else {
+      out.splice(out.indexOf("misc"), 1);
+      out.push("misc");
+    }
+    return out;
+  }
+
+  function renderCatsList(){
+    // Draft order -> rows
+    const order = normalizeOrder(catsDraftOrder);
+    catsDraftOrder = [...order];
+
+    const rows = order.map(catId => {
+      const c = catById(catId);
+      const builtIn = !!c?.builtIn;
+      const isMisc = catId === "misc";
+      const delDisabled = builtIn || isMisc; // default cats not deletable; misc never deletable
+
+      return `
+        <div class="catMgrRow" draggable="true" data-id="${escapeHtml(catId)}">
+          <div class="dragHandle" title="Drag to reorder">≡</div>
+          <input class="catNameInput" type="text" value="${escapeHtml(c?.name || "Misc")}">
+          <span class="catBadge ${builtIn ? "builtIn" : ""}">${builtIn ? "DEFAULT" : "CUSTOM"}</span>
+          <button class="delBtn" title="Delete" ${delDisabled ? "disabled":""} style="${delDisabled ? "opacity:.45; cursor:not-allowed;" : ""}">🗑️</button>
+        </div>
+      `;
+    }).join("");
+
+    catMgrList.innerHTML = rows;
+
+    // Wire rename + delete
+    catMgrList.querySelectorAll(".catMgrRow").forEach(row => {
+      const catId = row.getAttribute("data-id");
+      const input = row.querySelector(".catNameInput");
+      const del = row.querySelector(".delBtn");
+
+      input.addEventListener("change", () => {
+        const newName = normName(input.value);
+        if(!newName){
+          input.value = catNameFromId(catId);
+          return;
+        }
+        // prevent duplicate names
+        const dup = state.categories.some(c => c.id !== catId && c.name.toLowerCase() === newName.toLowerCase());
+        if(dup){
+          showToast("Category name already exists.", 1600);
+          input.value = catNameFromId(catId);
+          return;
+        }
+
+        // rename in catalog
+        const c = state.categories.find(x => x.id === catId);
+        if(c){
+          c.name = newName;
+          // keep items' catName as display backup (not required, but nice)
+          (state.current.items||[]).forEach(it => {
+            if(String(it.catId||"misc") === catId) it.catName = newName;
+          });
+          (state.masterGroceries||[]).forEach(m => {
+            if(String(m.catId||"misc") === catId) m.catName = newName;
+          });
+          (state.dishCatalog||[]).forEach(d => {
+            (d.ingredients||[]).forEach(ing => {
+              if(String(ing.catId||"misc") === catId) ing.catName = newName;
+            });
+          });
+          saveState(LS_KEY, state);
+        }
+      });
+
+      del.addEventListener("click", () => {
+        if(del.disabled) return;
+        const c = state.categories.find(x => x.id === catId);
+        const ok = confirm(`Delete category "${c?.name}"?\n\nItems in this category will move to Misc.`);
+        if(!ok) return;
+
+        // move items to misc
+        (state.current.items||[]).forEach(it => {
+          if(String(it.catId||"misc") === catId){
+            it.catId = "misc";
+            it.catName = catNameFromId("misc");
+          }
+        });
+        (state.masterGroceries||[]).forEach(m => {
+          if(String(m.catId||"misc") === catId){
+            m.catId = "misc";
+            m.catName = catNameFromId("misc");
+          }
+        });
+        (state.dishCatalog||[]).forEach(d => {
+          (d.ingredients||[]).forEach(ing => {
+            if(String(ing.catId||"misc") === catId){
+              ing.catId = "misc";
+              ing.catName = catNameFromId("misc");
+            }
+          });
+        });
+
+        // remove from catalog
+        state.categories = state.categories.filter(x => x.id !== catId);
+
+        // remove from orders
+        state.defaultOrder = state.defaultOrder.filter(id => id !== catId);
+        Object.keys(state.storeOrders||{}).forEach(sid => {
+          state.storeOrders[sid] = (state.storeOrders[sid]||[]).filter(id => id !== catId);
+        });
+
+        // remove from draft
+        catsDraftOrder = catsDraftOrder.filter(id => id !== catId);
+
+        saveState(LS_KEY, state);
+        renderCatsList();
+        showToast("Category deleted (moved items to Misc).", 1800);
+      });
+
+      // Drag / drop reorder
+      row.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", catId);
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      row.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
+
+      row.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const fromId = e.dataTransfer.getData("text/plain");
+        const toId = catId;
+        if(!fromId || !toId || fromId === toId) return;
+
+        const arr = [...catsDraftOrder];
+        const fromIdx = arr.indexOf(fromId);
+        const toIdx = arr.indexOf(toId);
+        if(fromIdx === -1 || toIdx === -1) return;
+
+        arr.splice(fromIdx, 1);
+        arr.splice(toIdx, 0, fromId);
+        catsDraftOrder = arr;
+        renderCatsList();
+      });
+    });
+  }
+
+  catAddBtn.onclick = () => {
+    const name = normName(catNewName.value);
+    if(!name){
+      showToast("Enter a category name.", 1400);
+      catNewName.focus();
+      return;
+    }
+
+    const dup = state.categories.some(c => c.name.toLowerCase() === name.toLowerCase());
+    if(dup){
+      showToast("That category already exists.", 1600);
+      catNewName.value = "";
+      return;
+    }
+
+    // create new category
+    const base = slugIdFromName(name);
+    let nid = base, k=2;
+    while(state.categories.some(c => c.id === nid)) nid = `${base}-${k++}`;
+
+    state.categories.push({ id:nid, name, builtIn:false });
+
+    // add to ALL orders (before misc)
+    state.defaultOrder = insertBeforeMisc(state.defaultOrder, nid);
+    Object.keys(state.storeOrders||{}).forEach(sid => {
+      state.storeOrders[sid] = insertBeforeMisc(state.storeOrders[sid], nid);
+    });
+
+    // add to current draft order
+    catsDraftOrder = insertBeforeMisc(catsDraftOrder, nid);
+
+    saveState(LS_KEY, state);
+    catNewName.value = "";
+    renderCatsList();
+    showToast("Category added.", 1400);
+  };
+
+  catCopyDefaultBtn.onclick = () => {
+    if(catsEditingStoreId === "__default__") return;
+    ensureStoreOrderExists(catsEditingStoreId);
+    catsDraftOrder = [...state.defaultOrder];
+    renderCatsList();
+    showToast("Copied Default order into this store draft.", 1600);
+  };
+
+  catSave.onclick = () => closeCatsModal(true);
+  catCancel.onclick = () => closeCatsModal(false);
+  catCloseX.onclick = () => closeCatsModal(false);
+  catBg.onclick = (e) => { if(e.target === catBg) closeCatsModal(false); };
+
+  document.getElementById("btnCats").onclick = () => {
+    // Default behavior: edit active store if one is selected, else default
+    const sid = state.activeStoreId || "__default__";
+    openCatsModalForStore(sid);
+  };
+
+  // =========================
+  // TOOLS: Export / Import (MERGE)  (updated for v70 category model)
   // =========================
   const deviceNameInput = document.getElementById("deviceName");
   const importFileEl = document.getElementById("importFile");
   const importReportEl = document.getElementById("importReport");
   const impOverwriteUPC = document.getElementById("impOverwriteUPC");
-  const impMergeCats = document.getElementById("impMergeCats");
-
-  function renderTools(){
-    if(deviceNameInput && deviceNameInput.value !== state.deviceName){
-      deviceNameInput.value = state.deviceName || "";
-    }
-  }
 
   deviceNameInput.addEventListener("change", () => {
     state.deviceName = normName(deviceNameInput.value) || "My Device";
-    saveState(state);
+    saveState(LS_KEY, state);
     showToast("Device name saved.", 1400);
   });
 
@@ -2495,41 +2823,42 @@
   }
 
   function exportPayload(kind){
-    const master = (state.masterGroceries || []).map(x => ({
-      name: normName(x.name),
-      catId: String(x.catId || "misc")
-    })).filter(x => x.name);
-
-    const dishes = (state.dishCatalog || []).map(d => ({
-      name: normName(d.name),
-      ingredients: Array.isArray(d.ingredients)
-        ? d.ingredients.map(i => ({ name: normName(i.name), catId: String(i.catId || "misc") })).filter(i=>i.name)
-        : []
-    })).filter(d => d.name);
-
-    const upc = state.upcDB && typeof state.upcDB === "object" ? state.upcDB : {};
-
     const base = {
       app: "grocery-app",
-      schema: 2,
+      schema: 2, // v70 schema
       exportedAt: new Date().toISOString(),
       deviceName: state.deviceName || "",
       appVersion: APP_VERSION
     };
 
-    if(kind === "master") return { ...base, kind, masterGroceries: master };
-    if(kind === "dishes") return { ...base, kind, dishCatalog: dishes };
-    if(kind === "upc") return { ...base, kind, upcDB: upc };
-
-    // all (recommended) — includes categories
-    return {
-      ...base,
-      kind: "all",
-      masterGroceries: master,
-      dishCatalog: dishes,
-      upcDB: upc,
-      categoryPrefs: state.categoryPrefs || { custom:{}, order:[] }
+    const payloadCats = {
+      categories: state.categories,
+      defaultOrder: state.defaultOrder,
+      storeOrders: state.storeOrders
     };
+
+    const master = (state.masterGroceries || []).map(x => ({
+      name: normName(x.name),
+      catId: String(x.catId||"misc"),
+      catName: normName(x.catName || catNameFromId(x.catId||"misc"))
+    })).filter(x => x.name);
+
+    const dishes = (state.dishCatalog || []).map(d => ({
+      name: normName(d.name),
+      ingredients: Array.isArray(d.ingredients) ? d.ingredients.map(i => ({
+        name: normName(i.name),
+        catId: String(i.catId||"misc"),
+        catName: normName(i.catName || catNameFromId(i.catId||"misc"))
+      })).filter(i=>i.name) : []
+    })).filter(d => d.name);
+
+    const upc = state.upcDB && typeof state.upcDB === "object" ? state.upcDB : {};
+
+    if(kind === "master") return { ...base, kind, ...payloadCats, masterGroceries: master };
+    if(kind === "dishes") return { ...base, kind, ...payloadCats, dishCatalog: dishes };
+    if(kind === "upc") return { ...base, kind, ...payloadCats, upcDB: upc };
+
+    return { ...base, kind: "all", ...payloadCats, masterGroceries: master, dishCatalog: dishes, upcDB: upc };
   }
 
   document.getElementById("btnExportAll").onclick = () => {
@@ -2562,39 +2891,66 @@
     importFileEl.click();
   };
 
-  function mergeCategoryPrefs(incoming){
-    if(!incoming || typeof incoming !== "object") return { merged:false };
+  function mergeCategoriesAndOrders(data){
+    // Merge categories by ID; if ID conflicts with different name, keep local ID but update name to local (safer)
+    const incCats = Array.isArray(data?.categories) ? data.categories : [];
+    incCats.forEach(c => {
+      const id = String(c?.id||"").trim();
+      const name = normName(c?.name||"");
+      const builtIn = !!c?.builtIn;
+      if(!id || !name) return;
 
-    const incCustom = incoming.custom && typeof incoming.custom === "object" ? incoming.custom : {};
-    const incOrder = Array.isArray(incoming.order) ? incoming.order : [];
-
-    let changed = false;
-
-    // merge custom labels (don't overwrite local unless new id)
-    Object.keys(incCustom).forEach(id => {
-      const lbl = normName(incCustom[id]?.label || "");
-      if(!lbl) return;
-
-      if(!state.categoryPrefs.custom[id]){
-        state.categoryPrefs.custom[id] = { label: lbl };
-        changed = true;
+      const local = state.categories.find(x => x.id === id);
+      if(!local){
+        state.categories.push({ id, name, builtIn });
+      } else {
+        // keep local builtIn if true; update name if local not builtIn (or if same)
+        if(!local.builtIn && name) local.name = name;
+        local.builtIn = local.builtIn || builtIn;
       }
     });
 
-    // merge order: keep local order, append unknown ids from imported order
-    const local = Array.isArray(state.categoryPrefs.order) ? [...state.categoryPrefs.order] : [];
-    const set = new Set(local);
-    incOrder.forEach(id => {
-      if(!set.has(id)){
-        local.push(id);
-        set.add(id);
-        changed = true;
-      }
-    });
-    state.categoryPrefs.order = local;
+    // Merge defaultOrder (union, prefer local order, append missing)
+    const incDefault = Array.isArray(data?.defaultOrder) ? data.defaultOrder : null;
+    if(incDefault){
+      // union: keep local, ensure any incoming IDs exist in local order
+      incDefault.forEach(id => {
+        id = String(id||"");
+        if(!id) return;
+        if(!state.defaultOrder.includes(id) && state.categories.some(c => c.id === id)){
+          state.defaultOrder = insertBeforeMisc(state.defaultOrder, id);
+        }
+      });
+    }
 
-    if(changed) saveState(state);
-    return { merged: changed };
+    // Merge storeOrders
+    const incStores = (data?.storeOrders && typeof data.storeOrders === "object") ? data.storeOrders : null;
+    if(incStores){
+      if(!state.storeOrders) state.storeOrders = {};
+      Object.keys(incStores).forEach(sid => {
+        const incOrder = Array.isArray(incStores[sid]) ? incStores[sid] : null;
+        if(!incOrder) return;
+        if(!state.storeOrders[sid]){
+          state.storeOrders[sid] = normalizeOrder(incOrder);
+        } else {
+          // union incoming into local store order
+          incOrder.forEach(id => {
+            id = String(id||"");
+            if(!id) return;
+            if(state.categories.some(c => c.id === id) && !state.storeOrders[sid].includes(id)){
+              state.storeOrders[sid] = insertBeforeMisc(state.storeOrders[sid], id);
+            }
+          });
+          state.storeOrders[sid] = normalizeOrder(state.storeOrders[sid]);
+        }
+      });
+    }
+
+    // normalize after merge
+    state.defaultOrder = normalizeOrder(state.defaultOrder);
+    Object.keys(state.storeOrders||{}).forEach(sid => {
+      state.storeOrders[sid] = normalizeOrder(state.storeOrders[sid]);
+    });
   }
 
   function mergeMaster(imported){
@@ -2602,15 +2958,17 @@
     const arr = Array.isArray(imported) ? imported : [];
     arr.forEach(x => {
       const name = normName(x?.name);
-      let catId = String(x?.catId || "misc");
-
-      // If older export had cat string, map it
-      if(!x?.catId && x?.cat){
-        catId = ensureCatForLabel(x.cat);
-      }
+      const catId  = String(x?.catId || "misc");
       if(!name) return;
-      const ok = addToMaster(name, catId);
-      if(ok) added++; else skipped++;
+
+      // ensure category exists
+      if(!state.categories.some(c => c.id === catId)){
+        // fallback to misc if unknown
+        addToMaster(name, "misc");
+      } else {
+        const ok = addToMaster(name, catId);
+        if(ok) added++; else skipped++;
+      }
     });
     return { added, skipped };
   }
@@ -2642,18 +3000,16 @@
 
       incoming.forEach(i => {
         const inName = normName(i?.name);
-        let inCatId = String(i?.catId || "misc");
-        if(!i?.catId && i?.cat){
-          inCatId = ensureCatForLabel(i.cat);
-        }
+        const inCatId  = String(i?.catId || "misc");
         if(!inName) return;
+
         const key = inName.toLowerCase()+"|"+inCatId;
         if(seen.has(key)){
           ingSkipped++;
           return;
         }
         seen.add(key);
-        local.ingredients.push({ name: inName, catId: inCatId });
+        local.ingredients.push({ name: inName, catId: inCatId, catName: catNameFromId(inCatId) });
         ingAdded++;
       });
 
@@ -2662,7 +3018,6 @@
       }
     });
 
-    saveState(state);
     return { dishAdded, dishUpdated, ingAdded, ingSkipped };
   }
 
@@ -2677,15 +3032,12 @@
 
       const incoming = obj[code];
       const name = normName(incoming?.name);
-      let catId = String(incoming?.catId || "misc");
-      if(!incoming?.catId && incoming?.cat){
-        catId = ensureCatForLabel(incoming.cat);
-      }
+      const catId  = String(incoming?.catId || "misc");
       if(!name) return;
 
       const exists = state.upcDB[clean];
       if(!exists){
-        state.upcDB[clean] = { name, catId };
+        state.upcDB[clean] = { name, catId, catName: catNameFromId(catId) };
         added++;
       } else {
         const same = normName(exists.name).toLowerCase()===name.toLowerCase()
@@ -2695,7 +3047,7 @@
           skipped++;
         } else {
           if(overwrite){
-            state.upcDB[clean] = { name, catId };
+            state.upcDB[clean] = { name, catId, catName: catNameFromId(catId) };
             updated++;
           } else {
             skipped++;
@@ -2704,7 +3056,6 @@
       }
     });
 
-    saveState(state);
     return { added, updated, skipped };
   }
 
@@ -2722,11 +3073,6 @@
         kind: data?.kind || "(unknown)"
       };
 
-      // Accept "all" or partials (master/dishes/upc)
-      const m = data?.masterGroceries ?? data?.master ?? null;
-      const d = data?.dishCatalog ?? data?.dishes ?? null;
-      const u = data?.upcDB ?? data?.upc ?? null;
-
       const doUPCOverwrite = !!impOverwriteUPC.checked;
 
       let report = "";
@@ -2735,13 +3081,13 @@
       report += `EXPORTED AT: ${meta.exportedAt}\n`;
       report += `KIND: ${meta.kind}\n\n`;
 
-      // categories
-      if(impMergeCats.checked && data?.categoryPrefs){
-        const r = mergeCategoryPrefs(data.categoryPrefs);
-        report += `CATEGORIES MERGE:\n  Merged: ${r.merged ? "YES" : "No changes"}\n\n`;
-      } else {
-        report += `CATEGORIES MERGE:\n  (Skipped)\n\n`;
-      }
+      // merge cats/orders first
+      mergeCategoriesAndOrders(data);
+      report += `CATEGORIES/ORDERS:\n  Merged category catalog + default/store orders.\n\n`;
+
+      const m = data?.masterGroceries ?? data?.master ?? null;
+      const d = data?.dishCatalog ?? data?.dishes ?? null;
+      const u = data?.upcDB ?? data?.upc ?? null;
 
       let masterRes = null, dishRes = null, upcRes = null;
 
@@ -2766,6 +3112,7 @@
         report += `UPC DB MERGE:\n  (No upc data in file)\n\n`;
       }
 
+      saveState(LS_KEY, state);
       debouncedRender();
 
       importReportEl.textContent = report.trim();
