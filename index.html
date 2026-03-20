@@ -12,7 +12,7 @@
 ============================================================ -->
 
 <!-- =========================
-     index.html  (BUILD 072)
+     index.html  (BUILD 073)
      ========================= -->
 <!doctype html>
 <html lang="en">
@@ -510,7 +510,7 @@
 </head>
 
 <body>
-  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 072)</span></header>
+  <header>Grocery APP <span style="opacity:.7;font-weight:600;">(Build 073)</span></header>
 
   <div class="wrap">
     <div class="tabs">
@@ -612,6 +612,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div><b>Current Menu:</b> <span class="pill ok"><span id="menuCount">0</span> dishes</span></div>
           <div class="muted">Scanning a dish adds it to Menu + Catalog.</div>
+          <div class="muted">Tap a dish to rename; delete button removes menu/catalog.</div>
         </div>
       </div>
       <div class="card" id="menuCard"></div>
@@ -621,7 +622,7 @@
           <div><b>Dish Catalog:</b> <span class="pill"><span id="catalogCount">0</span> total</span></div>
 
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-            <div class="muted">Tap a dish to rename; delete button removes menu/catalog.</div>
+            <div class="muted">Tap delete button removes menu/catalog.</div>
             <button id="btnClearCatalog" class="danger">Clear Catalog</button>
           </div>
         </div>
@@ -796,7 +797,7 @@
   // =========================
   // Consistency: Build / Version
   // =========================
-  const APP_VERSION = 72;
+  const APP_VERSION = 73;
 
   // Service worker registration
   if ("serviceWorker" in navigator) {
