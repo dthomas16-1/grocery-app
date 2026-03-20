@@ -1,5 +1,5 @@
 # grocery-app
-QR based grocery list app
+Grocery list / Menue app
 
 Open Chrome GoTo:
 https://dthomas16-1.github.io/grocery-app/
